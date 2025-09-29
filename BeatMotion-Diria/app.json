@@ -8,6 +8,7 @@
     "scheme": "beatmotiondiria",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "bundler": "metro",
     "ios": {
       "supportsTablet": true
     },
