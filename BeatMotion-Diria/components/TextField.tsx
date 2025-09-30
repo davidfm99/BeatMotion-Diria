@@ -6,6 +6,7 @@ type TextFieldProps = {
   onChangeText: (text: string) => void;
   placeholder?: string;
   secureTextEntry?: boolean;
+  error?: string;
 };
 
 const TextField = ({
@@ -14,6 +15,7 @@ const TextField = ({
   onChangeText,
   placeholder,
   secureTextEntry,
+  error,
 }: TextFieldProps) => {
   return (
     <View>
@@ -25,6 +27,7 @@ const TextField = ({
         secureTextEntry={secureTextEntry}
         className="border border-gray-100 p-2 rounded text-black placeholder:text-gray-400"
       />
+      {error && <Text className="text-red-500">{error}</Text>}
     </View>
   );
 };

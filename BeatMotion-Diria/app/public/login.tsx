@@ -4,17 +4,19 @@ import {
   Text,
   TextInput,
   TouchableHighlight,
+  Alert,
 } from "react-native";
 import { useState } from "react";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import useUserStore from "@/store/useUserStore";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 
 const LogIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { setUser } = useUserStore();
+  const router = useRouter();
 
   const handleLogin = () => {
     const auth = getAuth();
@@ -22,10 +24,16 @@ const LogIn = () => {
       .then((userCredential) => {
         const user = userCredential.user;
         setUser(user);
+        Alert.alert("Éxito", "Inicio de sesión exitoso", [
+          { text: "OK", onPress: () => router.push("/private/home") },
+        ]);
       })
       .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
+        Alert.alert(
+          "Error",
+          "Usuario o contraseña incorrectos. Intentelo de nuevo",
+          [{ text: "OK" }]
+        );
       });
   };
 
@@ -47,7 +55,11 @@ const LogIn = () => {
           secureTextEntry
         />
         <View className="flex-col gap-3">
-          <TouchableHighlight>
+          <TouchableHighlight
+            onPress={() => {
+              router.push("/public/resetPassword");
+            }}
+          >
             <Text className="text-sm text-secondary underline">
               ¿Olvidaste tu contraseña?
             </Text>
