@@ -1,5 +1,8 @@
-import { initializeApp } from 'firebase/app';
-import { getAnalytics } from "firebase/analytics";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getDatabase } from "firebase/database";
+import { initializeAuth, getReactNativePersistence } from "firebase/auth";
+
+import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAOL7CpmGBqMvuWyWGHFYN7e3Wm60_2dzc",
@@ -9,8 +12,12 @@ const firebaseConfig = {
   storageBucket: "beatmotion-b1ec6.firebasestorage.app",
   messagingSenderId: "736000845187",
   appId: "1:736000845187:web:658bf261a3165e8b8c42b6",
-  measurementId: "G-STX01S6FVQ"
+  measurementId: "G-STX01S6FVQ",
 };
 
-const app = initializeApp(firebaseConfig); 
-const analytics = getAnalytics(app);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
+});
+export const db = getDatabase(app);
