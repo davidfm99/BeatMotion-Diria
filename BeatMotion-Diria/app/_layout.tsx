@@ -3,11 +3,11 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { Stack, router } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import "../global.css";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useEffect } from "react";
 import { auth } from "../firebaseConfig";
 
@@ -17,6 +17,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function RootLayout() {
   const { user, setUser } = useUserStore();
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -27,10 +28,11 @@ export default function RootLayout() {
   }, [setUser]);
 
   useEffect(() => {
-    if (user === null) {
-      router.replace("/public/login");
+    console.log("User state changed:", user);
+    if (!user === null) {
+      router.push("/public/login");
     }
-  }, [user]);
+  }, [user, router]);
 
   const colorScheme = useColorScheme();
 

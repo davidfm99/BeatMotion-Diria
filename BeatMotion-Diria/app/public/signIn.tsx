@@ -1,10 +1,12 @@
-import { Button, View, Text } from "react-native";
+import { Button, View, Text, Alert } from "react-native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import TextField from "@/components/TextField";
+import { signInValidationSchema } from "@/constants/validationForms";
+import * as Yup from "yup";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -13,9 +15,49 @@ const SignIn = () => {
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
 
+  const [formErrors, setFormErrors] = useState({
+    name: "",
+    lastName: "",
+    phone: "",
+    email: "",
+    password: "",
+  });
+
+  const validateForm = () => {
+    try {
+      Yup.object(signInValidationSchema).validateSync(
+        { name, lastName, phone, email, password },
+        { abortEarly: false }
+      );
+      setFormErrors({
+        name: "",
+        lastName: "",
+        phone: "",
+        email: "",
+        password: "",
+      });
+    } catch (err: any) {
+      const errors = {
+        name: "",
+        lastName: "",
+        phone: "",
+        email: "",
+        password: "",
+      };
+      err.inner.forEach((error: any) => {
+        errors[error.path as keyof typeof errors] = error.message;
+      });
+      setFormErrors(errors);
+    }
+    return true;
+  };
+
   const register = async () => {
     const auth = getAuth();
     const db = getFirestore();
+    if (!validateForm()) {
+      return;
+    }
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -36,9 +78,15 @@ const SignIn = () => {
         active: true,
       });
       handleClearValues();
-      console.log("Usuario registrado y datos guardados");
+      Alert.alert("Registro exitoso", "Usuario registrado y datos guardados", [
+        { text: "continuar", onPress: () => console.log("Continuar") },
+      ]);
     } catch (error) {
-      console.error("Error registrando usuario:", error);
+      Alert.alert(
+        "Error",
+        "No se pudo registrar el usuario. Inténtalo de nuevo.",
+        [{ text: "OK" }]
+      );
     }
   };
 
@@ -61,24 +109,28 @@ const SignIn = () => {
           placeholder="Nombre"
           value={name}
           onChangeText={setName}
+          error={formErrors.name}
         />
         <TextField
           label="Apellido"
           placeholder="Apellido"
           value={lastName}
           onChangeText={setLastName}
+          error={formErrors.lastName}
         />
         <TextField
           label="Teléfono"
           placeholder="Teléfono"
           value={phone}
           onChangeText={setPhone}
+          error={formErrors.phone}
         />
         <TextField
           label="Email"
           placeholder="Email"
           value={email}
           onChangeText={setEmail}
+          error={formErrors.email}
         />
         <TextField
           label="Contraseña"
@@ -86,6 +138,7 @@ const SignIn = () => {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          error={formErrors.password}
         />
         <Button title="Ingresar" onPress={register} />
       </View>
