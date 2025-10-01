@@ -23,6 +23,7 @@ const LogIn = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
+        console.log("Logged in with:", user);
         setUser(user);
         Alert.alert("Éxito", "Inicio de sesión exitoso", [
           { text: "OK", onPress: () => router.push("/private/home") },

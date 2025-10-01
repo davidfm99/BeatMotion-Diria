@@ -1,15 +1,10 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { Stack } from "expo-router";
 import { auth } from "@/firebaseConfig";
+import useUserStore from "@/store/useUserStore";
 
 export default function PrivateLayout() {
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("Usuario logeado con uid:", user.uid);
-    } else {
-      console.log("Usuario no logeado");
-    }
-  });
+  const { user } = useUserStore();
 
   return (
     <Stack initialRouteName="home">

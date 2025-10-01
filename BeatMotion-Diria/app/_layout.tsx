@@ -36,6 +36,10 @@ export default function RootLayout() {
 
   const colorScheme = useColorScheme();
 
+  // if (user) {
+  //   signOut(auth);
+  // }
+
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
