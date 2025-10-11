@@ -78,7 +78,7 @@ export default function AdminUsersScreen() {
           className="bg-blue-500 px-3 py-2 rounded-xl"
           onPress={() => router.push(`/private/admin/user/${item.uid}` as any)}
         >
-          <Text className="text-white">Editar</Text>
+          <Text className="text-white">Ver Perfil</Text>
         </TouchableOpacity>
         <TouchableOpacity
           className="bg-yellow-500 px-3 py-2 rounded-xl"
