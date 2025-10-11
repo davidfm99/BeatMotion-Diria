@@ -6,6 +6,7 @@ import { auth } from "@/firebaseConfig";
 import useUserStore from "@/store/useUserStore";
 import { getFirestore, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
+
 type UserProfile = {
   firstName: string;
   lastName: string;
