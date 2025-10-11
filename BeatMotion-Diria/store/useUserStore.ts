@@ -6,7 +6,9 @@ const useUserStore = create(
   persist(
     (set: any) => ({
       user: null,
+      role: null,
       setUser: (user: any) => set({ user }),
+      setRole: (role: string | null) => set({ role }),
     }),
     {
       name: "user-storage",
