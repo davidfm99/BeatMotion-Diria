@@ -22,52 +22,53 @@ const LogIn = () => {
 
   console.log("useUserStore state:", useUserStore());
 
+  const fetchUserRole = async (uid: string) => {
+    try {
+      const userDoc = await getDoc(doc(firestore, "users", uid));
 
-const fetchUserRole = async (uid: string) => {
-  try {
-    
-    const userDoc = await getDoc(doc(firestore, "users", uid));
-
-    if (userDoc.exists()) {
-      const data = userDoc.data();
-      console.log("Firestore user data:", data);
-      return data.role ?? "user";
-    } else {
-      console.warn("User document not found in Firestore");
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        console.log("Firestore user data:", data);
+        return data.role ?? "user";
+      } else {
+        console.warn("User document not found in Firestore");
+        return "user";
+      }
+    } catch (error) {
+      console.error("Error fetching user role from Firestore:", error);
       return "user";
     }
-  } catch (error) {
-    console.error("Error fetching user role from Firestore:", error);
-    return "user";
-  }
-};
+  };
 
+  const handleLogin = async () => {
+    const auth = getAuth();
 
-const handleLogin = async () => {
-  const auth = getAuth();
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const firebaseUser = userCredential.user;
+      setUser(firebaseUser);
 
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const firebaseUser = userCredential.user;
-    setUser(firebaseUser);
+      const role = await fetchUserRole(firebaseUser.uid);
+      setRole(role);
 
-    const role = await fetchUserRole(firebaseUser.uid);
-    setRole(role);
+      console.log("Logged in with Firestore role:", role);
 
-    console.log("Logged in with Firestore role:", role);
-
-    Alert.alert("Éxito", "Inicio de sesión exitoso", [
-      { text: "OK", onPress: () => router.push("/private/home") },
-    ]);
-  } catch (error) {
-    console.error("Login error:", error);
-    Alert.alert(
-      "Error",
-      "Hubo un problema al iniciar sesión. Verifica tus credenciales o conexión.",
-      [{ text: "OK" }]
-    );
-  }
-};
+      Alert.alert("Éxito", "Inicio de sesión exitoso", [
+        { text: "OK", onPress: () => router.push("/private/home") },
+      ]);
+    } catch (error) {
+      console.error("Login error:", error);
+      Alert.alert(
+        "Error",
+        "Hubo un problema al iniciar sesión. Verifica tus credenciales o conexión.",
+        [{ text: "OK" }]
+      );
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 justify-center items-center p-4 w-full">
@@ -87,7 +88,9 @@ const handleLogin = async () => {
           secureTextEntry
         />
         <View className="flex-col gap-3">
-          <TouchableHighlight onPress={() => router.push("/public/resetPassword")}>
+          <TouchableHighlight
+            onPress={() => router.push("/public/resetPassword")}
+          >
             <Text className="text-sm text-secondary underline">
               ¿Olvidaste tu contraseña?
             </Text>
