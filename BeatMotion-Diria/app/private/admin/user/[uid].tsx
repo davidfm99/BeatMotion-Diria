@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,47 +14,103 @@ import { firestore } from "@/firebaseConfig";
 import { Picker } from "@react-native-picker/picker";
 import { useUserInfo } from "@/hooks/useUserInfo";
 import DataLoader from "@/components/DataLoader";
+import { capitalize } from "@/constants/helpers";
+import { ProfileAdminValidationSchema } from "@/constants/validationForms";
+import * as Yup from "yup";
+
+const USER_ROLES_MAPPER = {
+  user: "Usuario",
+  admin: "Administrador",
+  teacher: "Profesor",
+};
 
 export default function AdminUserProfile() {
   const { uid } = useLocalSearchParams();
-  const [profile, setProfile] = useState<any>(null);
   const [editing, setEditing] = useState(false);
   const userQuery = useUserInfo(uid as string);
+  const [form, setForm] = useState({
+    name: "",
+    lastName: "",
+    phone: "",
+    role: "user",
+    photoURL: "",
+    email: "",
+  });
+  const [formErrors, setFormErrors] = useState({
+    name: "",
+    lastName: "",
+    phone: "",
+    role: "",
+    email: "",
+  });
 
-  // Editable fields
-  const [name, setName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [role, setRole] = useState("user");
+  useEffect(() => {
+    if (userQuery.data) {
+      const userData = userQuery.data;
+      setForm({
+        name: userData.name || "",
+        lastName: userData.lastName || "",
+        phone: userData.phone || "",
+        role: userData.role || "user",
+        photoURL: userData.photoURL || "",
+        email: userData.email || "",
+      });
+    }
+  }, [userQuery.data]);
+
+  const validation = () => {
+    try {
+      Yup.object(ProfileAdminValidationSchema).validateSync(form, {
+        abortEarly: false,
+      });
+      setFormErrors({
+        name: "",
+        lastName: "",
+        phone: "",
+        role: "",
+        email: "",
+      });
+    } catch (err: any) {
+      const errors = {
+        name: "",
+        lastName: "",
+        phone: "",
+        role: "",
+        email: "",
+      };
+      err.inner.reduce((acc: any, curr: any) => {
+        acc[curr.path] = curr.message;
+        return acc;
+      }, errors);
+      setFormErrors(errors);
+      console.error("Validation error:", err);
+      Alert.alert("Error", "Por favor, verifica los campos.");
+      return false;
+    }
+    return true;
+  };
 
   // Save updates
   const handleSave = async () => {
-    try {
-      const ref = doc(firestore, "users", uid as string);
+    if (validation()) {
+      try {
+        const ref = doc(firestore, "users", uid as string);
 
-      await updateDoc(ref, {
-        name: name.trim(), // "Nombre" updates the 'name' field
-        lastName: lastName.trim(), // "Apellido" updates the 'lastName' field
-        phone: phone.trim(),
-        role,
-      });
+        await updateDoc(ref, {
+          name: form.name.trim(), // "Nombre" updates the 'name' field
+          lastName: form.lastName.trim(), // "Apellido" updates the 'lastName' field
+          phone: form.phone.trim(),
+          role: form.role,
+        });
 
-      Alert.alert("Éxito", "Información actualizada correctamente.");
-      setProfile({ ...profile, name, lastName, phone, role });
-      setEditing(false);
-    } catch (err) {
-      console.error("Error saving user:", err);
-      Alert.alert("Error", "No se pudo actualizar el usuario.");
+        Alert.alert("Éxito", "Información actualizada correctamente.");
+        setEditing(false);
+      } catch (err) {
+        console.error("Error saving user:", err);
+        Alert.alert("Error", "No se pudo actualizar el usuario.");
+      }
     }
   };
-
-  if (!profile) {
-    return (
-      <View className="flex-1 items-center justify-center bg-black px-6">
-        <Text className="text-white text-lg">Cargando usuario...</Text>
-      </View>
-    );
-  }
 
   return (
     <ScrollView className="flex-1 bg-black px-6 py-10">
@@ -64,32 +120,30 @@ export default function AdminUserProfile() {
 
       <DataLoader query={userQuery}>
         {(data) => {
-          setProfile(data);
-          setName(data?.name || "");
-          setLastName(data?.lastName || "");
-          setPhone(data?.phone || "");
-          setRole(data?.role || "user");
           return (
             <>
               {/* Avatar */}
               <View className="items-center mb-8">
-                {profile.photoURL ? (
+                {form.photoURL ? (
                   <Image
-                    source={{ uri: profile.photoURL }}
+                    source={{ uri: form.photoURL }}
                     className="w-28 h-28 rounded-full mb-4"
                   />
                 ) : (
                   <View className="w-28 h-28 rounded-full bg-gray-800 mb-4 items-center justify-center">
                     <Text className="text-white text-xl">
-                      {(name?.[0] ?? profile.email?.[0] ?? "U").toUpperCase()}
+                      {capitalize(form.name !== "" ? form.name?.[0] : "?")}{" "}
+                      {capitalize(
+                        form.lastName !== "" ? form.lastName?.[0] : "?"
+                      )}
                     </Text>
                   </View>
                 )}
                 <Text className="text-white text-xl font-semibold">
-                  {`${name} ${lastName}`.trim() || "Sin nombre"}
+                  {`${form.name} ${form.lastName}`.trim() || "Sin nombre"}
                 </Text>
                 <Text className="text-gray-400">
-                  {profile.email || "Sin correo"}
+                  {form?.email || "Sin correo"}
                 </Text>
               </View>
 
@@ -101,13 +155,22 @@ export default function AdminUserProfile() {
                 <View className="mb-3">
                   <Text className="text-gray-400 text-xs mb-1">Nombre</Text>
                   {editing ? (
-                    <TextInput
-                      value={name}
-                      onChangeText={setName}
-                      className="bg-gray-800 text-white rounded-xl px-3 py-3"
-                    />
+                    <>
+                      <TextInput
+                        value={form.name}
+                        onChangeText={(value) =>
+                          setForm({ ...form, name: value })
+                        }
+                        className="bg-gray-800 text-white rounded-xl px-3 py-3"
+                      />
+                      {formErrors.name ? (
+                        <Text className="text-red-500 text-xs mt-1">
+                          {formErrors.name}
+                        </Text>
+                      ) : null}
+                    </>
                   ) : (
-                    <Text className="text-white">{name || "—"}</Text>
+                    <Text className="text-white">{form.name || "—"}</Text>
                   )}
                 </View>
 
@@ -115,13 +178,22 @@ export default function AdminUserProfile() {
                 <View className="mb-3">
                   <Text className="text-gray-400 text-xs mb-1">Apellido</Text>
                   {editing ? (
-                    <TextInput
-                      value={lastName}
-                      onChangeText={setLastName}
-                      className="bg-gray-800 text-white rounded-xl px-3 py-3"
-                    />
+                    <>
+                      <TextInput
+                        value={form.lastName}
+                        onChangeText={(value) =>
+                          setForm({ ...form, lastName: value })
+                        }
+                        className="bg-gray-800 text-white rounded-xl px-3 py-3"
+                      />
+                      {formErrors.lastName ? (
+                        <Text className="text-red-500 text-xs mt-1">
+                          {formErrors.lastName}
+                        </Text>
+                      ) : null}
+                    </>
                   ) : (
-                    <Text className="text-white">{lastName || "—"}</Text>
+                    <Text className="text-white">{form.lastName || "—"}</Text>
                   )}
                 </View>
 
@@ -129,14 +201,23 @@ export default function AdminUserProfile() {
                 <View className="mb-3">
                   <Text className="text-gray-400 text-xs mb-1">Teléfono</Text>
                   {editing ? (
-                    <TextInput
-                      value={phone}
-                      onChangeText={setPhone}
-                      keyboardType="phone-pad"
-                      className="bg-gray-800 text-white rounded-xl px-3 py-3"
-                    />
+                    <>
+                      <TextInput
+                        value={form.phone}
+                        onChangeText={(value) =>
+                          setForm({ ...form, phone: value })
+                        }
+                        keyboardType="phone-pad"
+                        className="bg-gray-800 text-white rounded-xl px-3 py-3"
+                      />
+                      {formErrors.phone ? (
+                        <Text className="text-red-500 text-xs mt-1">
+                          {formErrors.phone}
+                        </Text>
+                      ) : null}
+                    </>
                   ) : (
-                    <Text className="text-white">{phone || "—"}</Text>
+                    <Text className="text-white">{form.phone || "—"}</Text>
                   )}
                 </View>
 
@@ -144,25 +225,32 @@ export default function AdminUserProfile() {
                 <View className="mb-3">
                   <Text className="text-gray-400 text-xs mb-1">Rol</Text>
                   {editing ? (
-                    <View className="bg-gray-800 rounded-xl">
-                      <Picker
-                        selectedValue={role}
-                        onValueChange={(value: string) => setRole(value)}
-                        dropdownIconColor="white"
-                        style={{ color: "white" }}
-                      >
-                        <Picker.Item label="Usuario" value="user" />
-                        <Picker.Item label="Administrador" value="admin" />
-                        <Picker.Item label="Profesor" value="teacher" />
-                      </Picker>
-                    </View>
+                    <>
+                      <View className="bg-gray-800 rounded-xl">
+                        <Picker
+                          selectedValue={form.role}
+                          onValueChange={(value: string) =>
+                            setForm({ ...form, role: value })
+                          }
+                          dropdownIconColor="white"
+                          style={{ color: "white" }}
+                        >
+                          <Picker.Item label="Usuario" value="user" />
+                          <Picker.Item label="Administrador" value="admin" />
+                          <Picker.Item label="Profesor" value="teacher" />
+                        </Picker>
+                      </View>
+                      {formErrors.role ? (
+                        <Text className="text-red-500 text-xs mt-1">
+                          {formErrors.role}
+                        </Text>
+                      ) : null}
+                    </>
                   ) : (
                     <Text className="text-white capitalize">
-                      {role === "user"
-                        ? "Usuario"
-                        : role === "admin"
-                        ? "Administrador"
-                        : "Profesor"}
+                      {USER_ROLES_MAPPER[
+                        form.role as keyof typeof USER_ROLES_MAPPER
+                      ] || "—"}
                     </Text>
                   )}
                 </View>

@@ -6,11 +6,11 @@ import { Alert } from "react-native";
 import zod from "zod";
 
 const userSchema = zod.object({
-  id: zod.string().uuid(),
+  uid: zod.string(),
   email: zod.string().email(),
   name: zod.string().min(2).max(100),
   lastName: zod.string().min(2).max(100),
-  phone: zod.string().min(10).max(15),
+  phone: zod.string().optional(),
   role: zod.enum(["user", "admin", "teacher"]),
   photoURL: zod.string().url().optional(),
   active: zod.boolean(),
@@ -36,12 +36,11 @@ export const useUserInfo = (userid: string) => {
   });
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(firestore, "users"), (snapshot) => {
-      const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-      queryClient.setQueryData(["users"], data);
+    const unsub = onSnapshot(doc(firestore, "users", userid), (snapshot) => {
+      queryClient.setQueryData(["user", userid], snapshot.data());
     });
     return () => unsub();
-  }, [queryClient]);
+  }, [queryClient, userid]);
 
   return query;
 };

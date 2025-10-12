@@ -4,14 +4,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useUserStore from "@/store/useUserStore";
 
-
 export default function HomeScreen() {
   const { role } = useUserStore();
 
   const goToProfile = () => {
     router.push("/private/profile");
   };
-
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -28,11 +26,11 @@ export default function HomeScreen() {
             Tu rol actual es: {role}
           </Text>
         )}
-        
+
         {/* Bottom bar */}
-        <View className="absolute left-0 right-0 bottom-0 bg-gray-900 h-16 flex-row items-center justify-end px-6">
-          
+        <View className="absolute left-0 right-0 bottom-0 bg-gray-900 h-24 flex-row items-center px-6 gap-3">
           {role === "admin" && (
+            <View className="flex-1">
               <TouchableOpacity
                 onPress={() => router.push("/private/admin/users" as any)}
                 className="w-12 h-12 rounded-full bg-yellow-400 items-center justify-center"
@@ -40,15 +38,20 @@ export default function HomeScreen() {
               >
                 <Ionicons name="people-outline" size={24} color="black" />
               </TouchableOpacity>
-            )}
+              <Text className="text-xs text-white mt-2">Usuarios</Text>
+            </View>
+          )}
 
-          <TouchableOpacity
-            onPress={goToProfile}
-            className="w-12 h-12 rounded-full bg-white items-center justify-center"
-            accessibilityLabel="Ir a mi perfil"
-          >
-            <Ionicons name="person-circle-outline" size={26} />
-          </TouchableOpacity>
+          <View className="">
+            <TouchableOpacity
+              onPress={goToProfile}
+              className="w-12 h-12 rounded-full bg-white items-center justify-center"
+              accessibilityLabel="Ir a mi perfil"
+            >
+              <Ionicons name="person-circle-outline" size={26} />
+            </TouchableOpacity>
+            <Text className="text-xs text-white mt-2">Ver Perfil</Text>
+          </View>
         </View>
       </View>
     </SafeAreaView>

@@ -8,19 +8,16 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import {
-  updateDoc,
-  doc,
-  deleteDoc,
-} from "firebase/firestore";
+import { updateDoc, doc, deleteDoc } from "firebase/firestore";
 import { firestore } from "@/firebaseConfig";
 import useUserStore from "@/store/useUserStore";
 import { useUsers } from "@/hooks/useUsers";
+import DataLoader from "@/components/DataLoader";
 
 export default function AdminUsersScreen() {
   const { role } = useUserStore();
   const router = useRouter();
-  const { data: users, isLoading } = useUsers();
+  const usersQuery = useUsers();
 
   // Protect access
   useEffect(() => {
@@ -102,25 +99,23 @@ export default function AdminUsersScreen() {
     </View>
   );
 
-  if (isLoading) {
-    return (
-      <View className="flex-1 justify-center items-center bg-black">
-        <ActivityIndicator color="white" size="large" />
-        <Text className="text-gray-400 mt-3">Cargando usuarios...</Text>
-      </View>
-    );
-  }
-
   return (
     <View className="flex-1 bg-black px-6 py-10">
       <Text className="text-white text-2xl font-bold mb-6">
         Gestión de usuarios
       </Text>
-      <FlatList
-        data={users}
-        keyExtractor={(item) => item.id}
-        renderItem={renderUser}
-      />
+      <DataLoader
+        query={usersQuery}
+        emptyMessage="No hay usuarios registrados."
+      >
+        {(data) => (
+          <FlatList
+            data={data}
+            keyExtractor={(item) => item.id}
+            renderItem={renderUser}
+          />
+        )}
+      </DataLoader>
     </View>
   );
 }

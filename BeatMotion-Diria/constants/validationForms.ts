@@ -10,3 +10,10 @@ export const signInValidationSchema = {
     "La contraseña debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial."
   ),
 };
+
+export const ProfileAdminValidationSchema = {
+  name: string().required("El nombre es obligatorio"),
+  lastName: string().required("El apellido es obligatorio"),
+  phone: string().required("El teléfono es obligatorio"),
+  role: string().oneOf(["user", "admin", "teacher"], "Rol no válido").required("El rol es obligatorio"),
+};
