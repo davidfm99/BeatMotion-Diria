@@ -21,14 +21,12 @@ export default function RootLayout() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log("Current user:", currentUser);
       setUser(currentUser);
     });
     return unsubscribe;
   }, [setUser]);
 
   useEffect(() => {
-    console.log("User state changed:", user);
     if (!user === null) {
       router.push("/public/login");
     }

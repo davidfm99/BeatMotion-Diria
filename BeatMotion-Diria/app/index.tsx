@@ -16,7 +16,7 @@ const App = () => {
   return (
     <>
       {user ? (
-        <Redirect href="/private/index" />
+        <Redirect href="/private/home" />
       ) : (
         <Redirect href="/public/login" />
       )}
