@@ -7,10 +7,9 @@ import type { Href } from "expo-router";
 export default function EditCourseScreen() {
   const { id, tab } = useLocalSearchParams<{ id?: string; tab?: string | string[] }>();
 
-  const navState = useRootNavigationState();     // ← estado del root navigator
-  const [notFound, setNotFound] = useState(false); // ← flag en vez de navegar inmediato
+  const navState = useRootNavigationState();
+  const [notFound, setNotFound] = useState(false);
 
-  // Guard: si llega un ID inválido (index/list/new) márcalo como notFound
   useEffect(() => {
     const invalid = [undefined, null, "", "index", "list", "new"];
     const val = Array.isArray(id) ? id[0] : id;
@@ -35,7 +34,7 @@ export default function EditCourseScreen() {
       const db = getFirestore();
       const snap = await getDoc(doc(db, "courses", String(id)));
       if (!snap.exists()) {
-        setNotFound(true); // ← NO navegues aquí
+        setNotFound(true);
         setLoading(false);
         return;
       }
@@ -51,7 +50,6 @@ export default function EditCourseScreen() {
     if (id) loadCourse();
   }, [id]);
 
-  // Suscripción a clases del curso
   useEffect(() => {
     if (!id) return;
     const db = getFirestore();
@@ -64,10 +62,9 @@ export default function EditCourseScreen() {
     return () => unsub();
   }, [id]);
 
-  // Navega solo cuando el root layout esté listo
   useEffect(() => {
     if (notFound && navState?.key) {
-      router.replace("/private/admin/coursesMenu"); // o "/private/admin/courses/index"
+      router.replace("/private/admin/coursesMenu");
     }
   }, [notFound, navState?.key]);
 

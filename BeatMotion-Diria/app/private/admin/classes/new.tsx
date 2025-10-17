@@ -9,23 +9,20 @@ export default function NewClassScreen() {
   const [courses, setCourses] = useState<any[]>([]);
   const [courseId, setCourseId] = useState<string>("");
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");           // guardamos YYYY-MM-DD
-  const [startTime, setStartTime] = useState(""); // guardamos HH:mm (24h)
-  const [endTime, setEndTime] = useState("");     // guardamos HH:mm (24h)
+  const [date, setDate] = useState("");
+  const [startTime, setStartTime] = useState(""); 
+  const [endTime, setEndTime] = useState("");     
   const [room, setRoom] = useState("");
   const [capacity, setCapacity] = useState<string>("");
 
-  // Pickers (UI)
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
 
-  // Objetos Date solo para mostrar AM/PM y DD/MM/YYYY
   const [dateObj, setDateObj] = useState<Date | null>(null);
   const [startObj, setStartObj] = useState<Date | null>(null);
   const [endObj, setEndObj] = useState<Date | null>(null);
 
-  // Navegación segura
   const navState = useRootNavigationState();
   const [pendingNav, setPendingNav] = useState(false);
 
@@ -41,15 +38,13 @@ export default function NewClassScreen() {
     return () => unsub();
   }, []);
 
-  // Cuando el router está listo y tenemos navegación pendiente, navegamos
   useEffect(() => {
     if (pendingNav && navState?.key) {
       setPendingNav(false);
-      router.replace("/private/admin/courses/index"); // o "/private/admin/coursesMenu"
+      router.replace("/private/admin/courses/index");
     }
   }, [pendingNav, navState?.key]);
 
-  // --- Helpers de formato ---
   function pad(n: number) {
     return n < 10 ? `0${n}` : String(n);
   }
@@ -58,20 +53,20 @@ export default function NewClassScreen() {
     const y = d.getFullYear();
     const m = pad(d.getMonth() + 1);
     const day = pad(d.getDate());
-    return `${y}-${m}-${day}`; // "2025-10-20"
+    return `${y}-${m}-${day}`;
   }
 
   function formatDDMMYYYY(d: Date) {
     const day = pad(d.getDate());
     const m = pad(d.getMonth() + 1);
     const y = d.getFullYear();
-    return `${day}/${m}/${y}`; // "20/10/2025"
+    return `${day}/${m}/${y}`;
   }
 
   function to24h(d: Date) {
     const hh = pad(d.getHours());
     const mm = pad(d.getMinutes());
-    return `${hh}:${mm}`; // "19:30"
+    return `${hh}:${mm}`;
   }
 
   function to12hLabel(d: Date) {
@@ -80,7 +75,7 @@ export default function NewClassScreen() {
     const ampm = hours >= 12 ? "PM" : "AM";
     hours = hours % 12;
     if (hours === 0) hours = 12;
-    return `${hours}:${minutes} ${ampm}`; // "7:30 PM"
+    return `${hours}:${minutes} ${ampm}`;
   }
 
   const handleSave = async () => {
@@ -97,17 +92,16 @@ export default function NewClassScreen() {
       await addDoc(collection(db, "classes"), {
         courseId,
         title: title.trim(),
-        date: date.trim() || null,               // "2025-10-20"
-        startTime: startTime.trim() || null,     // "19:00"
-        endTime: endTime.trim() || null,         // "20:00"
+        date: date.trim() || null,              
+        startTime: startTime.trim() || null,     
+        endTime: endTime.trim() || null,         
         room: room.trim() || null,
         capacity: capacity ? Number(capacity) : null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
       Alert.alert("Clase", "Creada correctamente.");
-      // router.replace("/private/admin/courses/index"); // ❌ evitar navegar directo
-      setPendingNav(true); // ✅ navega cuando el router esté listo
+      setPendingNav(true);
     } catch (e) {
       console.error(e);
       Alert.alert("Error", "No se pudo crear la clase.");
@@ -157,7 +151,7 @@ export default function NewClassScreen() {
             placeholderTextColor="#9CA3AF"
           />
 
-          {/* Fecha (picker) */}
+          {/* Fecha */}
           <Text className="text-white mb-1">Fecha</Text>
           <TouchableOpacity
             className="bg-gray-900 rounded-xl px-3 py-3 mb-3"
@@ -176,12 +170,10 @@ export default function NewClassScreen() {
                 setShowDatePicker(false);
                 if (!sel) return;
                 setDateObj(sel);
-                setDate(formatYYYYMMDD(sel)); // guardamos ISO
+                setDate(formatYYYYMMDD(sel));
               }}
             />
           )}
-
-          {/* Inicio (picker AM/PM) */}
           <Text className="text-white mb-1">Inicio</Text>
           <TouchableOpacity
             className="bg-gray-900 rounded-xl px-3 py-3 mb-3"
@@ -201,12 +193,11 @@ export default function NewClassScreen() {
                 setShowStartPicker(false);
                 if (!sel) return;
                 setStartObj(sel);
-                setStartTime(to24h(sel)); // guardamos 24h
+                setStartTime(to24h(sel));
               }}
             />
           )}
 
-          {/* Fin (picker AM/PM) */}
           <Text className="text-white mb-1">Fin</Text>
           <TouchableOpacity
             className="bg-gray-900 rounded-xl px-3 py-3 mb-3"
@@ -226,7 +217,7 @@ export default function NewClassScreen() {
                 setShowEndPicker(false);
                 if (!sel) return;
                 setEndObj(sel);
-                setEndTime(to24h(sel)); // guardamos 24h
+                setEndTime(to24h(sel));
               }}
             />
           )}

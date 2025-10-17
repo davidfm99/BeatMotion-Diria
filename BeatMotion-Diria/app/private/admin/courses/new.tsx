@@ -62,7 +62,6 @@ export default function NewCourseScreen() {
         placeholderTextColor="#9CA3AF"
       />
 
-      {/* Nivel como dropdown */}
       <Text className="text-white mb-1">Nivel</Text>
       <View className="bg-gray-900 rounded-xl mb-3">
         <Picker

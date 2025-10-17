@@ -32,7 +32,6 @@ export default function ClassesBrowserScreen() {
     return () => unsub();
   }, []);
 
-  // Cargar clases del curso seleccionado (server-side orderBy requiere índice)
   useEffect(() => {
     if (!selectedCourseId) {
       setClasses([]);
@@ -92,7 +91,6 @@ export default function ClassesBrowserScreen() {
         </Text>
       ) : (
         <>
-          {/* Lista de cursos (selector simple por toque) */}
           <Text className="text-white mb-2">Cursos:</Text>
           <FlatList
             horizontal

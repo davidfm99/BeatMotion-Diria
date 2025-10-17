@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 export default function CoursesMenuScreen() {
   useEffect(() => {
-    console.log("⚡ CoursesMenuScreen mounted");
+    console.log("CoursesMenuScreen mounted");
   }, []);
 
   return (
