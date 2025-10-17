@@ -1,4 +1,4 @@
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { Stack } from "expo-router";
 import { auth } from "@/firebaseConfig";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
