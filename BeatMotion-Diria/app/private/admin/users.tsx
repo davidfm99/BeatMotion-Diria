@@ -10,25 +10,25 @@ import {
 import { useRouter } from "expo-router";
 import { updateDoc, doc, deleteDoc } from "firebase/firestore";
 import { firestore } from "@/firebaseConfig";
-import useUserStore from "@/store/useUserStore";
+import { useActiveUser } from "@/hooks/UseActiveUser";
 import { useUsers } from "@/hooks/useUsers";
 import DataLoader from "@/components/DataLoader";
 
 export default function AdminUsersScreen() {
-  const { role } = useUserStore();
+  const { user } = useActiveUser();
   const router = useRouter();
   const usersQuery = useUsers();
 
   // Protect access
   useEffect(() => {
-    if (role !== "admin") {
+    if (user?.role !== "admin") {
       Alert.alert(
         "Acceso restringido",
         "Solo los administradores pueden ver esta sección"
       );
       router.replace("/private/home");
     }
-  }, [role, router]);
+  }, [user, router]);
 
   const handleDeactivate = async (uid: string, currentStatus: boolean) => {
     try {

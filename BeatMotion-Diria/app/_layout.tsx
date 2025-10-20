@@ -1,50 +1,43 @@
+// app/_layout.tsx
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { Stack, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import "../global.css";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { useEffect } from "react";
-import { auth } from "../firebaseConfig";
-
-import useUserStore from "@/store/useUserStore";
-
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useActiveUser } from "@/hooks/UseActiveUser";
+
+const queryClient = new QueryClient();
+
+function AppContent() {
+  const { user } = useActiveUser();
+
+  return (
+    <Stack>
+      <Stack.Protected guard={!user}>
+        <Stack.Screen name="public" options={{ headerShown: false }} />
+      </Stack.Protected>
+      <Stack.Protected guard={!!user}>
+        <Stack.Screen name="private" options={{ headerShown: false }} />
+      </Stack.Protected>
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
-  const { user, setUser } = useUserStore();
-  const router = useRouter();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return unsubscribe;
-  }, [setUser]);
-
-  useEffect(() => {
-    if (!user === null) {
-      router.push("/public/login");
-    }
-  }, [user, router]);
-
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Protected guard={!user}>
-          <Stack.Screen name="public" options={{ headerShown: false }} />
-        </Stack.Protected>
-        <Stack.Protected guard={!!user}>
-          <Stack.Screen name="private" options={{ headerShown: false }} />
-        </Stack.Protected>
-      </Stack>
-      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <AppContent />
+        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }

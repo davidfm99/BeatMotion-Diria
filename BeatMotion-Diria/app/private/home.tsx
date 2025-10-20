@@ -2,10 +2,11 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import useUserStore from "@/store/useUserStore";
+import { useActiveUser } from "@/hooks/UseActiveUser";
+import HomeUser from "./user/HomeUser";
 
 export default function HomeScreen() {
-  const { role } = useUserStore();
+  const { user } = useActiveUser();
 
   const goToProfile = () => {
     router.push("/private/profile");
@@ -21,15 +22,15 @@ export default function HomeScreen() {
           Tu espacio de baile. Explora clases, horarios y tu perfil.
         </Text>
 
-        {role && (
+        {user?.role && (
           <Text className="text-sm text-indigo-300 italic mb-8">
-            Tu rol actual es: {role}
+            Tu rol actual es: {user?.role}
           </Text>
         )}
 
         {/* Bottom bar */}
         <View className="absolute left-0 right-0 bottom-0 bg-gray-900 h-24 flex-row items-center px-6 gap-6">
-          {role === "admin" && (
+          {user?.role === "admin" && (
             <>
               <View className="flex-1 items-center">
                 <TouchableOpacity
@@ -44,7 +45,9 @@ export default function HomeScreen() {
 
               <View className="flex-1 items-center">
                 <TouchableOpacity
-                  onPress={() => router.push("/private/admin/coursesMenu" as any)}
+                  onPress={() =>
+                    router.push("/private/admin/coursesMenu" as any)
+                  }
                   className="w-12 h-12 rounded-full bg-yellow-400 items-center justify-center"
                   accessibilityLabel="Gestión de cursos"
                 >
