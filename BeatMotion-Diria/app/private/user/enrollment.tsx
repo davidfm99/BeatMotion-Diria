@@ -9,6 +9,7 @@ import { useActiveUser } from "@/hooks/UseActiveUser";
 import { useRouter } from "expo-router";
 import { useEnrollmentByUserId } from "@/hooks/enrollment/useEnrollmentByUserId";
 import { Enrollment as EnrollmentType } from "@/hooks/enrollment/schema";
+import { capitalize } from "@/constants/helpers";
 
 const INITIAL_PRICE = 20000;
 const PRICE_PER_COURSE = 5000;
@@ -83,6 +84,8 @@ const Enrollment = () => {
     router.replace("/private/home");
   };
 
+  console.log("Enrolled Course Ids:", coursesQuery?.data[0]?.startDate);
+
   return (
     <View className="mt-4">
       <Text className="text-white pl-4 text-2xl font-bold">
@@ -104,6 +107,10 @@ const Enrollment = () => {
                         {course.description}
                       </Text>
                       <Text className="text-gray-500">{course.level}</Text>
+                      <Text className="text-gray-500">
+                        {capitalize(course.day || "")}-{" "}
+                        {new Date(course.startDate || "").toLocaleDateString()}
+                      </Text>
                     </View>
                   }
                   isChecked={selectedCourses.includes(course.id)}

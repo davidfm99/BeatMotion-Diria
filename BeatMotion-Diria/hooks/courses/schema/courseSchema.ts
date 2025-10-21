@@ -17,7 +17,15 @@ export const courseSchema = zod.array(
         if (!value) return null;
         if (value instanceof Date) return value;
         if (value.toDate) return value.toDate();
-        return new Date(value);
+        if (
+          typeof value === "object" &&
+          "seconds" in value &&
+          "nanoseconds" in value
+        ) {
+          return new Date(value.seconds * 1000 + value.nanoseconds / 1_000_000);
+        }
+        if (typeof value === "string") return new Date(value);
+        return null;
       }),
   })
 );
