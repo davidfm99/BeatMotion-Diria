@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useActiveUser } from "@/hooks/UseActiveUser";
-import HomeUser from "./user/HomeUser";
+import HomeUser from "./user/homeUser";
 
 export default function HomeScreen() {
   const { user } = useActiveUser();
@@ -15,18 +15,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View className="flex-1 bg-black px-6 py-12 justify-center">
-        <Text className="text-3xl font-extrabold text-white mb-2">
-          Beatmotion Diria
-        </Text>
-        <Text className="text-base text-gray-300 mb-8">
-          Tu espacio de baile. Explora clases, horarios y tu perfil.
-        </Text>
-
-        {user?.role && (
-          <Text className="text-sm text-indigo-300 italic mb-8">
-            Tu rol actual es: {user?.role}
-          </Text>
-        )}
+        {user ? <HomeUser /> : null}
 
         {/* Bottom bar */}
         <View className="absolute left-0 right-0 bottom-0 bg-gray-900 h-24 flex-row items-center px-6 gap-6">
