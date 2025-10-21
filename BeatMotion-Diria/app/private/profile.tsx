@@ -1,4 +1,4 @@
-import { use, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,14 +11,9 @@ import {
 import { router } from "expo-router";
 import { signOut, updateProfile } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
+import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import { useActiveUser } from "@/hooks/UseActiveUser";
+import { QueryClient } from "@tanstack/react-query";
 
 type UserProfile = {
   firstName: string;
@@ -83,6 +78,8 @@ export default function ProfileScreen() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      const queryClient = new QueryClient();
+      queryClient.invalidateQueries({ queryKey: ["activeUser"] });
       router.replace("/public/login");
     } catch (err) {
       console.error("Error signing out:", err);
