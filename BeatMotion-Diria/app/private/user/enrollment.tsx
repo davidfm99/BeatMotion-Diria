@@ -3,7 +3,10 @@ import { useCourses } from "@/hooks/courses/useCourses";
 import DataLoader from "@/components/DataLoader";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { useEffect, useState } from "react";
-import { askForCameraPermission } from "@/components/enrollment/askCameraPermision";
+import {
+  askForCameraPermission,
+  uploadImage,
+} from "@/components/enrollment/askCameraPermision";
 import { useCreateEnrollment } from "@/hooks/enrollment/useCreateEnrollment";
 import { useActiveUser } from "@/hooks/UseActiveUser";
 import { useRouter } from "expo-router";
@@ -58,7 +61,7 @@ const Enrollment = () => {
     setImage(imageSelected);
   };
 
-  const handleConfirmEnrollment = () => {
+  const handleConfirmEnrollment = async () => {
     setPaymentInProcess(true);
     if (selectedCourses.length === 0) {
       alert("Selecciona al menos un curso para matricularte.");
@@ -68,23 +71,28 @@ const Enrollment = () => {
       alert("Por favor, sube el comprobante de pago.");
       return;
     }
-    createEnrollment.mutate({
-      coursesIds: selectedCourses,
-      data: {
-        status: "pending",
-        paymentProofImage: image,
-        userId: user?.uid,
-        totalAmount: getTotal(),
-        reviewedBy: null,
-        reviewedAt: null,
-      },
-    });
-    setPaymentInProcess(false);
+    try {
+      const imageUrl = await uploadImage(image, user!.uid);
+      createEnrollment.mutate({
+        coursesIds: selectedCourses,
+        data: {
+          status: "pending",
+          paymentProofImage: imageUrl,
+          userId: user?.uid,
+          totalAmount: getTotal(),
+          reviewedBy: null,
+          reviewedAt: null,
+        },
+      });
+    } catch (error: any) {
+      console.log("Error uploading enrollment:", error);
+      alert("Error al subir la matricula. Por favor, intenta de nuevo.");
+      setPaymentInProcess(false);
+      return;
+    }
     alert("Matrícula enviada con éxito. Será revisada pronto.");
     router.replace("/private/home");
   };
-
-  console.log("Enrolled Course Ids:", coursesQuery?.data[0]?.startDate);
 
   return (
     <View className="mt-4">
