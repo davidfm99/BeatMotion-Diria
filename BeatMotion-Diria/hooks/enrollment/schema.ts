@@ -13,9 +13,17 @@ export const enrollmentSchema = zod.array(
         if (!value) return null;
         if (value instanceof Date) return value;
         if (value.toDate) return value.toDate();
-        return new Date(value);
+        if (
+          typeof value === "object" &&
+          "seconds" in value &&
+          "nanoseconds" in value
+        ) {
+          return new Date(value.seconds * 1000 + value.nanoseconds / 1_000_000);
+        }
+        if (typeof value === "string") return new Date(value);
+        return null;
       }),
-    paymentProofUrl: zod.string().url().optional(),
+    paymentProofImage: zod.string().url().optional(),
     reviewedBy: zod.string().nullable(),
     reviewedAt: zod
       .any()
@@ -24,9 +32,53 @@ export const enrollmentSchema = zod.array(
         if (!value) return null;
         if (value instanceof Date) return value;
         if (value.toDate) return value.toDate();
-        return new Date(value);
+        if (
+          typeof value === "object" &&
+          "seconds" in value &&
+          "nanoseconds" in value
+        ) {
+          return new Date(value.seconds * 1000 + value.nanoseconds / 1_000_000);
+        }
+        if (typeof value === "string") return new Date(value);
+        return null;
       }),
     totalAmount: zod.number().min(0),
+    course: zod
+      .object({
+        id: zod.string(),
+        title: zod.string(),
+        description: zod.string(),
+        level: zod.string(),
+        day: zod.string().nullable(),
+        startDate: zod
+          .any()
+          .nullable()
+          .transform((value) => {
+            if (!value) return null;
+            if (value instanceof Date) return value;
+            if (value.toDate) return value.toDate();
+            if (
+              typeof value === "object" &&
+              "seconds" in value &&
+              "nanoseconds" in value
+            ) {
+              return new Date(
+                value.seconds * 1000 + value.nanoseconds / 1_000_000
+              );
+            }
+            if (typeof value === "string") return new Date(value);
+            return null;
+          }),
+      })
+      .nullish(),
+    user: zod
+      .object({
+        id: zod.string(),
+        firstName: zod.string(),
+        lastName: zod.string(),
+        email: zod.string().email(),
+      })
+      .nullish(),
   })
 );
 

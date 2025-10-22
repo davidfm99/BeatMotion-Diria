@@ -3,7 +3,8 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useActiveUser } from "@/hooks/UseActiveUser";
-import HomeUser from "./user/homeUser";
+import HomeUser from "./user/HomeUser";
+import HomeAdmin from "./admin/homeAdmin";
 
 export default function HomeScreen() {
   const { user } = useActiveUser();
@@ -15,7 +16,8 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View className="flex-1 bg-black px-6 py-12 justify-center">
-        {user ? <HomeUser /> : null}
+        {user?.role === "user" && <HomeUser />}
+        {user?.role === "admin" && <HomeAdmin />}
 
         {/* Bottom bar */}
         <View className="absolute left-0 right-0 bottom-0 bg-gray-900 h-24 flex-row items-center px-6 gap-6">
