@@ -36,6 +36,21 @@ export default function HomeScreen() {
 
               <View className="flex-1 items-center">
                 <TouchableOpacity
+                  onPress={() => router.push("/private/admin/draft")}
+                  className="w-12 h-12 rounded-full bg-yellow-400 items-center justify-center"
+                  accessibilityLabel="Ver borradores"
+                >
+                  <Ionicons
+                    name="document-text-outline"
+                    size={24}
+                    color="black"
+                  />
+                </TouchableOpacity>
+                <Text className="text-xs text-white mt-2">Borradores</Text>
+              </View>
+
+              <View className="flex-1 items-center">
+                <TouchableOpacity
                   onPress={() =>
                     router.push("/private/admin/coursesMenu" as any)
                   }
