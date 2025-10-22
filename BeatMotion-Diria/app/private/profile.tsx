@@ -1,10 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
-import { View, Text, Image, TouchableOpacity, TextInput, Alert, ScrollView } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  ScrollView,
+} from "react-native";
 import { router } from "expo-router";
 import { signOut, updateProfile } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
-import useUserStore from "@/store/useUserStore";
-import { getFirestore, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { getFirestore, doc, updateDoc } from "firebase/firestore";
+import { useActiveUser } from "@/hooks/UseActiveUser";
+import { QueryClient } from "@tanstack/react-query";
 
 type UserProfile = {
   firstName: string;
@@ -14,11 +23,7 @@ type UserProfile = {
 };
 
 export default function ProfileScreen() {
-  const { user } = useUserStore();
-
-  const currentUser = useMemo(() => {
-    return user ?? auth.currentUser;
-  }, [user]);
+  const { user } = useActiveUser();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [editing, setEditing] = useState(false);
@@ -27,53 +32,36 @@ export default function ProfileScreen() {
   const [phone, setPhone] = useState("");
 
   useEffect(() => {
-  const load = async () => {
-    if (!currentUser) return;
-    const uid = currentUser.uid;
-    const email = currentUser.email ?? "";
-
-    const dbFs = getFirestore();
-    const snap = await getDoc(doc(dbFs, "users", uid));
-
-    if (snap.exists()) {
-      const data = snap.data() as any;
-      const normalized = {
-        firstName: data.firstName ?? data.name ?? "",
-        lastName: data.lastName ?? "",
-        phone: data.phone ?? "",
-        email: data.email ?? email,
-      };
-      setProfile(normalized);
-      setFirstName(normalized.firstName);
-      setLastName(normalized.lastName);
-      setPhone(normalized.phone);
-    } else {
-      await setDoc(doc(dbFs, "users", uid), {
-        firstName: "",
-        lastName: "",
-        phone: "",
-        email,
+    if (user) {
+      setFirstName(user.firstName);
+      setLastName(user.lastName);
+      setPhone(user.phone);
+      setProfile({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        phone: user.phone || "",
+        email: user.email || "",
       });
-      setProfile({ firstName: "", lastName: "", phone: "", email });
     }
-  };
-  load();
-}, [currentUser]);
-// Guardar cambios del perfil
+  }, [user]);
+
+  // Guardar cambios del perfil
   const handleSave = async () => {
     try {
-      if (!currentUser) return;
+      if (!user) return;
       const dbFs = getFirestore();
-      await updateDoc(doc(dbFs, "users", currentUser.uid), {
+      await updateDoc(doc(dbFs, "users", user.uid), {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         phone: phone.trim(),
-        email: currentUser.email ?? "",
+        email: user.email ?? "",
       });
 
-
       try {
-        await updateProfile(currentUser, { displayName: `${firstName} ${lastName}`.trim() });
+        if (auth.currentUser)
+          await updateProfile(auth.currentUser, {
+            displayName: `${firstName} ${lastName}`.trim(),
+          });
       } catch (e) {
         console.warn("No se pudo actualizar displayName en Auth:", e);
       }
@@ -90,6 +78,8 @@ export default function ProfileScreen() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      const queryClient = new QueryClient();
+      queryClient.invalidateQueries({ queryKey: ["activeUser"] });
       router.replace("/public/login");
     } catch (err) {
       console.error("Error signing out:", err);
@@ -100,7 +90,7 @@ export default function ProfileScreen() {
     router.replace("/private/home");
   };
 
-  if (!currentUser || !profile) {
+  if (!user || !profile) {
     return (
       <View className="flex-1 items-center justify-center bg-black px-6">
         <Text className="text-white text-lg">Cargando usuario...</Text>
@@ -108,21 +98,21 @@ export default function ProfileScreen() {
     );
   }
 
-   // UI del perfil
+  // UI del perfil
   return (
     <ScrollView className="flex-1 bg-black px-6 py-10">
       <Text className="text-white text-2xl font-bold mb-6">Mi perfil</Text>
 
       <View className="items-center mb-8">
-        {currentUser.photoURL ? (
+        {user.photoURL ? (
           <Image
-            source={{ uri: currentUser.photoURL }}
+            source={{ uri: user.photoURL }}
             className="w-28 h-28 rounded-full mb-4"
           />
         ) : (
           <View className="w-28 h-28 rounded-full bg-gray-800 mb-4 items-center justify-center">
             <Text className="text-white text-xl">
-              {(profile.firstName?.[0] ?? currentUser.email?.[0] ?? "U").toUpperCase()}
+              {(profile.firstName?.[0] ?? user.email?.[0] ?? "U").toUpperCase()}
             </Text>
           </View>
         )}
@@ -210,7 +200,9 @@ export default function ProfileScreen() {
                 }
               }}
             >
-              <Text className="text-center font-semibold text-white">Cancelar</Text>
+              <Text className="text-center font-semibold text-white">
+                Cancelar
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -230,7 +222,9 @@ export default function ProfileScreen() {
           onPress={handleLogout}
           accessibilityLabel="Cerrar sesión"
         >
-          <Text className="text-center font-semibold text-white">Cerrar sesión</Text>
+          <Text className="text-center font-semibold text-white">
+            Cerrar sesión
+          </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
