@@ -14,26 +14,27 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useActiveUser } from "@/hooks/UseActiveUser";
 import { useMarketplaceItems } from "@/hooks/marketplace/useMarketplaceItems";
 import {
-  addMarketplaceItem,
-  deleteMarketplaceItem,
-  updateMarketplaceItem,
-} from "@/services/marketplace";
+  useCreateMarketplaceItem,
+  useDeleteMarketplaceItem,
+  useUpdateMarketplaceItem,
+} from "@/hooks/marketplace/useMarketplaceMutations";
+import {
+  pickMarketplaceImage,
+  uploadMarketplaceImage,
+} from "@/hooks/marketplace/marketplaceMedia";
 
-const normalizeMediaUrl = (value: string | null | undefined) => {
-  if (typeof value !== "string") return "";
-  const trimmed = value.trim();
-  if (!trimmed) return "";
-  return trimmed.replace(/^['"]+|['"]+$/g, "").trim();
+type MarketplaceImageState = {
+  id: string;
+  localUri?: string;
+  remoteUrl?: string;
 };
 
-const sanitizeGallery = (value: string) =>
-  value
-    .split(/\r?\n|,/)
-    .map((entry) => normalizeMediaUrl(entry))
-    .filter((entry) => entry.length > 0);
+const generateImageId = () =>
+  `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
 export default function MarketplaceAdminForm() {
   const { user } = useActiveUser();
@@ -58,20 +59,74 @@ export default function MarketplaceAdminForm() {
   const [price, setPrice] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [gallery, setGallery] = useState("");
+  const [primaryImage, setPrimaryImage] = useState<MarketplaceImageState | null>(null);
+  const [galleryImages, setGalleryImages] = useState<MarketplaceImageState[]>([]);
   const [category, setCategory] = useState("");
   const [itemCode, setItemCode] = useState("");
   const [active, setActive] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+
+  const createMarketplaceItemMutation = useCreateMarketplaceItem();
+  const updateMarketplaceItemMutation = useUpdateMarketplaceItem();
+  const deleteMarketplaceItemMutation = useDeleteMarketplaceItem();
+
+  const isSaving =
+    isUploadingImages ||
+    createMarketplaceItemMutation.isPending ||
+    updateMarketplaceItemMutation.isPending;
+  const isDeleting = deleteMarketplaceItemMutation.isPending;
+
+  const uploadImageIfNeeded = async (image: MarketplaceImageState | null) => {
+    if (!image) return null;
+    if (image.localUri) {
+      return uploadMarketplaceImage(image.localUri);
+    }
+    return image.remoteUrl ?? null;
+  };
+
+  const uploadGalleryIfNeeded = async (images: MarketplaceImageState[]) => {
+    const uploads = await Promise.all(images.map((entry) => uploadImageIfNeeded(entry)));
+    return uploads.filter((url): url is string => Boolean(url));
+  };
+
+  const handleSelectPrimaryImage = async () => {
+    if (isSaving) return;
+    const uri = await pickMarketplaceImage();
+    if (!uri) return;
+    setPrimaryImage({ id: generateImageId(), localUri: uri });
+  };
+
+  const handleRemovePrimaryImage = () => {
+    if (isSaving) return;
+    setPrimaryImage(null);
+  };
+
+  const handleAddGalleryImage = async () => {
+    if (isSaving) return;
+    const uri = await pickMarketplaceImage();
+    if (!uri) return;
+    setGalleryImages((prev) => [
+      ...prev,
+      { id: generateImageId(), localUri: uri },
+    ]);
+  };
+
+  const handleRemoveGalleryImage = (id: string) => {
+    if (isSaving) return;
+    setGalleryImages((prev) => prev.filter((image) => image.id !== id));
+  };
 
   useEffect(() => {
     hasHydratedFromItem.current = false;
   }, [itemId]);
 
   useEffect(() => {
-    if (!existingItem || hasHydratedFromItem.current) return;
+    if (hasHydratedFromItem.current) return;
+    if (!existingItem) {
+      setPrimaryImage(null);
+      setGalleryImages([]);
+      return;
+    }
 
     setName(existingItem.name ?? "");
     setPrice(
@@ -79,8 +134,25 @@ export default function MarketplaceAdminForm() {
     );
     setShortDescription(existingItem.shortDescription ?? "");
     setDescription(existingItem.description ?? "");
-    setImageUrl(existingItem.imageUrl ?? "");
-    setGallery(existingItem.gallery?.join("\n") ?? "");
+    setPrimaryImage(
+      existingItem.imageUrl
+        ? { id: generateImageId(), remoteUrl: existingItem.imageUrl }
+        : null,
+    );
+    const uniqueGallery = Array.from(
+      new Set(
+        (existingItem.gallery ?? []).filter(
+          (url): url is string =>
+            Boolean(url) && url !== existingItem.imageUrl,
+        ),
+      ),
+    );
+    setGalleryImages(
+      uniqueGallery.map((url) => ({
+        id: generateImageId(),
+        remoteUrl: url,
+      })),
+    );
     setCategory(existingItem.category ?? "");
     setItemCode(existingItem.itemId ?? "");
     setActive(existingItem.active !== false);
@@ -89,6 +161,8 @@ export default function MarketplaceAdminForm() {
   }, [existingItem]);
 
   const handleSubmit = async () => {
+    if (isSaving) return;
+
     if (user?.role !== "admin") {
       Alert.alert("Permisos", "Solo los administradores pueden gestionar articulos.");
       return;
@@ -126,16 +200,53 @@ export default function MarketplaceAdminForm() {
       return;
     }
 
-    const galleryItems = sanitizeGallery(gallery);
-    const primaryImage = normalizeMediaUrl(imageUrl);
-    const images = Array.from(
-      new Set([...(primaryImage ? [primaryImage] : []), ...galleryItems]),
-    );
-
     const normalizedDescription = description.trim();
     const normalizedShortDescription = shortDescription.trim();
     const normalizedCategory = category.trim();
     const normalizedItemCode = itemCode.trim();
+
+    if (!primaryImage) {
+      Alert.alert(
+        "Imagen requerida",
+        "Selecciona una imagen principal para el articulo.",
+      );
+      return;
+    }
+
+    let uploadedPrimaryUrl: string | null = null;
+    let uploadedGalleryUrls: string[] = [];
+    setIsUploadingImages(true);
+    try {
+      uploadedPrimaryUrl = await uploadImageIfNeeded(primaryImage);
+      if (!uploadedPrimaryUrl) {
+        Alert.alert(
+          "Imagen requerida",
+          "No pudimos preparar la imagen principal. Intenta nuevamente.",
+        );
+        return;
+      }
+      uploadedGalleryUrls = await uploadGalleryIfNeeded(galleryImages);
+    } catch (error) {
+      console.error(
+        "No se pudieron subir las imagenes del marketplace:",
+        error,
+      );
+      Alert.alert(
+        "Error",
+        "No pudimos preparar las imagenes seleccionadas. Intenta nuevamente en unos minutos.",
+      );
+      return;
+    } finally {
+      setIsUploadingImages(false);
+    }
+
+    if (!uploadedPrimaryUrl) {
+      return;
+    }
+
+    const images = Array.from(
+      new Set([uploadedPrimaryUrl, ...uploadedGalleryUrls]),
+    );
 
     const payload = {
       name: name.trim(),
@@ -166,9 +277,8 @@ export default function MarketplaceAdminForm() {
     };
 
     try {
-      setIsSaving(true);
       if (isEditing && itemId) {
-        await updateMarketplaceItem(itemId, payload);
+        await updateMarketplaceItemMutation.mutateAsync({ itemId, data: payload });
         Alert.alert("Marketplace", "Articulo actualizado correctamente.", [
           {
             text: "Aceptar",
@@ -176,7 +286,7 @@ export default function MarketplaceAdminForm() {
           },
         ]);
       } else {
-        await addMarketplaceItem({
+        await createMarketplaceItemMutation.mutateAsync({
           ...payload,
           createdBy: user?.uid ?? "desconocido",
         });
@@ -190,8 +300,8 @@ export default function MarketplaceAdminForm() {
         setPrice("");
         setShortDescription("");
         setDescription("");
-        setImageUrl("");
-        setGallery("");
+        setPrimaryImage(null);
+        setGalleryImages([]);
         setCategory("");
         setItemCode("");
         setActive(true);
@@ -202,9 +312,8 @@ export default function MarketplaceAdminForm() {
         "Error",
         "No pudimos guardar el articulo. Intenta nuevamente en unos minutos.",
       );
-    } finally {
-      setIsSaving(false);
     }
+
   };
 
   const handleDelete = () => {
@@ -220,8 +329,7 @@ export default function MarketplaceAdminForm() {
           style: "destructive",
           onPress: async () => {
             try {
-              setIsDeleting(true);
-              await deleteMarketplaceItem(itemId);
+              await deleteMarketplaceItemMutation.mutateAsync(itemId);
               Alert.alert("Marketplace", "Articulo eliminado correctamente.", [
                 {
                   text: "Aceptar",
@@ -234,8 +342,6 @@ export default function MarketplaceAdminForm() {
                 "Error",
                 "No pudimos eliminar el articulo. Intenta nuevamente en unos minutos.",
               );
-            } finally {
-              setIsDeleting(false);
             }
           },
         },
@@ -420,32 +526,93 @@ export default function MarketplaceAdminForm() {
 
             <View>
               <Text className="text-white font-semibold mb-2">
-                Imagen principal (URL)
+                Imagen principal
               </Text>
-              <TextInput
-                className="bg-gray-900 text-white rounded-2xl px-4 py-3"
-                placeholder="https://..."
-                placeholderTextColor="#6b7280"
-                value={imageUrl}
-                onChangeText={setImageUrl}
-                autoCapitalize="none"
-              />
+              {primaryImage ? (
+                <View className="bg-gray-900 rounded-2xl p-4 gap-4">
+                  <View className="rounded-xl overflow-hidden h-40 bg-gray-950">
+                    <Image
+                      source={{
+                        uri: primaryImage.localUri ?? primaryImage.remoteUrl ?? "",
+                      }}
+                      className="w-full h-full"
+                      contentFit="cover"
+                    />
+                  </View>
+                  <View className="flex-row gap-3">
+                    <TouchableOpacity
+                      className="flex-1 bg-yellow-400 rounded-full px-4 py-3 items-center"
+                      onPress={handleSelectPrimaryImage}
+                      disabled={isSaving}
+                    >
+                      <Text className="font-semibold text-black">
+                        Reemplazar imagen
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className="w-12 h-12 rounded-full bg-red-600 items-center justify-center"
+                      onPress={handleRemovePrimaryImage}
+                      disabled={isSaving}
+                      accessibilityLabel="Quitar imagen principal"
+                    >
+                      <Ionicons name="trash-outline" size={20} color="#ffffff" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  className="bg-gray-900 rounded-2xl px-4 py-5 items-center justify-center"
+                  onPress={handleSelectPrimaryImage}
+                  disabled={isSaving}
+                >
+                  <Ionicons name="image-outline" size={28} color="#9ca3af" />
+                  <Text className="text-gray-400 mt-2 text-sm text-center">
+                    Selecciona una imagen desde tu galeria
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
 
             <View>
-              <Text className="text-white font-semibold mb-2">
-                Galeria (una URL por linea)
-              </Text>
-              <TextInput
-                className="bg-gray-900 text-white rounded-2xl px-4 py-3 min-h-32"
-                placeholder="https://imagen-1.jpg&#10;https://imagen-2.jpg"
-                placeholderTextColor="#6b7280"
-                value={gallery}
-                onChangeText={setGallery}
-                multiline
-                autoCapitalize="none"
-                textAlignVertical="top"
-              />
+              <Text className="text-white font-semibold mb-2">Galeria</Text>
+              {galleryImages.length > 0 ? (
+                <View className="flex-row flex-wrap gap-4">
+                  {galleryImages.map((image) => {
+                    const uri = image.localUri ?? image.remoteUrl;
+                    if (!uri) return null;
+                    return (
+                      <View key={image.id} className="relative">
+                        <Image
+                          source={{ uri }}
+                          className="w-28 h-28 rounded-xl"
+                          contentFit="cover"
+                        />
+                        <TouchableOpacity
+                          onPress={() => handleRemoveGalleryImage(image.id)}
+                          className="absolute -top-2 -right-2 bg-black/80 rounded-full w-7 h-7 items-center justify-center"
+                          disabled={isSaving}
+                          accessibilityLabel="Eliminar imagen de la galeria"
+                        >
+                          <Ionicons name="close" size={16} color="#f87171" />
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
+                </View>
+              ) : (
+                <Text className="text-gray-400">
+                  Aun no has agregado imagenes adicionales.
+                </Text>
+              )}
+              <TouchableOpacity
+                className="mt-3 bg-gray-900 rounded-full px-4 py-3 items-center"
+                onPress={handleAddGalleryImage}
+                disabled={isSaving}
+              >
+                <Text className="text-white font-semibold">
+                  Agregar imagen a la galeria
+                </Text>
+              </TouchableOpacity>
             </View>
 
             <View className="flex-row items-center justify-between bg-gray-900 rounded-2xl px-4 py-3">
@@ -473,3 +640,17 @@ export default function MarketplaceAdminForm() {
     </SafeAreaView>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

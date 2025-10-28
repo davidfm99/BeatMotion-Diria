@@ -1,3 +1,4 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   addDoc,
   collection,
@@ -88,31 +89,60 @@ export type NewMarketplaceItem = Omit<MarketplaceUpsertInput, "createdBy"> & {
 
 export type UpdateMarketplaceItem = MarketplaceUpsertInput;
 
-export const addMarketplaceItem = async (data: NewMarketplaceItem) => {
-  const payload = {
-    ...prepareMarketplacePayload({ ...data, createdBy: data.createdBy }),
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  };
+export const useCreateMarketplaceItem = () => {
+  const queryClient = useQueryClient();
 
-  const docRef = await addDoc(collection(firestore, "marketplace"), payload);
-  return docRef.id;
+  return useMutation({
+    mutationFn: async (data: NewMarketplaceItem) => {
+      const payload = {
+        ...prepareMarketplacePayload({ ...data, createdBy: data.createdBy }),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+
+      const docRef = await addDoc(collection(firestore, "marketplace"), payload);
+      return docRef.id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["marketplace"] });
+    },
+  });
 };
 
-export const updateMarketplaceItem = async (
-  itemId: string,
-  data: UpdateMarketplaceItem,
-) => {
-  const payload = {
-    ...prepareMarketplacePayload(data),
-    updatedAt: serverTimestamp(),
-  };
-
-  const itemRef = doc(firestore, "marketplace", itemId);
-  await updateDoc(itemRef, payload);
+type UpdateMarketplaceItemArgs = {
+  itemId: string;
+  data: UpdateMarketplaceItem;
 };
 
-export const deleteMarketplaceItem = async (itemId: string) => {
-  const itemRef = doc(firestore, "marketplace", itemId);
-  await deleteDoc(itemRef);
+export const useUpdateMarketplaceItem = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ itemId, data }: UpdateMarketplaceItemArgs) => {
+      const payload = {
+        ...prepareMarketplacePayload(data),
+        updatedAt: serverTimestamp(),
+      };
+
+      const itemRef = doc(firestore, "marketplace", itemId);
+      await updateDoc(itemRef, payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["marketplace"] });
+    },
+  });
+};
+
+export const useDeleteMarketplaceItem = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (itemId: string) => {
+      const itemRef = doc(firestore, "marketplace", itemId);
+      await deleteDoc(itemRef);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["marketplace"] });
+    },
+  });
 };

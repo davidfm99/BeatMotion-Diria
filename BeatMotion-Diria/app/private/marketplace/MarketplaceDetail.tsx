@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+﻿import { useCallback, useMemo } from "react";
 import {
   Alert,
   ActivityIndicator,
@@ -14,7 +14,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import type { Href } from "expo-router";
 import { useMarketplaceItems } from "@/hooks/marketplace/useMarketplaceItems";
 import { useActiveUser } from "@/hooks/UseActiveUser";
-import { deleteMarketplaceItem } from "@/services/marketplace";
+import { useDeleteMarketplaceItem } from "@/hooks/marketplace/useMarketplaceMutations";
 
 const formatCurrency = (value: number, currency?: string) => {
   const fallback = `${currency ?? "CRC"} ${value.toLocaleString("es-CR")}`;
@@ -34,7 +34,8 @@ export default function MarketplaceDetail() {
   const { itemId } = useLocalSearchParams<{ itemId?: string }>();
   const { data, isLoading } = useMarketplaceItems();
   const { user } = useActiveUser();
-  const [isDeleting, setIsDeleting] = useState(false);
+  const deleteMarketplaceItemMutation = useDeleteMarketplaceItem();
+  const isDeleting = deleteMarketplaceItemMutation.isPending;
 
   const item = useMemo(
     () => data?.find((entry) => entry.id === itemId) ?? null,
@@ -62,8 +63,7 @@ export default function MarketplaceDetail() {
           style: "destructive",
           onPress: async () => {
             try {
-              setIsDeleting(true);
-              await deleteMarketplaceItem(item.id);
+              await deleteMarketplaceItemMutation.mutateAsync(item.id);
               Alert.alert("Marketplace", "Articulo eliminado correctamente.", [
                 {
                   text: "Aceptar",
@@ -76,14 +76,12 @@ export default function MarketplaceDetail() {
                 "Error",
                 "No pudimos eliminar el articulo. Intenta nuevamente en unos minutos.",
               );
-            } finally {
-              setIsDeleting(false);
             }
           },
         },
       ],
     );
-  }, [item, isDeleting]);
+  }, [item, isDeleting, deleteMarketplaceItemMutation]);
 
   if (isLoading) {
     return (
@@ -259,3 +257,9 @@ export default function MarketplaceDetail() {
     </SafeAreaView>
   );
 }
+
+
+
+
+
+

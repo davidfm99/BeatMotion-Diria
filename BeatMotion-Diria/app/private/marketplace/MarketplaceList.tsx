@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+﻿import { useCallback, useMemo, useState } from "react";
 import {
   Alert,
   ActivityIndicator,
@@ -16,7 +16,7 @@ import type { Href } from "expo-router";
 import { useMarketplaceItems } from "@/hooks/marketplace/useMarketplaceItems";
 import { useActiveUser } from "@/hooks/UseActiveUser";
 import type { MarketplaceItem } from "@/hooks/marketplace/schema";
-import { deleteMarketplaceItem } from "@/services/marketplace";
+import { useDeleteMarketplaceItem } from "@/hooks/marketplace/useMarketplaceMutations";
 
 const formatCurrency = (value: number, currency?: string) => {
   const fallback = `${currency ?? "CRC"} ${value.toLocaleString("es-CR")}`;
@@ -35,6 +35,7 @@ const formatCurrency = (value: number, currency?: string) => {
 export default function MarketplaceList() {
   const { data, isLoading, isRefetching, refetch } = useMarketplaceItems();
   const { user } = useActiveUser();
+  const deleteMarketplaceItemMutation = useDeleteMarketplaceItem();
   const [pendingDeletionId, setPendingDeletionId] = useState<string | null>(null);
   const isAdmin = user?.role === "admin";
 
@@ -64,7 +65,7 @@ export default function MarketplaceList() {
           onPress: async () => {
             try {
               setPendingDeletionId(item.id);
-              await deleteMarketplaceItem(item.id);
+              await deleteMarketplaceItemMutation.mutateAsync(item.id);
               Alert.alert("Marketplace", "Articulo eliminado correctamente.");
             } catch (error) {
               console.error("No se pudo eliminar el articulo:", error);
@@ -237,3 +238,7 @@ export default function MarketplaceList() {
     </SafeAreaView>
   );
 }
+
+
+
+
