@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -10,11 +10,11 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { useActiveUser } from "@/hooks/UseActiveUser";
 import { useMarketplaceItems } from "@/hooks/marketplace/useMarketplaceItems";
 import {
@@ -536,7 +536,7 @@ export default function MarketplaceAdminForm() {
                         uri: primaryImage.localUri ?? primaryImage.remoteUrl ?? "",
                       }}
                       className="w-full h-full"
-                      contentFit="cover"
+                      resizeMode="cover"
                     />
                   </View>
                   <View className="flex-row gap-3">
@@ -585,7 +585,7 @@ export default function MarketplaceAdminForm() {
                         <Image
                           source={{ uri }}
                           className="w-28 h-28 rounded-xl"
-                          contentFit="cover"
+                          resizeMode="cover"
                         />
                         <TouchableOpacity
                           onPress={() => handleRemoveGalleryImage(image.id)}
@@ -640,6 +640,8 @@ export default function MarketplaceAdminForm() {
     </SafeAreaView>
   );
 }
+
+
 
 
 

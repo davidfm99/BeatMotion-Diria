@@ -3,13 +3,13 @@ import {
   Alert,
   ActivityIndicator,
   FlatList,
+  Image,
   RefreshControl,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import type { Href } from "expo-router";
@@ -174,7 +174,7 @@ export default function MarketplaceList() {
                   <Image
                     source={{ uri: item.imageUrl }}
                     className="h-full w-full"
-                    contentFit="cover"
+                    resizeMode="cover"
                   />
                 ) : (
                   <View className="flex-1 items-center justify-center">

@@ -2,13 +2,13 @@
 import {
   Alert,
   ActivityIndicator,
+  Image,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import type { Href } from "expo-router";
@@ -174,7 +174,7 @@ export default function MarketplaceDetail() {
               <Image
                 source={{ uri: item.imageUrl }}
                 className="h-full w-full"
-                contentFit="cover"
+                resizeMode="cover"
               />
             ) : (
               <View className="flex-1 items-center justify-center">
@@ -236,7 +236,7 @@ export default function MarketplaceDetail() {
                     <Image
                       source={{ uri: url }}
                       className="h-full w-full"
-                      contentFit="cover"
+                      resizeMode="cover"
                     />
                   </View>
                 ))}
@@ -257,6 +257,7 @@ export default function MarketplaceDetail() {
     </SafeAreaView>
   );
 }
+
 
 
 
