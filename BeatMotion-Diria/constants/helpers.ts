@@ -19,4 +19,19 @@ const getEnrollmentColor = (status: string) => {
       return "text-gray-400";
   }
 };
-export { capitalize, statusTranslations, getEnrollmentColor };
+
+const formatCurrency = (value: number, currency?: string) => {
+  const fallback = `${currency ?? "CRC"} ${value.toLocaleString("es-CR")}`;
+  try {
+    return new Intl.NumberFormat("es-CR", {
+      style: "currency",
+      currency: currency ?? "CRC",
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch (error) {
+    console.error("No se pudo formatear el monto:", error);
+    return fallback;
+  }
+};
+
+export { capitalize, formatCurrency, getEnrollmentColor, statusTranslations };
