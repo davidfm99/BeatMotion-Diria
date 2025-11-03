@@ -3,7 +3,7 @@ const capitalize = (s: string) =>
 
 const statusTranslations: { [key: string]: string } = {
   pending: "Pendiente",
-  accepted: "Aceptada",
+  approved: "Aprobada",
   rejected: "Rechazada",
 };
 
@@ -11,7 +11,7 @@ const getEnrollmentColor = (status: string) => {
   switch (status) {
     case "pending":
       return "text-yellow-400";
-    case "accepted":
+    case "approved":
       return "text-green-400";
     case "rejected":
       return "text-red-400";

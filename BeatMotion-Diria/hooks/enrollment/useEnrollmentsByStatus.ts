@@ -8,7 +8,6 @@ import { useUsers } from "../useUsers";
 import { enrollmentSchema } from "./schema";
 
 export const useEnrollmentsByStatus = (status: string) => {
-  //   const queryClient = useQueryClient();
   const { data: courses } = useCourses();
   const { data: users } = useUsers();
 

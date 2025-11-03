@@ -29,7 +29,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 
 const FILTER_OPTIONS = [
   { label: "Pendientes", value: "pending" },
-  { label: "Aceptadas", value: "accepted" },
+  { label: "Aceptadas", value: "approved" },
   { label: "Rechazadas", value: "rejected" },
 ];
 
@@ -56,14 +56,14 @@ const EnrollmentList = () => {
 
   const handleClickOption = async (
     enrollment: Enrollmentype,
-    action: "accept" | "reject"
+    action: "approve" | "reject"
   ) => {
     const { course, user, ...rest } = enrollment;
     console.log("Updating enrollment:", enrollment.id, "Action:", activeUser);
     try {
       await updateEnrollment.mutateAsync({
         ...rest,
-        status: action === "accept" ? "accepted" : "rejected",
+        status: action === "approve" ? "approved" : "rejected",
         reviewedBy: activeUser?.uid || null,
         reviewedAt: serverTimestamp(),
       });
@@ -75,12 +75,12 @@ const EnrollmentList = () => {
 
   const handleConfirmationEnrollment = (
     enrollment: Enrollmentype,
-    action: "accept" | "reject"
+    action: "approve" | "reject"
   ) => {
     Alert.alert(
-      `Confirmar ${action === "accept" ? "aceptar" : "rechazar"}`,
+      `Confirmar ${action === "approve" ? "aprobar" : "rechazar"}`,
       `¿Estás seguro de que deseas ${
-        action === "accept" ? "aceptar" : "rechazar"
+        action === "approve" ? "aprobar" : "rechazar"
       } la matrícula de ${enrollment.user?.firstName} ${
         enrollment.user?.lastName
       }?`,
@@ -141,7 +141,7 @@ const EnrollmentList = () => {
                     <TouchableHighlight
                       className="w-12 h-12 rounded-full bg-green-600 items-center justify-center"
                       onPress={() =>
-                        handleConfirmationEnrollment(item, "accept")
+                        handleConfirmationEnrollment(item, "approve")
                       }
                     >
                       <AntDesign name="check" size={16} color="#fff" />

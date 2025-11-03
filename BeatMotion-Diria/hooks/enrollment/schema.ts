@@ -24,7 +24,7 @@ export const enrollmentSchema = zod.array(
     id: zod.string(),
     userId: zod.string(),
     courseId: zod.string(),
-    status: zod.enum(["pending", "accepted", "rejected"]),
+    status: zod.enum(["pending", "approved", "rejected"]),
     submittedAt: timestampSchema,
     paymentProofImage: zod.string().url().optional(),
     reviewedBy: zod.string().nullable(),
