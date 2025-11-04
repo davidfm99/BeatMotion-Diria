@@ -5,6 +5,8 @@ const statusTranslations: { [key: string]: string } = {
   pending: "Pendiente",
   approved: "Aprobada",
   rejected: "Rechazada",
+  ok: "Pago realizado",
+  late: "Pago atrasado",
 };
 
 const getEnrollmentColor = (status: string) => {
@@ -12,8 +14,10 @@ const getEnrollmentColor = (status: string) => {
     case "pending":
       return "text-yellow-400";
     case "approved":
+    case "ok":
       return "text-green-400";
     case "rejected":
+    case "late":
       return "text-red-400";
     default:
       return "text-gray-400";

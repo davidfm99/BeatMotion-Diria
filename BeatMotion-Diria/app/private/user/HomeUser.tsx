@@ -1,14 +1,14 @@
-import { TouchableHighlight, View, Text } from "react-native";
-import MyCourses from "./myCourses";
-import Icon from "react-native-vector-icons/Ionicons";
-import { useRouter } from "expo-router";
 import type { Href } from "expo-router";
+import { useRouter } from "expo-router";
+import { Text, TouchableHighlight, View } from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
+import MyCourses from "./myCourses";
 
 const HomeUser = () => {
   const router = useRouter();
 
   const handleClickEnroll = () => {
-    router.push("/private/user/enrollment");
+    router.push("/private/user/enrollment/createEnrollment");
   };
 
   const handleOpenMarketplace = () => {

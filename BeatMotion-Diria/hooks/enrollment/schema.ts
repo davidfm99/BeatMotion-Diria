@@ -1,7 +1,6 @@
 import zod from "zod";
 
-//ToDo make ths timestamp reusable to other schemas
-const timestampSchema = zod
+export const timestampSchema = zod
   .any()
   .nullable()
   .transform((value) => {
