@@ -1,7 +1,14 @@
-﻿import { useCallback, useMemo } from "react";
+﻿import { formatCurrency } from "@/constants/helpers";
+import { useMarketplaceItems } from "@/hooks/marketplace/useMarketplaceItems";
+import { useDeleteMarketplaceItem } from "@/hooks/marketplace/useMarketplaceMutations";
+import { useActiveUser } from "@/hooks/UseActiveUser";
+import { Ionicons } from "@expo/vector-icons";
+import type { Href } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { useCallback, useMemo } from "react";
 import {
-  Alert,
   ActivityIndicator,
+  Alert,
   Image,
   ScrollView,
   Text,
@@ -9,26 +16,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
-import type { Href } from "expo-router";
-import { useMarketplaceItems } from "@/hooks/marketplace/useMarketplaceItems";
-import { useActiveUser } from "@/hooks/UseActiveUser";
-import { useDeleteMarketplaceItem } from "@/hooks/marketplace/useMarketplaceMutations";
-
-const formatCurrency = (value: number, currency?: string) => {
-  const fallback = `${currency ?? "CRC"} ${value.toLocaleString("es-CR")}`;
-  try {
-    return new Intl.NumberFormat("es-CR", {
-      style: "currency",
-      currency: currency ?? "CRC",
-      maximumFractionDigits: 0,
-    }).format(value);
-  } catch (error) {
-    console.error("No se pudo formatear el monto:", error);
-    return fallback;
-  }
-};
 
 export default function MarketplaceDetail() {
   const { itemId } = useLocalSearchParams<{ itemId?: string }>();
@@ -39,14 +26,14 @@ export default function MarketplaceDetail() {
 
   const item = useMemo(
     () => data?.find((entry) => entry.id === itemId) ?? null,
-    [data, itemId],
+    [data, itemId]
   );
   const isAdmin = user?.role === "admin";
 
   const handleEdit = useCallback(() => {
     if (!item) return;
     router.push(
-      `/private/marketplace/MarketplaceAdminForm?itemId=${item.id}` as Href,
+      `/private/marketplace/MarketplaceAdminForm?itemId=${item.id}` as Href
     );
   }, [item]);
 
@@ -74,12 +61,12 @@ export default function MarketplaceDetail() {
               console.error("No se pudo eliminar el articulo:", error);
               Alert.alert(
                 "Error",
-                "No pudimos eliminar el articulo. Intenta nuevamente en unos minutos.",
+                "No pudimos eliminar el articulo. Intenta nuevamente en unos minutos."
               );
             }
           },
         },
-      ],
+      ]
     );
   }, [item, isDeleting, deleteMarketplaceItemMutation]);
 
@@ -249,7 +236,8 @@ export default function MarketplaceDetail() {
               ¿Cómo comprar?
             </Text>
             <Text className="text-gray-400 text-sm leading-5">
-              Contáctanos a través de nuestro instagram o whatsapp para consultar por disponibilidad y realizar tu pedido.
+              Contáctanos a través de nuestro instagram o whatsapp para
+              consultar por disponibilidad y realizar tu pedido.
             </Text>
           </View>
         </View>
@@ -257,10 +245,3 @@ export default function MarketplaceDetail() {
     </SafeAreaView>
   );
 }
-
-
-
-
-
-
-

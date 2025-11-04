@@ -1,7 +1,16 @@
-﻿import { useCallback, useMemo, useState } from "react";
+﻿import BackButton from "@/components/backButton";
+import { formatCurrency } from "@/constants/helpers";
+import type { MarketplaceItem } from "@/hooks/marketplace/schema";
+import { useMarketplaceItems } from "@/hooks/marketplace/useMarketplaceItems";
+import { useDeleteMarketplaceItem } from "@/hooks/marketplace/useMarketplaceMutations";
+import { useActiveUser } from "@/hooks/UseActiveUser";
+import { Ionicons } from "@expo/vector-icons";
+import type { Href } from "expo-router";
+import { router } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
 import {
-  Alert,
   ActivityIndicator,
+  Alert,
   FlatList,
   Image,
   RefreshControl,
@@ -10,46 +19,27 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import type { Href } from "expo-router";
-import { useMarketplaceItems } from "@/hooks/marketplace/useMarketplaceItems";
-import { useActiveUser } from "@/hooks/UseActiveUser";
-import type { MarketplaceItem } from "@/hooks/marketplace/schema";
-import { useDeleteMarketplaceItem } from "@/hooks/marketplace/useMarketplaceMutations";
-
-const formatCurrency = (value: number, currency?: string) => {
-  const fallback = `${currency ?? "CRC"} ${value.toLocaleString("es-CR")}`;
-  try {
-    return new Intl.NumberFormat("es-CR", {
-      style: "currency",
-      currency: currency ?? "CRC",
-      maximumFractionDigits: 0,
-    }).format(value);
-  } catch (error) {
-    console.error("No se pudo formatear el monto:", error);
-    return fallback;
-  }
-};
 
 export default function MarketplaceList() {
   const { data, isLoading, isRefetching, refetch } = useMarketplaceItems();
   const { user } = useActiveUser();
   const deleteMarketplaceItemMutation = useDeleteMarketplaceItem();
-  const [pendingDeletionId, setPendingDeletionId] = useState<string | null>(null);
+  const [pendingDeletionId, setPendingDeletionId] = useState<string | null>(
+    null
+  );
   const isAdmin = user?.role === "admin";
 
   const items = useMemo(() => data ?? [], [data]);
 
   const handleOpenItem = useCallback((item: MarketplaceItem) => {
     router.push(
-      `/private/marketplace/MarketplaceDetail?itemId=${item.id}` as Href,
+      `/private/marketplace/MarketplaceDetail?itemId=${item.id}` as Href
     );
   }, []);
 
   const handleEditItem = useCallback((item: MarketplaceItem) => {
     router.push(
-      `/private/marketplace/MarketplaceAdminForm?itemId=${item.id}` as Href,
+      `/private/marketplace/MarketplaceAdminForm?itemId=${item.id}` as Href
     );
   }, []);
 
@@ -71,14 +61,14 @@ export default function MarketplaceList() {
               console.error("No se pudo eliminar el articulo:", error);
               Alert.alert(
                 "Error",
-                "No pudimos eliminar el articulo. Intenta nuevamente en unos minutos.",
+                "No pudimos eliminar el articulo. Intenta nuevamente en unos minutos."
               );
             } finally {
               setPendingDeletionId(null);
             }
           },
         },
-      ],
+      ]
     );
   }, []);
 
@@ -98,6 +88,7 @@ export default function MarketplaceList() {
   return (
     <SafeAreaView className="flex-1 bg-black">
       <View className="flex-row items-center justify-between px-6 pt-8 pb-4">
+        <BackButton />
         <View>
           <Text className="text-white text-2xl font-semibold">
             Tienda Diriá
@@ -106,13 +97,6 @@ export default function MarketplaceList() {
             Explora los artículos disponibles para la academia.
           </Text>
         </View>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="w-10 h-10 rounded-full bg-gray-900 items-center justify-center"
-          accessibilityLabel="Volver"
-        >
-          <Ionicons name="chevron-back" size={22} color="#ffffff" />
-        </TouchableOpacity>
       </View>
 
       {items.length === 0 ? (
@@ -164,7 +148,11 @@ export default function MarketplaceList() {
                     {pendingDeletionId === item.id ? (
                       <ActivityIndicator size="small" color="#f87171" />
                     ) : (
-                      <Ionicons name="trash-outline" size={18} color="#f87171" />
+                      <Ionicons
+                        name="trash-outline"
+                        size={18}
+                        color="#f87171"
+                      />
                     )}
                   </TouchableOpacity>
                 </View>
@@ -238,7 +226,3 @@ export default function MarketplaceList() {
     </SafeAreaView>
   );
 }
-
-
-
-

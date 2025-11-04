@@ -1,41 +1,49 @@
-import { View, Text, TouchableHighlight } from "react-native";
-import { useEnrollments } from "@/hooks/enrollment/useEnrrollments";
 import DataLoader from "@/components/DataLoader";
-import { statusTranslations, getEnrollmentColor } from "@/constants/helpers";
+import {
+  formatCurrency,
+  getEnrollmentColor,
+  statusTranslations,
+} from "@/constants/helpers";
+import { useEnrollmentsByStatus } from "@/hooks/enrollment/useEnrollmentsByStatus";
 import { useRouter } from "expo-router";
+import { FlatList, Text, TouchableHighlight, View } from "react-native";
 
 const EnrollmentAvailable = () => {
-  const enrollmentQuery = useEnrollments();
   const router = useRouter();
+  const pendingEnrollmentsQuery = useEnrollmentsByStatus("pending");
 
   const handleViewMoreEnrolls = () => {
-    router.push("/private/admin/enrollmentList");
+    router.push("/private/admin/enrollments/enrollmentList");
   };
 
   return (
     <View>
-      <View className="flex-row justify-between">
-        <Text className="text-white text-2xl font- w-auto font-extrabold">
-          Matriculas pendientes
-        </Text>
+      <View className="flex-row justify-between items-center mb-2">
+        <View className="flex-row items-center gap-2">
+          <Text className="text-white text-2xl font- w-auto font-extrabold">
+            Matriculas
+          </Text>
+          <Text className="text-gray-400 text-lg font-semibold">
+            ({pendingEnrollmentsQuery.data?.length || 0} Pendientes)
+          </Text>
+        </View>
         <TouchableHighlight
-          className="rounded-full px-3 py-3 self-end justify-center active:opacity-80 mb-5 flex-row gap-2 items-center"
+          className="active:opacity-80"
           onPress={handleViewMoreEnrolls}
         >
-          <>
-            <Text className="text-primary gap-2 font-bold">Ver más</Text>
-          </>
+          <Text className="text-primary font-bold">Ver más</Text>
         </TouchableHighlight>
       </View>
-      <View className="border rounded-md bg-slate-700 p-4">
+      <View className="border rounded-md bg-slate-900 p-4 h-56 overflow-auto">
         <DataLoader
-          query={enrollmentQuery}
+          query={pendingEnrollmentsQuery}
           emptyMessage="No existen matriculas pendientes"
         >
-          {(data) =>
-            data
-              .filter((_, index) => index < 2)
-              .map((enrollment) => (
+          {(data) => (
+            <FlatList
+              data={data.filter((_, index) => index < 2)}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item: enrollment }) => (
                 <View
                   key={enrollment.id}
                   className="border-b border-gray-600 py-2"
@@ -50,7 +58,7 @@ const EnrollmentAvailable = () => {
                     </Text>
                   </Text>
                   <Text className="text-gray-400">
-                    Monto total: ₡{enrollment.totalAmount}
+                    Monto total: {formatCurrency(enrollment.totalAmount)}
                   </Text>
                   <Text className="text-gray-400">
                     Fecha de solicitud:{" "}
@@ -61,8 +69,9 @@ const EnrollmentAvailable = () => {
                     {enrollment?.user?.lastName}
                   </Text>
                 </View>
-              ))
-          }
+              )}
+            />
+          )}
         </DataLoader>
       </View>
     </View>
