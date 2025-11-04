@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useActiveUser } from "@/hooks/UseActiveUser";
-import HomeUser from "./user/homeUser";
+import HomeUser from "./user/HomeUser";
 
 export default function HomeScreen() {
   const { user } = useActiveUser();
