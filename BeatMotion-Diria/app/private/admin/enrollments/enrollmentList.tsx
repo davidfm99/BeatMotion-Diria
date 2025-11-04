@@ -137,24 +137,26 @@ const EnrollmentList = () => {
                 }}
               >
                 <>
-                  <View className="absolute top-2 right-2 z-10 flex-row gap-4">
-                    <TouchableHighlight
-                      className="w-12 h-12 rounded-full bg-green-600 items-center justify-center"
-                      onPress={() =>
-                        handleConfirmationEnrollment(item, "approve")
-                      }
-                    >
-                      <AntDesign name="check" size={16} color="#fff" />
-                    </TouchableHighlight>
-                    <TouchableHighlight
-                      className="w-12 h-12 rounded-full bg-red-600 items-center justify-center"
-                      onPress={() =>
-                        handleConfirmationEnrollment(item, "reject")
-                      }
-                    >
-                      <AntDesign name="close" size={16} color="#fff" />
-                    </TouchableHighlight>
-                  </View>
+                  {item.status === "pending" && (
+                    <View className="absolute top-2 right-2 z-10 flex-row gap-4">
+                      <TouchableHighlight
+                        className="w-12 h-12 rounded-full bg-green-600 items-center justify-center"
+                        onPress={() =>
+                          handleConfirmationEnrollment(item, "approve")
+                        }
+                      >
+                        <AntDesign name="check" size={16} color="#fff" />
+                      </TouchableHighlight>
+                      <TouchableHighlight
+                        className="w-12 h-12 rounded-full bg-red-600 items-center justify-center"
+                        onPress={() =>
+                          handleConfirmationEnrollment(item, "reject")
+                        }
+                      >
+                        <AntDesign name="close" size={16} color="#fff" />
+                      </TouchableHighlight>
+                    </View>
+                  )}
                   <View className="h-36 w-full bg-gray-950">
                     {item.paymentProofImage ? (
                       <Image

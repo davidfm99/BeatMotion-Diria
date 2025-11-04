@@ -34,7 +34,7 @@ const EnrollmentAvailable = () => {
           <Text className="text-primary font-bold">Ver más</Text>
         </TouchableHighlight>
       </View>
-      <View className="border rounded-md bg-slate-700 p-4">
+      <View className="border rounded-md bg-slate-900 p-4 h-56 overflow-auto">
         <DataLoader
           query={pendingEnrollmentsQuery}
           emptyMessage="No existen matriculas pendientes"
