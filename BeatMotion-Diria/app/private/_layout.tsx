@@ -9,6 +9,12 @@ export default function PrivateLayout() {
         name="user/course/[courseId]"
         options={{ headerShown: false }}
       />
+      <Stack.Screen name="admin" options={{ headerShown: false }} />
+      {/* MarketPlace */}
+      <Stack.Screen
+        name="marketplace/MarketplaceList"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

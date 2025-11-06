@@ -1,5 +1,6 @@
 import DataLoader from "@/components/DataLoader";
 import FilterPills from "@/components/FilterPills";
+import HeaderTitle from "@/components/headerTitle";
 import {
   formatCurrency,
   getEnrollmentColor,
@@ -104,7 +105,7 @@ const EnrollmentList = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      <Text className="text-white text-3xl font-bold p-4 mb-4">Matriculas</Text>
+      <HeaderTitle title="Centro de Matriculas" />
       <View className="items-center mb-2">
         <FilterPills
           options={FILTER_OPTIONS}

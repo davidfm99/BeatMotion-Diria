@@ -1,4 +1,4 @@
-﻿import BackButton from "@/components/backButton";
+﻿import HeaderTitle from "@/components/headerTitle";
 import { formatCurrency } from "@/constants/helpers";
 import type { MarketplaceItem } from "@/hooks/marketplace/schema";
 import { useMarketplaceItems } from "@/hooks/marketplace/useMarketplaceItems";
@@ -87,17 +87,10 @@ export default function MarketplaceList() {
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      <View className="flex-row items-center justify-between px-6 pt-8 pb-4">
-        <BackButton />
-        <View>
-          <Text className="text-white text-2xl font-semibold">
-            Tienda Diriá
-          </Text>
-          <Text className="text-gray-400">
-            Explora los artículos disponibles para la academia.
-          </Text>
-        </View>
-      </View>
+      <HeaderTitle
+        title="Tienda Diriá"
+        subtitle="Explora los artículos disponibles para la academia."
+      />
 
       {items.length === 0 ? (
         <View className="flex-1 items-center justify-center px-10">

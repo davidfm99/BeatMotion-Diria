@@ -1,9 +1,9 @@
-import BackButton from "@/components/backButton";
 import DataLoader from "@/components/DataLoader";
 import {
   askForCameraPermission,
   uploadImage,
 } from "@/components/enrollment/askCameraPermision";
+import HeaderTitle from "@/components/headerTitle";
 import { capitalize } from "@/constants/helpers";
 import { useCourses } from "@/hooks/courses/useCourses";
 import { Enrollment as EnrollmentType } from "@/hooks/enrollment/schema";
@@ -97,10 +97,7 @@ const CreateEnrollment = () => {
 
   return (
     <View className="mt-4">
-      <BackButton />
-      <Text className="text-white pl-4 text-2xl font-bold">
-        Cursos disponibles
-      </Text>
+      <HeaderTitle title="Cursos Disponibles" />
       <DataLoader query={coursesQuery} emptyMessage="No hay cursos disponibles">
         {/* TODO: fix this filter for something better */}
         {(data) =>

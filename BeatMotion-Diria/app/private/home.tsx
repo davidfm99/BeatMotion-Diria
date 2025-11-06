@@ -1,10 +1,10 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useActiveUser } from "@/hooks/UseActiveUser";
-import HomeUser from "./user/HomeUser";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import HomeAdmin from "./admin/homeAdmin";
+import HomeUser from "./user/HomeUser";
 
 export default function HomeScreen() {
   const { user } = useActiveUser();
@@ -36,17 +36,19 @@ export default function HomeScreen() {
 
               <View className="flex-1 items-center">
                 <TouchableOpacity
-                  onPress={() => router.push("/private/admin/draft")}
+                  onPress={() =>
+                    router.push(
+                      "/private/admin/notifications/notificationCenter"
+                    )
+                  }
                   className="w-12 h-12 rounded-full bg-yellow-400 items-center justify-center"
                   accessibilityLabel="Ver borradores"
                 >
-                  <Ionicons
-                    name="document-text-outline"
-                    size={24}
-                    color="black"
-                  />
+                  <AntDesign name="notification" size={24} color="black" />
                 </TouchableOpacity>
-                <Text className="text-xs text-white mt-2">Borradores</Text>
+                <Text className="text-xs text-white text-center mt-2">
+                  Centro notificaciones
+                </Text>
               </View>
 
               <View className="flex-1 items-center">

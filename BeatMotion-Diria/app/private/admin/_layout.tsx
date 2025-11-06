@@ -53,6 +53,13 @@ export default function AdminLayout() {
         name="enrollments/enrollmentList"
         options={{ headerShown: false }}
       />
+
+      {/* notification Center */}
+      <Stack.Screen
+        name="notifications/notificationCenter"
+        options={{ headerShown: false }}
+      />
+
     </Stack>
   );
 }
