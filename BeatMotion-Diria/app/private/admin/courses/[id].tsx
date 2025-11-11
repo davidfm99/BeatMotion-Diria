@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView } from "react-native";
 import { useLocalSearchParams, router, useRootNavigationState } from "expo-router";
-import { getFirestore, doc, getDoc, updateDoc, serverTimestamp, collection, query, where, onSnapshot } from "firebase/firestore";
+import { getFirestore, doc, getDoc, updateDoc, serverTimestamp, collection, query, where, onSnapshot, getDocs, orderBy } from "firebase/firestore";
+import { Picker } from "@react-native-picker/picker";
 import type { Href } from "expo-router";
+
+type Teacher = {
+  id: string;
+  name: string;
+  lastName: string;
+  email: string;
+};
 
 export default function EditCourseScreen() {
   const { id, tab } = useLocalSearchParams<{ id?: string; tab?: string | string[] }>();
@@ -19,6 +27,8 @@ export default function EditCourseScreen() {
   }, [id]);
 
   const [loading, setLoading] = useState(true);
+  const [loadingTeachers, setLoadingTeachers] = useState(true);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [title, setTitle] = useState("");
   const [teacher, setTeacher] = useState("");
   const [level, setLevel] = useState("Inicial");
@@ -27,6 +37,51 @@ export default function EditCourseScreen() {
   const [isActive, setIsActive] = useState(true);
 
   const [classes, setClasses] = useState<any[]>([]);
+
+  useEffect(() => {
+    loadTeachers();
+  }, []);
+
+  const loadTeachers = async () => {
+    try {
+      setLoadingTeachers(true);
+      const db = getFirestore();
+      const q = query(
+        collection(db, "users"),
+        where("role", "==", "teacher"),
+        orderBy("name", "asc")
+      );
+      
+      const snapshot = await getDocs(q);
+      const teachersList: Teacher[] = [];
+      
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        teachersList.push({
+          id: doc.id,
+          name: data.name || "",
+          lastName: data.lastName || "",
+          email: data.email || "",
+        });
+      });
+
+      setTeachers(teachersList);
+    } catch (error: any) {
+      console.error("Error loading teachers:", error);
+      
+      if (error.code === 'failed-precondition') {
+        Alert.alert(
+          "Configuración requerida",
+          "Se necesita crear un índice en Firestore. Revisa la consola para el enlace de creación del índice.",
+          [{ text: "OK" }]
+        );
+      } else {
+        Alert.alert("Error", "No se pudieron cargar los profesores.");
+      }
+    } finally {
+      setLoadingTeachers(false);
+    }
+  };
 
   useEffect(() => {
     const loadCourse = async () => {
@@ -69,6 +124,11 @@ export default function EditCourseScreen() {
   }, [notFound, navState?.key]);
 
   const handleUpdateCourse = async () => {
+    if (!title.trim() || !teacher.trim()) {
+      Alert.alert("Faltan datos", "Título y profesor son obligatorios.");
+      return;
+    }
+
     try {
       const db = getFirestore();
       await updateDoc(doc(db, "courses", String(id)), {
@@ -87,7 +147,7 @@ export default function EditCourseScreen() {
     }
   };
 
-  if (loading) {
+  if (loading || loadingTeachers) {
     return (
       <View className="flex-1 items-center justify-center bg-black">
         <Text className="text-white">Cargando...</Text>
@@ -105,36 +165,59 @@ export default function EditCourseScreen() {
 
       {!showClassesTab ? (
         <>
-          <Text className="text-white mb-1">Título</Text>
+          <Text className="text-white mb-2 font-semibold">Título *</Text>
           <TextInput
-            className="bg-gray-900 text-white rounded-xl px-3 py-3 mb-3"
+            className="bg-gray-900 text-white rounded-xl px-4 py-3 mb-4"
             value={title}
             onChangeText={setTitle}
             placeholder="Título"
             placeholderTextColor="#9CA3AF"
           />
 
-          <Text className="text-white mb-1">Profesor</Text>
-          <TextInput
-            className="bg-gray-900 text-white rounded-xl px-3 py-3 mb-3"
-            value={teacher}
-            onChangeText={setTeacher}
-            placeholder="Profesor"
-            placeholderTextColor="#9CA3AF"
-          />
+          <Text className="text-white mb-2 font-semibold">Profesor *</Text>
+          {teachers.length === 0 ? (
+            <View className="bg-gray-900 rounded-xl px-4 py-3 mb-4">
+              <Text className="text-gray-400">No hay usuarios con rol de profesor</Text>
+              <Text className="text-gray-500 text-xs mt-2">
+                Asigna el rol profesor a un usuario
+              </Text>
+            </View>
+          ) : (
+            <View className="bg-gray-900 rounded-xl mb-4">
+              <Picker
+                selectedValue={teacher}
+                onValueChange={(value) => setTeacher(String(value))}
+                dropdownIconColor="#ffffff"
+                style={{ color: "white" }}
+              >
+                {teachers.map((t) => (
+                  <Picker.Item 
+                    key={t.id} 
+                    label={`${t.name} ${t.lastName}`}
+                    value={`${t.name} ${t.lastName}`}
+                  />
+                ))}
+              </Picker>
+            </View>
+          )}
 
-          <Text className="text-white mb-1">Nivel</Text>
-          <TextInput
-            className="bg-gray-900 text-white rounded-xl px-3 py-3 mb-3"
-            value={level}
-            onChangeText={setLevel}
-            placeholder="Inicial/Intermedio/Avanzado"
-            placeholderTextColor="#9CA3AF"
-          />
+          <Text className="text-white mb-2 font-semibold">Nivel *</Text>
+          <View className="bg-gray-900 rounded-xl mb-4">
+            <Picker
+              selectedValue={level}
+              onValueChange={(v) => setLevel(String(v))}
+              dropdownIconColor="#ffffff"
+              style={{ color: "white" }}
+            >
+              <Picker.Item label="Inicial" value="Inicial" />
+              <Picker.Item label="Intermedio" value="Intermedio" />
+              <Picker.Item label="Avanzado" value="Avanzado" />
+            </Picker>
+          </View>
 
-          <Text className="text-white mb-1">Descripción</Text>
+          <Text className="text-white mb-2 font-semibold">Descripción</Text>
           <TextInput
-            className="bg-gray-900 text-white rounded-xl px-3 py-3 mb-3"
+            className="bg-gray-900 text-white rounded-xl px-4 py-3 mb-4"
             value={description}
             onChangeText={setDescription}
             placeholder="Descripción"
@@ -142,9 +225,9 @@ export default function EditCourseScreen() {
             multiline
           />
 
-          <Text className="text-white mb-1">Imagen (URL)</Text>
+          <Text className="text-white mb-2 font-semibold">Imagen (URL)</Text>
           <TextInput
-            className="bg-gray-900 text-white rounded-xl px-3 py-3 mb-6"
+            className="bg-gray-900 text-white rounded-xl px-4 py-3 mb-6"
             value={imageUrl}
             onChangeText={setImageUrl}
             placeholder="https://..."
@@ -152,8 +235,9 @@ export default function EditCourseScreen() {
           />
 
           <TouchableOpacity
-            className="bg-white rounded-2xl px-5 py-4 active:opacity-80 mb-4"
+            className="bg-primary rounded-2xl px-5 py-4 active:opacity-80 mb-4"
             onPress={handleUpdateCourse}
+            disabled={teachers.length === 0}
           >
             <Text className="text-center font-semibold">Guardar cambios</Text>
           </TouchableOpacity>
@@ -174,10 +258,12 @@ export default function EditCourseScreen() {
           {classes.map((cl) => (
             <View key={cl.id} className="bg-gray-900 rounded-2xl px-4 py-3 mb-3">
               <Text className="text-white font-semibold">
-                {cl.date} {cl.startTime}-{cl.endTime}
+                {cl.title || `${cl.date} ${cl.startTime}-${cl.endTime}`}
               </Text>
               <Text className="text-gray-400">
-                Sala: {cl.room ?? "—"} · Cupo: {cl.capacity ?? "—"}
+                {cl.date && `Fecha: ${cl.date}`}
+                {cl.room && ` • Sala: ${cl.room}`}
+                {cl.capacity && ` • Cupo: ${cl.capacity}`}
               </Text>
 
               <View className="flex-row gap-2 mt-3">
@@ -200,7 +286,7 @@ export default function EditCourseScreen() {
       <View className="flex-row gap-2 mt-4">
         <TouchableOpacity
           className="bg-gray-700 rounded-2xl px-5 py-3"
-          onPress={() => router.replace("/private/admin/courses/index")}
+          onPress={() => router.replace("/private/admin/coursesMenu")}
         >
           <Text className="text-center text-white font-semibold">Volver</Text>
         </TouchableOpacity>
