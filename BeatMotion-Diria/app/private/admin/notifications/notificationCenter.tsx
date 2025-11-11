@@ -1,8 +1,10 @@
 import FilterPills from "@/components/FilterPills";
 import HeaderTitle from "@/components/headerTitle";
+import { useRouter } from "expo-router";
 import { useState } from "react";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import DraftHistoryScreen from "./draftHistory";
 
 type TabType = "drafts" | "sent";
@@ -13,6 +15,7 @@ const CENTER_OPTIONS = [
 ];
 
 const NotificationCenter = () => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("sent");
 
   const handleTabPress = (tab: string) => {
@@ -22,16 +25,22 @@ const NotificationCenter = () => {
   return (
     <SafeAreaView className="flex-1 bg-gray-950">
       <HeaderTitle title="Centro de notificaciones" />
-      <View className="flex-col ">
+      <View className="flex-col items-center">
         <FilterPills
           options={CENTER_OPTIONS}
           onSelect={handleTabPress}
           selected={activeTab}
         />
-        <View className=" flex-1">
+        <View className="w-full p-4">
           {activeTab === "drafts" ? <DraftHistoryScreen /> : null}
         </View>
       </View>
+      <Pressable
+        onPress={() => router.push("/private/admin/notifications/draft")}
+        className="absolute self-end bottom-16 right-5 w-16 h-16 rounded-full bg-primary justify-center items-center shadow-lg"
+      >
+        <Ionicons name="add" size={28} color="#fff" />
+      </Pressable>
     </SafeAreaView>
   );
 };

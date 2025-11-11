@@ -9,7 +9,7 @@ import {
 import { Enrollment as Enrollmentype } from "@/hooks/enrollment/schema";
 import { useEnrollmentsByStatus } from "@/hooks/enrollment/useEnrollmentsByStatus";
 import { useUpdateEnrollment } from "@/hooks/enrollment/useUpdateEnrollment";
-import { useActiveUser } from "@/hooks/UseActiveUser";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useRouter } from "expo-router";
 import { serverTimestamp } from "firebase/database";
 import { useState } from "react";

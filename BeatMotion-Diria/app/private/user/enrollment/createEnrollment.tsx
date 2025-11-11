@@ -9,7 +9,7 @@ import { useCourses } from "@/hooks/courses/useCourses";
 import { Enrollment as EnrollmentType } from "@/hooks/enrollment/schema";
 import { useCreateEnrollment } from "@/hooks/enrollment/useCreateEnrollment";
 import { useEnrollmentByUserId } from "@/hooks/enrollment/useEnrollmentByUserId";
-import { useActiveUser } from "@/hooks/UseActiveUser";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Text, TouchableHighlight, View } from "react-native";

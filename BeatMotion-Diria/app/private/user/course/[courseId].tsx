@@ -1,7 +1,7 @@
 import DataLoader from "@/components/DataLoader";
 import { getEnrollmentColor, statusTranslations } from "@/constants/helpers";
 import { useCourseDetail } from "@/hooks/courses/useCourseDetail";
-import { useActiveUser } from "@/hooks/UseActiveUser";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useLocalSearchParams } from "expo-router";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

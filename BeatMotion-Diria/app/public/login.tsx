@@ -1,17 +1,17 @@
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
+import { useRouter } from "expo-router";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Button,
-  View,
   Text,
   TextInput,
   TouchableHighlight,
-  Alert,
-  ActivityIndicator,
+  View,
 } from "react-native";
-import { useState } from "react";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { useActiveUser } from "@/hooks/UseActiveUser";
 
 const LogIn = () => {
   const [email, setEmail] = useState("");

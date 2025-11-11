@@ -1,19 +1,19 @@
-import { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-  ScrollView,
-} from "react-native";
+import { auth } from "@/firebaseConfig";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
+import { QueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { signOut, updateProfile } from "firebase/auth";
-import { auth } from "@/firebaseConfig";
-import { getFirestore, doc, updateDoc } from "firebase/firestore";
-import { useActiveUser } from "@/hooks/UseActiveUser";
-import { QueryClient } from "@tanstack/react-query";
+import { doc, getFirestore, updateDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 type UserProfile = {
   firstName: string;

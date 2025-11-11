@@ -59,7 +59,10 @@ export default function AdminLayout() {
         name="notifications/notificationCenter"
         options={{ headerShown: false }}
       />
-
+      <Stack.Screen
+        name="notifications/draft"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

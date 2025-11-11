@@ -12,7 +12,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { doc, updateDoc } from "firebase/firestore";
 import { firestore } from "@/firebaseConfig";
 import { Picker } from "@react-native-picker/picker";
-import { useUserInfo } from "@/hooks/useUserInfo";
+import { useUserInfo } from "@/hooks/user/useUserInfo";
 import DataLoader from "@/components/DataLoader";
 import { capitalize } from "@/constants/helpers";
 import { ProfileAdminValidationSchema } from "@/constants/validationForms";

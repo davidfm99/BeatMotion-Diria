@@ -6,7 +6,7 @@ export const draftSchema = zod.object({
   title: zod.string(),
   content: zod.string(),
   createdAt: timestampSchema,
-  recipients: zod.array(zod.string()),
+  recipients: zod.array(zod.string()).nullable(),
 });
 
 export const draftListSchema = zod.array(draftSchema);

@@ -1,61 +1,106 @@
 import DataLoader from "@/components/DataLoader";
+import { formatDate } from "@/constants/helpers";
 import { firestore } from "@/firebaseConfig";
 import { useDraft } from "@/hooks/notifications/useDraft";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { deleteDoc, doc } from "firebase/firestore";
 import React from "react";
-import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  Text,
+  View,
+} from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import Reanimated, { SharedValue } from "react-native-reanimated";
 
-interface Draft {
-  id: string;
-  title: string;
-  content: string;
-  status: string;
-  createdAt: string;
-}
+const RightOptions = (prog: SharedValue<number>, drag: SharedValue<number>) => {
+  return (
+    <Reanimated.View className="bg-red-600 rounded-xl items-center flex justify-center px-4 flex-1">
+      <View className="w-full text-center items-center">
+        <MaterialIcons name="delete" size={24} color="white" />
+        <Text className="text-white">Eliminar</Text>
+      </View>
+    </Reanimated.View>
+  );
+};
 
 export default function DraftHistoryScreen() {
   const useDraftQuery = useDraft();
+  const router = useRouter();
 
   const handleDelete = async (id: string) => {
     try {
       await deleteDoc(doc(firestore, "drafts", id));
       Alert.alert("Éxito", "Borrador eliminado");
-      // Actualizar la lista localmente
-      setDrafts((prev) => prev.filter((d) => d.id !== id));
     } catch (err) {
       console.error(err);
       Alert.alert("Error", "No se pudo eliminar el borrador");
     }
   };
 
-  return (
-    <View>
-      <DataLoader
-        query={useDraftQuery}
-        emptyMessage="No hay borradores guardados."
-      >
-        {(draft) => (
-          <FlatList
-            data={draft}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View key={item.id} className="bg-[#222] p-2.5 rounded-xl mb-2.5">
-                <Text className="text-white font-bold">{item.title}</Text>
-                <Text className="text-gray-300">{item.content}</Text>
-                <Text className="text-gray-400">Creado: {item.createdAt}</Text>
+  const confirmDelete = (id: string) => {
+    Alert.alert(
+      "Confirmar eliminación",
+      "¿Estás seguro de que deseas eliminar este borrador?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: () => handleDelete(id),
+        },
+      ]
+    );
+  };
 
-                {/* Botón Eliminar */}
-                <TouchableOpacity
-                  onPress={() => handleDelete(draft.id)}
-                  className="mt-2.5 bg-red-600 p-2 rounded-lg items-center"
+  // const handlePressDraft = (id: string) => {
+  //   router.push(`/private/admin/notifications/draft/${id}`);
+  // };
+
+  return (
+    <DataLoader
+      query={useDraftQuery}
+      emptyMessage="No hay borradores guardados."
+    >
+      {(draft, isFetching, refetch) => (
+        <FlatList
+          data={draft}
+          keyExtractor={(item) => item.id}
+          refreshControl={
+            <RefreshControl refreshing={isFetching} onRefresh={refetch} />
+          }
+          renderItem={({ item }) => (
+            <GestureHandlerRootView>
+              <ReanimatedSwipeable
+                containerStyle={{ marginVertical: 5 }}
+                onSwipeableOpen={() => confirmDelete(item.id)}
+                renderRightActions={RightOptions}
+                rightThreshold={40}
+                friction={2}
+              >
+                <Pressable
+                  key={item.id}
+                  className="active:bg-secondary gap-2 p-2.5 bg-gray-800 rounded-xl"
+                  onPress={() => {}}
                 >
-                  <Text className="text-white font-bold">Eliminar</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          />
-        )}
-      </DataLoader>
-    </View>
+                  <Text className="text-white font-bold text-2xl">
+                    {item.title}
+                  </Text>
+                  <Text className="text-gray-300">{item.content}</Text>
+                  <Text className="text-gray-300">
+                    Creado: {formatDate(item.createdAt)}
+                  </Text>
+                </Pressable>
+              </ReanimatedSwipeable>
+            </GestureHandlerRootView>
+          )}
+        />
+      )}
+    </DataLoader>
   );
 }

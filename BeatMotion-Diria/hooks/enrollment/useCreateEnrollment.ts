@@ -1,12 +1,12 @@
+import { firestore } from "@/firebaseConfig";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   collection,
+  doc,
   serverTimestamp,
   writeBatch,
-  doc,
 } from "firebase/firestore";
-import { firestore } from "@/firebaseConfig";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useActiveUser } from "@/hooks/UseActiveUser";
 
 export const createEnrollment = async ({
   data,

@@ -1,7 +1,21 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+﻿import {
+  pickMarketplaceImage,
+  uploadMarketplaceImage,
+} from "@/hooks/marketplace/marketplaceMedia";
+import { useMarketplaceItems } from "@/hooks/marketplace/useMarketplaceItems";
+import {
+  useCreateMarketplaceItem,
+  useDeleteMarketplaceItem,
+  useUpdateMarketplaceItem,
+} from "@/hooks/marketplace/useMarketplaceMutations";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
+import { Ionicons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -10,22 +24,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router, useLocalSearchParams } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useActiveUser } from "@/hooks/UseActiveUser";
-import { useMarketplaceItems } from "@/hooks/marketplace/useMarketplaceItems";
-import {
-  useCreateMarketplaceItem,
-  useDeleteMarketplaceItem,
-  useUpdateMarketplaceItem,
-} from "@/hooks/marketplace/useMarketplaceMutations";
-import {
-  pickMarketplaceImage,
-  uploadMarketplaceImage,
-} from "@/hooks/marketplace/marketplaceMedia";
 
 type MarketplaceImageState = {
   id: string;
@@ -41,7 +41,7 @@ export default function MarketplaceAdminForm() {
   const { itemId: rawItemId } = useLocalSearchParams<{ itemId?: string }>();
   const itemId = useMemo(
     () => (Array.isArray(rawItemId) ? rawItemId[0] : rawItemId),
-    [rawItemId],
+    [rawItemId]
   );
   const isEditing = Boolean(itemId);
   const { data: marketplaceItems, isLoading: isLoadingItems } =
@@ -51,7 +51,7 @@ export default function MarketplaceAdminForm() {
       itemId
         ? marketplaceItems?.find((entry) => entry.id === itemId) ?? null
         : null,
-    [itemId, marketplaceItems],
+    [itemId, marketplaceItems]
   );
   const hasHydratedFromItem = useRef(false);
 
@@ -59,8 +59,11 @@ export default function MarketplaceAdminForm() {
   const [price, setPrice] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [description, setDescription] = useState("");
-  const [primaryImage, setPrimaryImage] = useState<MarketplaceImageState | null>(null);
-  const [galleryImages, setGalleryImages] = useState<MarketplaceImageState[]>([]);
+  const [primaryImage, setPrimaryImage] =
+    useState<MarketplaceImageState | null>(null);
+  const [galleryImages, setGalleryImages] = useState<MarketplaceImageState[]>(
+    []
+  );
   const [category, setCategory] = useState("");
   const [itemCode, setItemCode] = useState("");
   const [active, setActive] = useState(true);
@@ -85,7 +88,9 @@ export default function MarketplaceAdminForm() {
   };
 
   const uploadGalleryIfNeeded = async (images: MarketplaceImageState[]) => {
-    const uploads = await Promise.all(images.map((entry) => uploadImageIfNeeded(entry)));
+    const uploads = await Promise.all(
+      images.map((entry) => uploadImageIfNeeded(entry))
+    );
     return uploads.filter((url): url is string => Boolean(url));
   };
 
@@ -129,29 +134,26 @@ export default function MarketplaceAdminForm() {
     }
 
     setName(existingItem.name ?? "");
-    setPrice(
-      existingItem.price != null ? String(existingItem.price) : "",
-    );
+    setPrice(existingItem.price != null ? String(existingItem.price) : "");
     setShortDescription(existingItem.shortDescription ?? "");
     setDescription(existingItem.description ?? "");
     setPrimaryImage(
       existingItem.imageUrl
         ? { id: generateImageId(), remoteUrl: existingItem.imageUrl }
-        : null,
+        : null
     );
     const uniqueGallery = Array.from(
       new Set(
         (existingItem.gallery ?? []).filter(
-          (url): url is string =>
-            Boolean(url) && url !== existingItem.imageUrl,
-        ),
-      ),
+          (url): url is string => Boolean(url) && url !== existingItem.imageUrl
+        )
+      )
     );
     setGalleryImages(
       uniqueGallery.map((url) => ({
         id: generateImageId(),
         remoteUrl: url,
-      })),
+      }))
     );
     setCategory(existingItem.category ?? "");
     setItemCode(existingItem.itemId ?? "");
@@ -164,7 +166,10 @@ export default function MarketplaceAdminForm() {
     if (isSaving) return;
 
     if (user?.role !== "admin") {
-      Alert.alert("Permisos", "Solo los administradores pueden gestionar articulos.");
+      Alert.alert(
+        "Permisos",
+        "Solo los administradores pueden gestionar articulos."
+      );
       return;
     }
 
@@ -172,7 +177,7 @@ export default function MarketplaceAdminForm() {
       if (isLoadingItems) {
         Alert.alert(
           "Marketplace",
-          "Aun estamos cargando el articulo seleccionado. Intenta nuevamente en unos segundos.",
+          "Aun estamos cargando el articulo seleccionado. Intenta nuevamente en unos segundos."
         );
       } else {
         Alert.alert(
@@ -183,7 +188,7 @@ export default function MarketplaceAdminForm() {
               text: "Aceptar",
               onPress: () => router.back(),
             },
-          ],
+          ]
         );
       }
       return;
@@ -208,7 +213,7 @@ export default function MarketplaceAdminForm() {
     if (!primaryImage) {
       Alert.alert(
         "Imagen requerida",
-        "Selecciona una imagen principal para el articulo.",
+        "Selecciona una imagen principal para el articulo."
       );
       return;
     }
@@ -221,7 +226,7 @@ export default function MarketplaceAdminForm() {
       if (!uploadedPrimaryUrl) {
         Alert.alert(
           "Imagen requerida",
-          "No pudimos preparar la imagen principal. Intenta nuevamente.",
+          "No pudimos preparar la imagen principal. Intenta nuevamente."
         );
         return;
       }
@@ -229,11 +234,11 @@ export default function MarketplaceAdminForm() {
     } catch (error) {
       console.error(
         "No se pudieron subir las imagenes del marketplace:",
-        error,
+        error
       );
       Alert.alert(
         "Error",
-        "No pudimos preparar las imagenes seleccionadas. Intenta nuevamente en unos minutos.",
+        "No pudimos preparar las imagenes seleccionadas. Intenta nuevamente en unos minutos."
       );
       return;
     } finally {
@@ -245,7 +250,7 @@ export default function MarketplaceAdminForm() {
     }
 
     const images = Array.from(
-      new Set([uploadedPrimaryUrl, ...uploadedGalleryUrls]),
+      new Set([uploadedPrimaryUrl, ...uploadedGalleryUrls])
     );
 
     const payload = {
@@ -253,32 +258,35 @@ export default function MarketplaceAdminForm() {
       shortDescription: normalizedShortDescription.length
         ? normalizedShortDescription
         : isEditing
-          ? null
-          : undefined,
+        ? null
+        : undefined,
       description: normalizedDescription.length
         ? normalizedDescription
         : isEditing
-          ? null
-          : undefined,
+        ? null
+        : undefined,
       price: parsedPrice,
       currency: "CRC",
       category: normalizedCategory.length
         ? normalizedCategory
         : isEditing
-          ? null
-          : undefined,
+        ? null
+        : undefined,
       active,
       itemId: normalizedItemCode.length
         ? normalizedItemCode
         : isEditing
-          ? null
-          : undefined,
+        ? null
+        : undefined,
       images,
     };
 
     try {
       if (isEditing && itemId) {
-        await updateMarketplaceItemMutation.mutateAsync({ itemId, data: payload });
+        await updateMarketplaceItemMutation.mutateAsync({
+          itemId,
+          data: payload,
+        });
         Alert.alert("Marketplace", "Articulo actualizado correctamente.", [
           {
             text: "Aceptar",
@@ -310,10 +318,9 @@ export default function MarketplaceAdminForm() {
       console.error("No se pudo guardar el articulo:", error);
       Alert.alert(
         "Error",
-        "No pudimos guardar el articulo. Intenta nuevamente en unos minutos.",
+        "No pudimos guardar el articulo. Intenta nuevamente en unos minutos."
       );
     }
-
   };
 
   const handleDelete = () => {
@@ -340,12 +347,12 @@ export default function MarketplaceAdminForm() {
               console.error("No se pudo eliminar el articulo:", error);
               Alert.alert(
                 "Error",
-                "No pudimos eliminar el articulo. Intenta nuevamente en unos minutos.",
+                "No pudimos eliminar el articulo. Intenta nuevamente en unos minutos."
               );
             }
           },
         },
-      ],
+      ]
     );
   };
 
@@ -356,7 +363,8 @@ export default function MarketplaceAdminForm() {
           Permiso denegado
         </Text>
         <Text className="text-gray-400 text-center mb-6">
-          Solo los administradores pueden acceder a este formulario de la tienda.
+          Solo los administradores pueden acceder a este formulario de la
+          tienda.
         </Text>
         <TouchableOpacity
           className="bg-yellow-400 px-6 py-3 rounded-full"
@@ -384,7 +392,8 @@ export default function MarketplaceAdminForm() {
           No encontramos este articulo.
         </Text>
         <Text className="text-gray-400 text-center mb-6">
-          Puede que haya sido eliminado recientemente. Vuelve a la lista del marketplace.
+          Puede que haya sido eliminado recientemente. Vuelve a la lista del
+          marketplace.
         </Text>
         <TouchableOpacity
           className="bg-yellow-400 px-6 py-3 rounded-full"
@@ -533,7 +542,8 @@ export default function MarketplaceAdminForm() {
                   <View className="rounded-xl overflow-hidden h-40 bg-gray-950">
                     <Image
                       source={{
-                        uri: primaryImage.localUri ?? primaryImage.remoteUrl ?? "",
+                        uri:
+                          primaryImage.localUri ?? primaryImage.remoteUrl ?? "",
                       }}
                       className="w-full h-full"
                       resizeMode="cover"
@@ -555,7 +565,11 @@ export default function MarketplaceAdminForm() {
                       disabled={isSaving}
                       accessibilityLabel="Quitar imagen principal"
                     >
-                      <Ionicons name="trash-outline" size={20} color="#ffffff" />
+                      <Ionicons
+                        name="trash-outline"
+                        size={20}
+                        color="#ffffff"
+                      />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -632,7 +646,11 @@ export default function MarketplaceAdminForm() {
             disabled={isSaving}
           >
             <Text className="font-semibold text-black">
-              {isSaving ? "Guardando..." : isEditing ? "Actualizar articulo" : "Guardar articulo"}
+              {isSaving
+                ? "Guardando..."
+                : isEditing
+                ? "Actualizar articulo"
+                : "Guardar articulo"}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -640,19 +658,3 @@ export default function MarketplaceAdminForm() {
     </SafeAreaView>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
