@@ -5,6 +5,10 @@ export default function PrivateLayout() {
     <Stack initialRouteName="home">
       <Stack.Screen name="home" options={{ headerShown: false }} />
       <Stack.Screen name="profile" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="user/course/[courseId]"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

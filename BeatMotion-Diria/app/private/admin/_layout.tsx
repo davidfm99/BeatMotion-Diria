@@ -1,8 +1,8 @@
 import { Stack, router } from "expo-router";
-import { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { View, Text } from "react-native";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { Text, View } from "react-native";
 
 export default function AdminLayout() {
   const [allowed, setAllowed] = useState<null | boolean>(null);
@@ -47,6 +47,12 @@ export default function AdminLayout() {
       <Stack.Screen name="classes/list" options={{ title: "Ver clases" }} />
       <Stack.Screen name="classes/new" options={{ title: "Nueva clase" }} />
       <Stack.Screen name="classes/[id]" options={{ title: "Editar clase" }} />
+
+      {/* Matriculas */}
+      <Stack.Screen
+        name="enrollments/enrollmentList"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useActiveUser } from "@/hooks/UseActiveUser";
 import HomeUser from "./user/HomeUser";
+import HomeAdmin from "./admin/homeAdmin";
 
 export default function HomeScreen() {
   const { user } = useActiveUser();
@@ -15,7 +16,8 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View className="flex-1 bg-black px-6 py-12 justify-center">
-        {user ? <HomeUser /> : null}
+        {user?.role === "user" && <HomeUser />}
+        {user?.role === "admin" && <HomeAdmin />}
 
         {/* Bottom bar */}
         <View className="absolute left-0 right-0 bottom-0 bg-gray-900 h-24 flex-row items-center px-6 gap-6">
@@ -30,6 +32,21 @@ export default function HomeScreen() {
                   <Ionicons name="people-outline" size={24} color="black" />
                 </TouchableOpacity>
                 <Text className="text-xs text-white mt-2">Usuarios</Text>
+              </View>
+
+              <View className="flex-1 items-center">
+                <TouchableOpacity
+                  onPress={() => router.push("/private/admin/draft")}
+                  className="w-12 h-12 rounded-full bg-yellow-400 items-center justify-center"
+                  accessibilityLabel="Ver borradores"
+                >
+                  <Ionicons
+                    name="document-text-outline"
+                    size={24}
+                    color="black"
+                  />
+                </TouchableOpacity>
+                <Text className="text-xs text-white mt-2">Borradores</Text>
               </View>
 
               <View className="flex-1 items-center">

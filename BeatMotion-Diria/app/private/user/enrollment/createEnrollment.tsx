@@ -1,20 +1,24 @@
-import { View, Text, TouchableHighlight, Image } from "react-native";
-import { useCourses } from "@/hooks/courses/useCourses";
+import BackButton from "@/components/backButton";
 import DataLoader from "@/components/DataLoader";
-import BouncyCheckbox from "react-native-bouncy-checkbox";
-import { useEffect, useState } from "react";
-import { askForCameraPermission } from "@/components/enrollment/askCameraPermision";
+import {
+  askForCameraPermission,
+  uploadImage,
+} from "@/components/enrollment/askCameraPermision";
+import { capitalize } from "@/constants/helpers";
+import { useCourses } from "@/hooks/courses/useCourses";
+import { Enrollment as EnrollmentType } from "@/hooks/enrollment/schema";
 import { useCreateEnrollment } from "@/hooks/enrollment/useCreateEnrollment";
+import { useEnrollmentByUserId } from "@/hooks/enrollment/useEnrollmentByUserId";
 import { useActiveUser } from "@/hooks/UseActiveUser";
 import { useRouter } from "expo-router";
-import { useEnrollmentByUserId } from "@/hooks/enrollment/useEnrollmentByUserId";
-import { Enrollment as EnrollmentType } from "@/hooks/enrollment/schema";
-import { capitalize } from "@/constants/helpers";
+import { useEffect, useState } from "react";
+import { Image, Text, TouchableHighlight, View } from "react-native";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 const INITIAL_PRICE = 20000;
 const PRICE_PER_COURSE = 5000;
 
-const Enrollment = () => {
+const CreateEnrollment = () => {
   const createEnrollment = useCreateEnrollment();
   const { user } = useActiveUser();
   const coursesQuery = useCourses();
@@ -58,7 +62,7 @@ const Enrollment = () => {
     setImage(imageSelected);
   };
 
-  const handleConfirmEnrollment = () => {
+  const handleConfirmEnrollment = async () => {
     setPaymentInProcess(true);
     if (selectedCourses.length === 0) {
       alert("Selecciona al menos un curso para matricularte.");
@@ -68,26 +72,32 @@ const Enrollment = () => {
       alert("Por favor, sube el comprobante de pago.");
       return;
     }
-    createEnrollment.mutate({
-      coursesIds: selectedCourses,
-      data: {
-        status: "pending",
-        paymentProofImage: image,
-        userId: user?.uid,
-        totalAmount: getTotal(),
-        reviewedBy: null,
-        reviewedAt: null,
-      },
-    });
-    setPaymentInProcess(false);
+    try {
+      const imageUrl = await uploadImage(image, user!.uid);
+      createEnrollment.mutate({
+        coursesIds: selectedCourses,
+        data: {
+          status: "pending",
+          paymentProofImage: imageUrl,
+          userId: user?.uid,
+          totalAmount: getTotal(),
+          reviewedBy: null,
+          reviewedAt: null,
+        },
+      });
+    } catch (error: any) {
+      console.log("Error uploading enrollment:", error);
+      alert("Error al subir la matricula. Por favor, intenta de nuevo.");
+      setPaymentInProcess(false);
+      return;
+    }
     alert("Matrícula enviada con éxito. Será revisada pronto.");
     router.replace("/private/home");
   };
 
-  console.log("Enrolled Course Ids:", coursesQuery?.data[0]?.startDate);
-
   return (
     <View className="mt-4">
+      <BackButton />
       <Text className="text-white pl-4 text-2xl font-bold">
         Cursos disponibles
       </Text>
@@ -159,4 +169,4 @@ const Enrollment = () => {
     </View>
   );
 };
-export default Enrollment;
+export default CreateEnrollment;

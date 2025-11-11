@@ -1,10 +1,15 @@
-import React from "react";
-import { View, Text, ActivityIndicator } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { UseQueryResult } from "@tanstack/react-query";
+import React from "react";
+import { ActivityIndicator, Text, View } from "react-native";
 
 type DataLoaderProps<T> = {
   query: UseQueryResult<T>;
-  children: (data: T) => React.ReactNode;
+  children: (
+    data: T,
+    isRefetching: boolean,
+    refetch: () => void
+  ) => React.ReactNode;
   emptyMessage?: string;
 };
 
@@ -13,13 +18,14 @@ export default function DataLoader<T>({
   children,
   emptyMessage = "No data available",
 }: DataLoaderProps<T>) {
-  const { data, isLoading, isError, error, isFetching } = query;
+  const { data, isLoading, isError, error, isFetching, isRefetching, refetch } =
+    query;
 
   if (isLoading || isFetching) {
     return (
       <View className="flex-1 items-center justify-center p-4">
         <ActivityIndicator size="large" />
-        <Text style={{ marginTop: 8 }}>Loading...</Text>
+        <Text className="mt-4 dark:text-white">Loading...</Text>
       </View>
     );
   }
@@ -36,10 +42,15 @@ export default function DataLoader<T>({
   if (!data || (Array.isArray(data) && data.length === 0)) {
     return (
       <View className="flex-1 items-center justify-center p-4">
-        <Text>{emptyMessage}</Text>
+        <MaterialCommunityIcons
+          name="dance-ballroom"
+          size={48}
+          color="#4b5563"
+        />
+        <Text className="text-white mt-3">{emptyMessage}</Text>
       </View>
     );
   }
 
-  return <>{children(data)}</>;
+  return <>{children(data, isRefetching, refetch)}</>;
 }
