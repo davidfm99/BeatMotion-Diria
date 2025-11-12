@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Button, View } from "react-native";
+import { View } from "react-native";
 import YoutubePlayer from "react-native-youtube-iframe";
 
 function YouTubeVideoPlayer({ videoURL }: { videoURL: string }) {
@@ -11,10 +11,6 @@ function YouTubeVideoPlayer({ videoURL }: { videoURL: string }) {
     }
   }, []);
 
-  const togglePlaying = useCallback(() => {
-    setPlaying((prev) => !prev);
-  }, []);
-
   return (
     <View>
       <YoutubePlayer
@@ -23,7 +19,6 @@ function YouTubeVideoPlayer({ videoURL }: { videoURL: string }) {
         videoId={"wOOzajNBQ-M"}
         onChangeState={onStateChange}
       />
-      <Button title={playing ? "Pause" : "Play"} onPress={togglePlaying} />
     </View>
   );
 }
