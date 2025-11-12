@@ -18,7 +18,7 @@ const HomeUser = () => {
   return (
     <View>
       <TouchableHighlight
-        className="bg-secondary self-end text-white w-1/2 rounded-full px-3 py-3  justify-center active:opacity-80 mb-8 flex-row gap-2 items-center"
+        className="bg-primary self-end text-gray-950 w-1/2 rounded-full px-3 py-3  justify-center active:opacity-80 mb-8 flex-row gap-2 items-center"
         onPress={handleClickEnroll}
       >
         <>

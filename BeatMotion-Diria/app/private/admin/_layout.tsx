@@ -39,14 +39,32 @@ export default function AdminLayout() {
       <Stack.Screen name="coursesMenu" options={{ title: "Cursos" }} />
 
       {/* Cursos */}
-      <Stack.Screen name="courses/list" options={{ title: "Ver cursos" }} />
-      <Stack.Screen name="courses/new" options={{ title: "Nuevo curso" }} />
-      <Stack.Screen name="courses/[id]" options={{ title: "Editar curso" }} />
+      <Stack.Screen
+        name="courses/list"
+        options={{ title: "Ver cursos", headerShown: false }}
+      />
+      <Stack.Screen
+        name="courses/new"
+        options={{ title: "Nuevo curso", headerShown: false }}
+      />
+      <Stack.Screen
+        name="courses/[id]"
+        options={{ title: "Editar curso", headerShown: false }}
+      />
 
       {/* Clases */}
-      <Stack.Screen name="classes/list" options={{ title: "Ver clases" }} />
-      <Stack.Screen name="classes/new" options={{ title: "Nueva clase" }} />
-      <Stack.Screen name="classes/[id]" options={{ title: "Editar clase" }} />
+      <Stack.Screen
+        name="classes/list"
+        options={{ title: "Ver clases", headerShown: false }}
+      />
+      <Stack.Screen
+        name="classes/new"
+        options={{ title: "Nueva clase", headerShown: false }}
+      />
+      <Stack.Screen
+        name="classes/[id]"
+        options={{ title: "Editar clase", headerShown: false }}
+      />
 
       {/* Matriculas */}
       <Stack.Screen

@@ -6,13 +6,15 @@ import {
   getDocs,
   where,
 } from "@firebase/firestore";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert } from "react-native";
 import { useCourseMemberByUser } from "../courseMember/useCourseMemberByUser";
 import { courseSchemaWithMember } from "./schema/courseSchema";
 
 //Bring courses where the user is member
+//TODO add update when a new course is added 
 export const useCoursesByUserMember = (uid: string) => {
+  const queryClient = useQueryClient();
   const { data: courseMembers } = useCourseMemberByUser(uid);
 
   const getMyCourses = async () => {
