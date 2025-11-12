@@ -11,8 +11,13 @@ const HomeAdmin = () => {
     router.push("/private/marketplace/MarketplaceList" as Href);
   };
 
+  const handleOpenDashboard = () => {
+    router.push("/private/admin/Dashboard" as Href); 
+  };
+
   return (
     <View className="gap-6">
+      {/* Botón para la tienda */}
       <TouchableOpacity
         className="bg-yellow-400 rounded-full px-4 py-3 self-end flex-row items-center gap-2 active:opacity-80"
         onPress={handleOpenMarketplace}
@@ -20,9 +25,21 @@ const HomeAdmin = () => {
         <Icon name="bag-handle-outline" size={20} color="#000000" />
         <Text className="text-black font-semibold">Gestionar Tienda</Text>
       </TouchableOpacity>
+
+      {/* Botón para el dashboard */}
+      <TouchableOpacity
+        className="bg-green-500 rounded-full px-4 py-3 self-end flex-row items-center gap-2 active:opacity-80"
+        onPress={handleOpenDashboard}
+      >
+        <Icon name="analytics-outline" size={20} color="#FFFFFF" />
+        <Text className="text-white font-semibold">Ver Dashboard</Text>
+      </TouchableOpacity>
+
+      {/* Componente existente */}
       <EnrollmentAvailable />
     </View>
   );
 };
 
 export default HomeAdmin;
+

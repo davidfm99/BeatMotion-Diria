@@ -47,6 +47,10 @@ export const enrollmentSchema = zod.array(
         email: zod.string().email(),
       })
       .nullish(),
+
+    assignedClass: zod.string().nullable().optional(),
+    classAssignedAt: timestampSchema.nullable().optional(),
+    classAssignedBy: zod.string().nullable().optional(),
   })
 );
 

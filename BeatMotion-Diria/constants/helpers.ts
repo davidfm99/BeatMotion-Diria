@@ -10,9 +10,18 @@ const statusTranslations: { [key: string]: string } = {
 };
 
 const getEnrollmentColor = (status: string) => {
-  if (status === "pending") return "text-yellow-400";
-  if (status === "approved" || status === "ok") return "text-green-400";
-  return "text-red-400";
+  switch (status) {
+    case "pending":
+      return "text-yellow-400";
+    case "approved":
+    case "ok":
+      return "text-green-400";
+    case "rejected":
+    case "late":
+      return "text-red-400";
+    default:
+      return "text-gray-100";
+  }
 };
 
 const formatCurrency = (value: number, currency?: string) => {

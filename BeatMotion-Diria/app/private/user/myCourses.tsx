@@ -4,6 +4,7 @@ import { useCoursesByUserMember } from "@/hooks/courses/useCoursesByUserMember";
 import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useRouter } from "expo-router";
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+
 const MyCourses = () => {
   const router = useRouter();
   const { user: activeUser } = useActiveUser();
@@ -39,13 +40,14 @@ const MyCourses = () => {
               data={data}
               keyExtractor={(item) => item.id}
               numColumns={1}
+              showsVerticalScrollIndicator={false}
               refreshControl={
                 <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
               }
               renderItem={({ item: course }) => (
                 <Pressable
                   onPress={() => handleClickCourse(course.courseId)}
-                  className="active:bg-secondary bg-gray-950 rounded-lg"
+                  className="active:bg-secondary bg-gray-950 rounded-lg mb-3"
                 >
                   <View key={course.id} className="mb-4 p-4  mx-1">
                     <Text className="text-white text-xl font-bold">
