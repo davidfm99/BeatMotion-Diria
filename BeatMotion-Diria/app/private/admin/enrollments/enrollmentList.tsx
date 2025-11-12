@@ -21,7 +21,6 @@ import {
   RefreshControl,
   Text,
   TouchableHighlight,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -37,6 +36,8 @@ const FILTER_OPTIONS = [
 const EnrollmentList = () => {
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const enrollmentByStatusQuery = useEnrollmentsByStatus(statusFilter);
+  console.log(enrollmentByStatusQuery.data);
+
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
   const [imageSelected, setImageSelected] = useState<string | null>(null);
@@ -188,21 +189,6 @@ const EnrollmentList = () => {
                         {item.course?.title}
                       </Text>
                     </TouchableHighlight>
-                     {item.status === "approved" && (
-            <TouchableOpacity
-              onPress={() =>
-                router.push({
-                  pathname: "/private/admin/enrollments/assignClass",
-                  params: { id: item.id },
-                })
-              }
-              className="bg-yellow-500 p-3 rounded-xl mt-3 items-center"
-            >
-              <Text className="text-black font-semibold">
-                Asignar clases
-              </Text>
-            </TouchableOpacity>
-                      )}
 
                     <Text className="text-white text-lg">
                       Estado:{" "}

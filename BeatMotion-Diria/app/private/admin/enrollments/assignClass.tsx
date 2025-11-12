@@ -5,6 +5,8 @@ import { useEnrollmentsByStatus } from "@/hooks/enrollment/useEnrollmentsByStatu
 import { useClassesByCourse } from "@/hooks/classes/useClassesByCourse";
 import { useAssignClass } from "@/hooks/classes/useAssignClass";
 
+//TODO see if this component is useful or get rid of it
+
 export default function AssignClass() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
