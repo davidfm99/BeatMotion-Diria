@@ -3,20 +3,39 @@ const capitalize = (s: string) =>
 
 const statusTranslations: { [key: string]: string } = {
   pending: "Pendiente",
-  accepted: "Aceptada",
+  approved: "Aprobada",
   rejected: "Rechazada",
+  ok: "Pago realizado",
+  late: "Pago atrasado",
 };
 
 const getEnrollmentColor = (status: string) => {
   switch (status) {
     case "pending":
       return "text-yellow-400";
-    case "accepted":
+    case "approved":
+    case "ok":
       return "text-green-400";
     case "rejected":
+    case "late":
       return "text-red-400";
     default:
-      return "text-gray-400";
+      return "text-gray-100";
   }
 };
-export { capitalize, statusTranslations, getEnrollmentColor };
+
+const formatCurrency = (value: number, currency?: string) => {
+  const fallback = `${currency ?? "CRC"} ${value.toLocaleString("es-CR")}`;
+  try {
+    return new Intl.NumberFormat("es-CR", {
+      style: "currency",
+      currency: currency ?? "CRC",
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch (error) {
+    console.error("No se pudo formatear el monto:", error);
+    return fallback;
+  }
+};
+
+export { capitalize, formatCurrency, getEnrollmentColor, statusTranslations };

@@ -8,8 +8,6 @@
  */
 
 import { setGlobalOptions } from "firebase-functions";
-import { onRequest } from "firebase-functions/https";
-import * as logger from "firebase-functions/logger";
 import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 
 import * as admin from "firebase-admin";
@@ -17,6 +15,7 @@ import * as admin from "firebase-admin";
 admin.initializeApp();
 const db = admin.firestore();
 
+// Triggered when an enrollment document is updated
 export const onEnrollmentAccepted = onDocumentUpdated(
   "enrollments/{enrollmentId}",
   async (event) => {
@@ -26,32 +25,36 @@ export const onEnrollmentAccepted = onDocumentUpdated(
 
     if (!before || !after) return;
 
-    const now = admin.firestore.Timestamp.now();
     const oneMonthLater = admin.firestore.Timestamp.fromDate(
-      new Date(now.toDate().setMonth(now.toDate().getMonth() + 1))
+      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     );
-
-    await db
-      .collection("CourseMember")
-      .add({
-        enrollmentId: enrollmentId,
-        userId: after.userId,
-        courseId: after.courseId,
-        joinedAt: now,
-        active: true,
-        nextPaymentDate: oneMonthLater,
-      })
-      .then(() => {
-        console.log(
-          `CourseMember document created for enrollment ID: ${enrollmentId}`
-        );
-      })
-      .catch((error) => {
-        console.error(
-          `Error creating CourseMember document for enrollment ID: ${enrollmentId}`,
-          error
-        );
-      });
+    if (before.status !== "approved" && after.status === "approved") {
+      await db
+        .collection("courseMember")
+        .add({
+          enrollmentId: enrollmentId,
+          userId: after.userId,
+          courseId: after.courseId,
+          joinedAt: admin.firestore.FieldValue.serverTimestamp(),
+          active: true,
+          paymentStatus: "ok", // pending | late | ok
+          attendanceCount: 0,
+          nextPaymentDate: oneMonthLater,
+          createdBy: after.reviewedBy || null,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        })
+        .then(() => {
+          console.log(
+            `CourseMember document created for enrollment ID: ${enrollmentId}`
+          );
+        })
+        .catch((error) => {
+          console.error(
+            `Error creating CourseMember document for enrollment ID: ${enrollmentId}`,
+            error
+          );
+        });
+    }
   }
 );
 
