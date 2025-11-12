@@ -21,6 +21,7 @@ import {
   RefreshControl,
   Text,
   TouchableHighlight,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -187,6 +188,22 @@ const EnrollmentList = () => {
                         {item.course?.title}
                       </Text>
                     </TouchableHighlight>
+                     {item.status === "approved" && (
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: "/private/admin/enrollments/assignClass",
+                  params: { id: item.id },
+                })
+              }
+              className="bg-yellow-500 p-3 rounded-xl mt-3 items-center"
+            >
+              <Text className="text-black font-semibold">
+                Asignar clases
+              </Text>
+            </TouchableOpacity>
+                      )}
+
                     <Text className="text-white text-lg">
                       Estado:{" "}
                       <Text className={`${getEnrollmentColor(item.status)}`}>
