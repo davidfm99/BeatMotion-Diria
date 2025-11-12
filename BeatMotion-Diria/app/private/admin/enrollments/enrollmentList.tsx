@@ -36,6 +36,8 @@ const FILTER_OPTIONS = [
 const EnrollmentList = () => {
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const enrollmentByStatusQuery = useEnrollmentsByStatus(statusFilter);
+  console.log(enrollmentByStatusQuery.data);
+
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
   const [imageSelected, setImageSelected] = useState<string | null>(null);
@@ -187,6 +189,7 @@ const EnrollmentList = () => {
                         {item.course?.title}
                       </Text>
                     </TouchableHighlight>
+
                     <Text className="text-white text-lg">
                       Estado:{" "}
                       <Text className={`${getEnrollmentColor(item.status)}`}>
