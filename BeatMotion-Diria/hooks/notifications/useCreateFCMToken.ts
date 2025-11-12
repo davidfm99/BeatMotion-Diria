@@ -36,7 +36,6 @@ export const useCreateFCMToken = () => {
       {
         token,
         updatedAt: new Date().toISOString(),
-        courses: courseMembers.map((member) => member.courseId),
         role,
       },
       { merge: true }

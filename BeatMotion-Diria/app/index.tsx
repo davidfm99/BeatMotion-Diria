@@ -8,7 +8,6 @@ import { useEffect } from "react";
 const App = () => {
   const { user } = useActiveUser();
   const createFCMTokenMutation = useCreateFCMToken();
-  const useCourseMemberByUserQuery = useCourseMemberByUser(user?.uid || "");
 
   useEffect(() => {
     const auth = getAuth();
@@ -18,7 +17,6 @@ const App = () => {
         createFCMTokenMutation.mutate({
           userId: userLogged?.uid,
           role: user.role,
-          courseMembers: useCourseMemberByUserQuery.data ?? ([] as any[]),
         });
       } else {
         //TODO see if this is necessary
