@@ -8,6 +8,7 @@
  */
 
 import { setGlobalOptions } from "firebase-functions";
+import { HttpsError, onCall } from "firebase-functions/https";
 import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 
 import * as admin from "firebase-admin";
@@ -57,6 +58,66 @@ export const onEnrollmentAccepted = onDocumentUpdated(
     }
   }
 );
+
+interface NotificationPayload {
+  title: string;
+  content: string;
+  userRole: string;
+}
+
+export const sendExpoPushNotification = onCall(async (data) => {
+  try {
+    const { title, content, userRole } =
+      data.data as unknown as NotificationPayload;
+
+    if (!title || !content || !userRole) {
+      throw new Error("Missing title, body or UserRole");
+    }
+
+    let tokens = [];
+    const snapShot =
+      userRole !== "all"
+        ? await db.collection("pushTokens").where("role", "==", userRole).get()
+        : await db.collection("pushTokens").get();
+    if (snapShot.docs) {
+      const tokens = snapShot.docs.map((doc) => doc.get("token"));
+      const messages = tokens.map((token) => ({
+        to: token,
+        sound: "default",
+        title,
+        body: content,
+      }));
+
+      const expoRes = await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(messages),
+      });
+
+      await expoRes.json();
+      const userIds = snapShot.docs.map((doc) => doc.id);
+      const batch = db.batch();
+      console.log(userIds);
+      userIds.forEach((userId) => {
+        const ref = db.collection("notificationsSent").doc();
+        batch.set(ref, {
+          userId,
+          title,
+          content,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          read: false,
+        });
+      });
+      batch.commit();
+    }
+    return { success: tokens.length, failed: 0 };
+  } catch (er: any) {
+    console.error("Error sending push notification", er);
+    throw new HttpsError("internal", "Error sending push notification");
+  }
+});
 
 // For cost control, you can set the maximum number of containers that can be
 // running at the same time. This helps mitigate the impact of unexpected

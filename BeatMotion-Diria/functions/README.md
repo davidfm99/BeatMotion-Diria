@@ -21,3 +21,14 @@ This will create content into /lib
 ```bash
    firebase deploy --only functions:<NameOfFunction>
 ```
+
+
+- To look a logs in CMD propmt
+
+
+```bash
+  firebase functions:log
+```
+```bash
+  firebase functions:log --only sendExpoPushNotification
+```

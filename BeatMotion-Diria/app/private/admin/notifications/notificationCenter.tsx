@@ -16,7 +16,7 @@ const CENTER_OPTIONS = [
 
 const NotificationCenter = () => {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabType>("sent");
+  const [activeTab, setActiveTab] = useState<TabType>("drafts");
 
   const handleTabPress = (tab: string) => {
     setActiveTab(tab as TabType);
@@ -31,12 +31,17 @@ const NotificationCenter = () => {
           onSelect={handleTabPress}
           selected={activeTab}
         />
-        <View className="w-full p-4">
+        <View className="w-full px-5">
           {activeTab === "drafts" ? <DraftHistoryScreen /> : null}
         </View>
       </View>
       <Pressable
-        onPress={() => router.push("/private/admin/notifications/draft")}
+        onPress={() =>
+          router.push({
+            pathname: "/private/admin/notifications/[draftId]",
+            params: { draftId: "new" },
+          })
+        }
         className="absolute self-end bottom-16 right-5 w-16 h-16 rounded-full bg-primary justify-center items-center shadow-lg"
       >
         <Ionicons name="add" size={28} color="#fff" />

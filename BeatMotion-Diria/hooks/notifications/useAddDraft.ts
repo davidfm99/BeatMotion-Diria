@@ -2,13 +2,9 @@ import { firestore } from "@/firebaseConfig";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addDoc, collection } from "firebase/firestore";
 import { Alert } from "react-native";
-import { z } from "zod";
-import { draftSchema } from "./notificationSchemas";
+import { RequestSchema } from "./notificationSchemas";
 
-// If you're using Zod:
-type DraftInput = z.infer<typeof draftSchema>;
-
-const createDraft = async (d: DraftInput) => {
+const createDraft = async (d: RequestSchema) => {
   if (d.recipients?.length === 0) {
     Alert.alert("Error", "Selecciona al menos un destinatario.");
     return;
@@ -20,10 +16,10 @@ const createDraft = async (d: DraftInput) => {
       createdAt: new Date().toISOString(),
     });
 
-    Alert.alert("Éxito", "Comunicado enviado a Firebase.");
+    Alert.alert("Éxito", "Borrador ha sido guardado correctamente.");
   } catch (err) {
     console.error(err);
-    Alert.alert("Error", "No se pudo enviar el comunicado.");
+    Alert.alert("Error", "No se pudo enviar el comunicado, intentar de nuevo.");
   }
 };
 

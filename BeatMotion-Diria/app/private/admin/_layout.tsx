@@ -78,7 +78,7 @@ export default function AdminLayout() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="notifications/draft"
+        name="notifications/[draftId]"
         options={{ headerShown: false }}
       />
     </Stack>

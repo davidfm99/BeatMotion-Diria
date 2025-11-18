@@ -6,7 +6,13 @@ export const draftSchema = zod.object({
   title: zod.string(),
   content: zod.string(),
   createdAt: timestampSchema,
-  recipients: zod.array(zod.string()).nullable(),
+  recipients: zod.enum(["all", "student", "teacher"]),
 });
 
 export const draftListSchema = zod.array(draftSchema);
+
+export type RequestSchema = {
+  title: string;
+  content: string;
+  recipients: "all" | "student" | "teacher";
+};

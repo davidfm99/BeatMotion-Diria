@@ -1,50 +1,61 @@
 import { firestore } from "@/firebaseConfig";
-import { CourseSchemaWithMember } from "@/hooks/courses/schema/courseSchema";
-import { useMutation } from "@tanstack/react-query";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
+import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { useEffect } from "react";
 
 export const useCreateFCMToken = () => {
-  const registerPushToken = async ({
-    userId,
-    role,
-    courseMembers,
-  }: {
-    userId: string;
-    role: string;
-    courseMembers: CourseSchemaWithMember[];
-  }) => {
-    if (!Device.isDevice) return;
+  const { user } = useActiveUser();
 
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-    const finalStatus =
-      existingStatus === "granted"
-        ? existingStatus
-        : (await Notifications.requestPermissionsAsync()).status;
+  useEffect(() => {
+    if (!user?.uid) return;
 
-    if (finalStatus !== "granted") {
-      console.log("Push permissions not granted");
-      return;
-    }
+    const registerToken = async () => {
+      if (!Device.isDevice) {
+        console.log("Push notifications only work on a physical device");
+        return;
+      }
 
-    const token = (await Notifications.getExpoPushTokenAsync()).data;
+      // Request permission if needed
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
 
-    await setDoc(
-      doc(firestore, "pushTokens", userId),
-      {
-        token,
-        updatedAt: new Date().toISOString(),
-        role,
-      },
-      { merge: true }
+      if (finalStatus !== "granted") {
+        console.log("Permission not granted for push notifications");
+        return;
+      }
+
+      const { data: expoToken } = await Notifications.getExpoPushTokenAsync({
+        projectId: Constants.expoConfig?.extra?.eas?.projectId,
+      });
+
+      const ref = doc(firestore, "pushTokens", user.uid);
+      await setDoc(
+        ref,
+        {
+          token: expoToken,
+          role: user.role,
+          timestamp: serverTimestamp(),
+        },
+        { merge: true }
+      );
+    };
+
+    registerToken();
+
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      () => {
+        registerToken();
+      }
     );
-  };
 
-  const mutation = useMutation({
-    mutationFn: registerPushToken,
-  });
-
-  return mutation;
+    return () => subscription.remove();
+  }, [user?.uid]);
 };

@@ -1,10 +1,12 @@
 import { firestore } from "@/firebaseConfig";
-import { useQuery } from "@tanstack/react-query";
-import { collection, getDocs } from "firebase/firestore";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { collection, getDocs, onSnapshot } from "firebase/firestore";
+import { useEffect } from "react";
 import { Alert } from "react-native";
 import { draftListSchema } from "./notificationSchemas";
 
 export const useDraft = () => {
+  const queryClient = useQueryClient();
   const getDrafts = async () => {
     try {
       const snapshot = await getDocs(collection(firestore, "drafts"));
@@ -20,9 +22,20 @@ export const useDraft = () => {
   };
 
   const query = useQuery({
-    queryKey: ["draft"],
+    queryKey: ["drafts"],
     queryFn: getDrafts,
   });
-  
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(firestore, "drafts"), (snapshot) => {
+      const drafts = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      queryClient.setQueryData(["drafts"], drafts);
+    });
+    return () => unsub();
+  }, [queryClient]);
+
   return query;
 };

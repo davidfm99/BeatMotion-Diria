@@ -10,6 +10,8 @@ const statusTranslations: { [key: string]: string } = {
 };
 
 const getEnrollmentColor = (status: string) => {
+  if (!status) return "text-gray-100";
+
   switch (status) {
     case "pending":
       return "text-yellow-400";

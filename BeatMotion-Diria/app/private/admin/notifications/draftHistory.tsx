@@ -58,9 +58,12 @@ export default function DraftHistoryScreen() {
     );
   };
 
-  // const handlePressDraft = (id: string) => {
-  //   router.push(`/private/admin/notifications/draft/${id}`);
-  // };
+  const handlePressDraft = (id: string) => {
+    router.push({
+      pathname: `/private/admin/notifications/[draftId]`,
+      params: { draftId: id },
+    });
+  };
 
   return (
     <DataLoader
@@ -86,7 +89,7 @@ export default function DraftHistoryScreen() {
                 <Pressable
                   key={item.id}
                   className="active:bg-secondary gap-2 p-2.5 bg-gray-800 rounded-xl"
-                  onPress={() => {}}
+                  onPress={() => handlePressDraft(item.id)}
                 >
                   <Text className="text-white font-bold text-2xl">
                     {item.title}

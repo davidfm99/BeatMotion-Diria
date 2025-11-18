@@ -1,3 +1,4 @@
+import { useCreateFCMToken } from "@/hooks/notifications/useCreateFCMToken";
 import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -8,6 +9,7 @@ import HomeUser from "./user/HomeUser";
 
 export default function HomeScreen() {
   const { user } = useActiveUser();
+  useCreateFCMToken();
 
   const goToProfile = () => {
     router.push("/private/profile");
