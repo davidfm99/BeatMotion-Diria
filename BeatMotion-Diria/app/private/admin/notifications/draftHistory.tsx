@@ -2,7 +2,7 @@ import DataLoader from "@/components/DataLoader";
 import { formatDate } from "@/constants/helpers";
 import { firestore } from "@/firebaseConfig";
 import { useDraft } from "@/hooks/notifications/useDraft";
-import { MaterialIcons } from "@expo/vector-icons";
+import { EvilIcons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { deleteDoc, doc } from "firebase/firestore";
 import React from "react";
@@ -92,6 +92,7 @@ export default function DraftHistoryScreen() {
                   onPress={() => handlePressDraft(item.id)}
                 >
                   <Text className="text-white font-bold text-2xl">
+                    <EvilIcons name="envelope" size={24} color="#40E0D0" />
                     {item.title}
                   </Text>
                   <Text className="text-gray-300">{item.content}</Text>

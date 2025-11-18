@@ -6,6 +6,7 @@ import { Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import DraftHistoryScreen from "./draftHistory";
+import NotificationsHistory from "./notificationsHistory";
 
 type TabType = "drafts" | "sent";
 
@@ -31,8 +32,12 @@ const NotificationCenter = () => {
           onSelect={handleTabPress}
           selected={activeTab}
         />
-        <View className="w-full px-5">
-          {activeTab === "drafts" ? <DraftHistoryScreen /> : null}
+        <View className="">
+          {activeTab === "drafts" ? (
+            <DraftHistoryScreen />
+          ) : (
+            <NotificationsHistory />
+          )}
         </View>
       </View>
       <Pressable

@@ -39,7 +39,7 @@ interface Draft {
 
 enum Recipients {
   "all",
-  "student",
+  "user",
   "teacher",
 }
 

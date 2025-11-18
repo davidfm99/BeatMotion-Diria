@@ -6,7 +6,7 @@ export const draftSchema = zod.object({
   title: zod.string(),
   content: zod.string(),
   createdAt: timestampSchema,
-  recipients: zod.enum(["all", "student", "teacher"]),
+  recipients: zod.enum(["all", "user", "teacher"]),
 });
 
 export const draftListSchema = zod.array(draftSchema);
@@ -14,5 +14,5 @@ export const draftListSchema = zod.array(draftSchema);
 export type RequestSchema = {
   title: string;
   content: string;
-  recipients: "all" | "student" | "teacher";
+  recipients: "all" | "user" | "teacher";
 };

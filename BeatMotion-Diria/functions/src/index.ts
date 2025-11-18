@@ -99,9 +99,14 @@ export const sendExpoPushNotification = onCall(async (data) => {
       await expoRes.json();
       const userIds = snapShot.docs.map((doc) => doc.id);
       const batch = db.batch();
-      console.log(userIds);
+      db.collection("notificationsHistory").add({
+        title,
+        content,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        recipients: userRole,
+      });
       userIds.forEach((userId) => {
-        const ref = db.collection("notificationsSent").doc();
+        const ref = db.collection("notifications").doc();
         batch.set(ref, {
           userId,
           title,
