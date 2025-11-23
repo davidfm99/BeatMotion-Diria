@@ -1,4 +1,5 @@
 import { useCreateFCMToken } from "@/hooks/notifications/useCreateFCMToken";
+import { useMyNotifications } from "@/hooks/notifications/useMyNotifications";
 import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -9,6 +10,8 @@ import HomeUser from "./user/HomeUser";
 
 export default function HomeScreen() {
   const { user } = useActiveUser();
+  const myNotifications = useMyNotifications(user?.uid);
+
   useCreateFCMToken();
 
   const goToProfile = () => {
@@ -75,10 +78,13 @@ export default function HomeScreen() {
                 onPress={() =>
                   router.push("/private/user/notifications/myNotifications")
                 }
-                className="w-12 h-12 rounded-full bg-white items-center justify-center"
+                className="w-12 h-12 rounded-full bg-white items-center justify-center relative "
                 accessibilityLabel="Gestión de usuarios"
               >
                 <Ionicons name="notifications" size={24} color="black" />
+                {myNotifications.data?.find((noti) => !noti.read) && (
+                  <Text className="w-2 h-2 rounded-xl bg-red-500 absolute z-10 top-2 right-3"></Text>
+                )}
               </TouchableOpacity>
               <Text className="text-xs text-white mt-2">Notificaciones</Text>
             </View>
