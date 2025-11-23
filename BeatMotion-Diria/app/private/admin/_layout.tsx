@@ -85,6 +85,7 @@ export default function AdminLayout() {
         name="notifications/notificationsHistory"
         options={{ headerShown: false }}
       />
+      
     </Stack>
   );
 }

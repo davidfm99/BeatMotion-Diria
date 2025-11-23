@@ -72,8 +72,10 @@ export default function HomeScreen() {
           {user?.role !== "admin" && (
             <View className="flex-1 items-center">
               <TouchableOpacity
-                onPress={() => router.push("/private/admin/users")}
-                className="w-12 h-12 rounded-full bg-yellow-400 items-center justify-center"
+                onPress={() =>
+                  router.push("/private/user/notifications/myNotifications")
+                }
+                className="w-12 h-12 rounded-full bg-white items-center justify-center"
                 accessibilityLabel="Gestión de usuarios"
               >
                 <Ionicons name="notifications" size={24} color="black" />

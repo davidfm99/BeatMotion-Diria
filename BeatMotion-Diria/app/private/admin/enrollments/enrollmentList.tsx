@@ -37,7 +37,6 @@ const FILTER_OPTIONS = [
 const EnrollmentList = () => {
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const enrollmentByStatusQuery = useEnrollmentsByStatus(statusFilter);
-  console.log(enrollmentByStatusQuery.data);
 
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
@@ -62,7 +61,6 @@ const EnrollmentList = () => {
     action: "approve" | "reject"
   ) => {
     const { course, user, ...rest } = enrollment;
-    console.log("Updating enrollment:", enrollment.id, "Action:", activeUser);
     try {
       await updateEnrollment.mutateAsync({
         ...rest,

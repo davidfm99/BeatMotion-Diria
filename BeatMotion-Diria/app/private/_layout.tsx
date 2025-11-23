@@ -15,6 +15,10 @@ export default function PrivateLayout() {
         name="marketplace/MarketplaceList"
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="user/notifications/myNotifications"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

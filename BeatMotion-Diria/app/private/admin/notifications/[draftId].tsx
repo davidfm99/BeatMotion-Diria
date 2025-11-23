@@ -1,4 +1,5 @@
 import HeaderTitle from "@/components/headerTitle";
+import { DraftValidationSchema } from "@/constants/validationForms";
 import { functions } from "@/firebaseConfig";
 import { useAddDraft } from "@/hooks/notifications/useAddDraft";
 import { useDraftById } from "@/hooks/notifications/useDraftById";
@@ -16,6 +17,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { object } from "yup";
 
 const OPTIONS = [
   { label: "Todos los usuarios", value: "all" },
@@ -38,9 +40,9 @@ interface Draft {
 }
 
 enum Recipients {
-  "all",
-  "user",
-  "teacher",
+  "all" = "all",
+  "user" = "user",
+  "teacher" = "teacher",
 }
 
 export default function DraftScreen() {
@@ -49,6 +51,10 @@ export default function DraftScreen() {
   const useAddDraftMutation = useAddDraft();
   const useUpdateDraftMutation = useUpdateDraft();
   const draftById = useDraftById(draftId as string);
+  const [formErrors, setFormErrors] = useState({
+    title: "",
+    content: "",
+  });
   //Todo fix this any type
   const [draft, setDraft] = useState<any>({
     title: "",
@@ -64,26 +70,48 @@ export default function DraftScreen() {
     setDraft({ ...draft, [key]: value });
   };
 
-  const saveDraftLocal = () => {
-    if (!draft.title || !draft.content) {
-      Alert.alert("Error", "Título y contenido obligatorios.");
-      return;
+  const validation = () => {
+    try {
+      object(DraftValidationSchema).validateSync(draft, {
+        abortEarly: false,
+      });
+      setFormErrors({
+        title: "",
+        content: "",
+      });
+    } catch (err: any) {
+      const errors = {
+        title: "",
+        content: "",
+      };
+      err.inner.reduce((acc: any, curr: any) => {
+        acc[curr.path] = curr.message;
+        return acc;
+      }, errors);
+      setFormErrors(errors);
+      return false;
     }
-    if (isEditing) {
-      useUpdateDraftMutation.mutate({
-        id: draftId as string,
-        body: {
+    return true;
+  };
+
+  const saveDraftLocal = () => {
+    if (validation()) {
+      if (isEditing) {
+        useUpdateDraftMutation.mutate({
+          id: draftId as string,
+          body: {
+            title: draft.title,
+            content: draft.content,
+            recipients: draft.recipients,
+          },
+        });
+      } else {
+        useAddDraftMutation.mutate({
           title: draft.title,
           content: draft.content,
           recipients: draft.recipients,
-        },
-      });
-    } else {
-      useAddDraftMutation.mutate({
-        title: draft.title,
-        content: draft.content,
-        recipients: draft.recipients,
-      });
+        });
+      }
     }
   };
 
@@ -107,22 +135,31 @@ export default function DraftScreen() {
       <HeaderTitle title="Guardar Borrador" />
 
       <ScrollView className="flex-1 p-5">
-        <TextInput
-          placeholder="Título"
-          placeholderTextColor="#aaa"
-          value={draft.title}
-          onChangeText={(text) => handleChange("title", text)}
-          className="bg-neutral-800 text-white p-3 rounded-xl mb-3"
-        />
-
-        <TextInput
-          placeholder="Contenido"
-          placeholderTextColor="#aaa"
-          value={draft.content}
-          onChangeText={(text) => handleChange("content", text)}
-          multiline
-          className="bg-neutral-800 text-white p-3 rounded-xl mb-3 min-h-[100px] text-top"
-        />
+        <View className="mb-4">
+          <TextInput
+            placeholder="Título"
+            placeholderTextColor="#aaa"
+            value={draft.title}
+            onChangeText={(text) => handleChange("title", text)}
+            className="bg-neutral-800 text-white p-3 rounded-xl mb-3"
+          />
+          {formErrors.title && (
+            <Text className="text-red-500  mb-3">{formErrors.title}</Text>
+          )}
+        </View>
+        <View className="mb-4">
+          <TextInput
+            placeholder="Contenido"
+            placeholderTextColor="#aaa"
+            value={draft.content}
+            onChangeText={(text) => handleChange("content", text)}
+            multiline
+            className="bg-neutral-800 text-white p-3 rounded-xl mb-3 min-h-[100px] text-top"
+          />
+          {formErrors.content && (
+            <Text className="text-red-500">{formErrors.content}</Text>
+          )}
+        </View>
 
         <View>
           <Text className="text-white text-lg font-bold">A quien enviar</Text>

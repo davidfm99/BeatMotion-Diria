@@ -16,7 +16,7 @@ const updateDraft = async ({
     await updateDoc(draftRef, body);
     Alert.alert("Borrador guardado correctamente.");
   } catch (err) {
-    console.log("Error in draft update", err);
+    console.error("Error in draft update", err);
     Alert.alert("Error al guardar. Intentelo de nuevo.");
   }
 };

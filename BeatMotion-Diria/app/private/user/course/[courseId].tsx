@@ -20,8 +20,6 @@ const CourseDetail = () => {
     courseId as string
   );
 
-  console.log(classesQuery.data);
-
   const toggleClassOpen = (classId: string) => {
     setClassesOpen((prev) => {
       if (prev?.includes(classId)) {

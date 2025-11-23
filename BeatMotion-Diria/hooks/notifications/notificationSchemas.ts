@@ -16,3 +16,15 @@ export type RequestSchema = {
   content: string;
   recipients: "all" | "user" | "teacher";
 };
+
+export const notificationsSchema = zod.object({
+  id: zod.string(),
+  title: zod.string(),
+  content: zod.string(),
+  createdAt: timestampSchema,
+  read: zod.boolean(),
+});
+
+export const notificationsList = zod.array(notificationsSchema);
+
+export type Notification = zod.infer<typeof notificationsSchema>;
