@@ -1,5 +1,6 @@
 import DataLoader from "@/components/DataLoader";
 import FilterPills from "@/components/FilterPills";
+import HeaderTitle from "@/components/headerTitle";
 import {
   formatCurrency,
   getEnrollmentColor,
@@ -8,7 +9,7 @@ import {
 import { Enrollment as Enrollmentype } from "@/hooks/enrollment/schema";
 import { useEnrollmentsByStatus } from "@/hooks/enrollment/useEnrollmentsByStatus";
 import { useUpdateEnrollment } from "@/hooks/enrollment/useUpdateEnrollment";
-import { useActiveUser } from "@/hooks/UseActiveUser";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useRouter } from "expo-router";
 import { serverTimestamp } from "firebase/database";
 import { useState } from "react";
@@ -36,7 +37,6 @@ const FILTER_OPTIONS = [
 const EnrollmentList = () => {
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const enrollmentByStatusQuery = useEnrollmentsByStatus(statusFilter);
-  console.log(enrollmentByStatusQuery.data);
 
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
@@ -61,7 +61,6 @@ const EnrollmentList = () => {
     action: "approve" | "reject"
   ) => {
     const { course, user, ...rest } = enrollment;
-    console.log("Updating enrollment:", enrollment.id, "Action:", activeUser);
     try {
       await updateEnrollment.mutateAsync({
         ...rest,
@@ -106,7 +105,7 @@ const EnrollmentList = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      <Text className="text-white text-3xl font-bold p-4 mb-4">Matriculas</Text>
+      <HeaderTitle title="Centro de Matriculas" />
       <View className="items-center mb-2">
         <FilterPills
           options={FILTER_OPTIONS}

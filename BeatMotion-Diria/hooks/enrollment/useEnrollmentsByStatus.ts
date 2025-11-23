@@ -4,7 +4,7 @@ import { Alert } from "react-native";
 import { firestore } from "@/firebaseConfig";
 import { collection, getDocs, query, where } from "@firebase/firestore";
 import { useCourses } from "../courses/useCourses";
-import { useUsers } from "../useUsers";
+import { useUsers } from "../user/useUsers";
 import { enrollmentSchema } from "./schema";
 
 export const useEnrollmentsByStatus = (status: string) => {

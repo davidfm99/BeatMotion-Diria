@@ -25,3 +25,7 @@ export const courseSchemaWithMember = zod.array(
 export const courseWithMemberElement = courseSchema.element.merge(
   courseMemberSchema.element
 );
+
+export type CourseSchemaWithMember = zod.infer<
+  typeof courseSchemaWithMember
+>[number];

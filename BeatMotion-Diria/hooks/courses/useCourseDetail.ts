@@ -14,7 +14,6 @@ export const useCourseDetail = (uid: string, courseId: string) => {
       if (!courseMembers || courseMembers.length === 0) {
         return null;
       }
-      console.log("Fetching course detail for courseId:", courseId);
       const snapshot = await getDoc(doc(firestore, "courses", courseId));
       if (!snapshot.exists()) {
         throw new Error("Course not found");
@@ -38,7 +37,6 @@ export const useCourseDetail = (uid: string, courseId: string) => {
     queryFn: getMyCourseDetail,
     enabled: !!uid && !!courseMembers,
     refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 1, // 1 minute
   });
 
   return query;

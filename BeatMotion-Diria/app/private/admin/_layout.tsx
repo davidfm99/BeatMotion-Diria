@@ -71,6 +71,21 @@ export default function AdminLayout() {
         name="enrollments/enrollmentList"
         options={{ headerShown: false }}
       />
+
+      {/* notification Center */}
+      <Stack.Screen
+        name="notifications/notificationCenter"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="notifications/[draftId]"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="notifications/notificationsHistory"
+        options={{ headerShown: false }}
+      />
+      
     </Stack>
   );
 }

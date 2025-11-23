@@ -1,15 +1,15 @@
-import BackButton from "@/components/backButton";
 import DataLoader from "@/components/DataLoader";
 import {
   askForCameraPermission,
   uploadImage,
 } from "@/components/enrollment/askCameraPermision";
+import HeaderTitle from "@/components/headerTitle";
 import { capitalize } from "@/constants/helpers";
 import { useCourses } from "@/hooks/courses/useCourses";
 import { Enrollment as EnrollmentType } from "@/hooks/enrollment/schema";
 import { useCreateEnrollment } from "@/hooks/enrollment/useCreateEnrollment";
 import { useEnrollmentByUserId } from "@/hooks/enrollment/useEnrollmentByUserId";
-import { useActiveUser } from "@/hooks/UseActiveUser";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Text, TouchableHighlight, View } from "react-native";
@@ -97,10 +97,7 @@ const CreateEnrollment = () => {
 
   return (
     <View className="mt-4">
-      <BackButton />
-      <Text className="text-white pl-4 text-2xl font-bold">
-        Cursos disponibles
-      </Text>
+      <HeaderTitle title="Cursos Disponibles" />
       <DataLoader query={coursesQuery} emptyMessage="No hay cursos disponibles">
         {/* TODO: fix this filter for something better */}
         {(data) =>

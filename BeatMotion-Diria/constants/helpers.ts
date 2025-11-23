@@ -5,11 +5,13 @@ const statusTranslations: { [key: string]: string } = {
   pending: "Pendiente",
   approved: "Aprobada",
   rejected: "Rechazada",
-  ok: "Pago realizado",
-  late: "Pago atrasado",
+  ok: "Realizado",
+  late: "Atrasado",
 };
 
 const getEnrollmentColor = (status: string) => {
+  if (!status) return "text-gray-100";
+
   switch (status) {
     case "pending":
       return "text-yellow-400";
@@ -38,4 +40,20 @@ const formatCurrency = (value: number, currency?: string) => {
   }
 };
 
-export { capitalize, formatCurrency, getEnrollmentColor, statusTranslations };
+const formatDate = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-CR");
+  } catch (error) {
+    console.error("No se pudo formatear la fecha:", error);
+    return dateString;
+  }
+};
+
+export {
+  capitalize,
+  formatCurrency,
+  formatDate,
+  getEnrollmentColor,
+  statusTranslations,
+};

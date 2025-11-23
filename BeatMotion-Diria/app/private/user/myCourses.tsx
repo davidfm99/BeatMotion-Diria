@@ -1,7 +1,7 @@
 import DataLoader from "@/components/DataLoader";
 import { getEnrollmentColor, statusTranslations } from "@/constants/helpers";
 import { useCoursesByUserMember } from "@/hooks/courses/useCoursesByUserMember";
-import { useActiveUser } from "@/hooks/UseActiveUser";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useRouter } from "expo-router";
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 

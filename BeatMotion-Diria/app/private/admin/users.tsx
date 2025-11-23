@@ -1,18 +1,11 @@
-import { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { updateDoc, doc, deleteDoc } from "firebase/firestore";
-import { firestore } from "@/firebaseConfig";
-import { useActiveUser } from "@/hooks/UseActiveUser";
-import { useUsers } from "@/hooks/useUsers";
 import DataLoader from "@/components/DataLoader";
+import { firestore } from "@/firebaseConfig";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
+import { useUsers } from "@/hooks/user/useUsers";
+import { useRouter } from "expo-router";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { useEffect } from "react";
+import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
 
 export default function AdminUsersScreen() {
   const { user } = useActiveUser();

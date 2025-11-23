@@ -1,11 +1,11 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { firestore } from "@/firebaseConfig";
 import { collection, getDocs, onSnapshot } from "@firebase/firestore";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Alert } from "react-native";
-import { enrollmentSchema } from "./schema";
 import { useCourses } from "../courses/useCourses";
-import { useUsers } from "../useUsers";
+import { useUsers } from "../user/useUsers";
+import { enrollmentSchema } from "./schema";
 
 export const useEnrollments = () => {
   const queryClient = useQueryClient();

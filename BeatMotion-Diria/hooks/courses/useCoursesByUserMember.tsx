@@ -6,15 +6,14 @@ import {
   getDocs,
   where,
 } from "@firebase/firestore";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Alert } from "react-native";
 import { useCourseMemberByUser } from "../courseMember/useCourseMemberByUser";
 import { courseSchemaWithMember } from "./schema/courseSchema";
 
 //Bring courses where the user is member
-//TODO add update when a new course is added 
+//TODO add update when a new course is added
 export const useCoursesByUserMember = (uid: string) => {
-  const queryClient = useQueryClient();
   const { data: courseMembers } = useCourseMemberByUser(uid);
 
   const getMyCourses = async () => {
@@ -48,7 +47,7 @@ export const useCoursesByUserMember = (uid: string) => {
     queryFn: getMyCourses,
     enabled: !!uid && !!courseMembers,
     refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 1, // 1 minute
+    staleTime: 1000 * 60 * 10, // 1 minute
   });
 
   return query;

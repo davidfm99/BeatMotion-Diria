@@ -3,7 +3,7 @@ import YouTubeVideoPlayer from "@/components/YoutubeVideoPlayer";
 import { getEnrollmentColor, statusTranslations } from "@/constants/helpers";
 import { useClassesByCourseId } from "@/hooks/classes/useClassesByCourseId";
 import { useCourseDetail } from "@/hooks/courses/useCourseDetail";
-import { useActiveUser } from "@/hooks/UseActiveUser";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -19,8 +19,6 @@ const CourseDetail = () => {
     activeUser?.uid || "",
     courseId as string
   );
-
-  console.log(classesQuery.data);
 
   const toggleClassOpen = (classId: string) => {
     setClassesOpen((prev) => {

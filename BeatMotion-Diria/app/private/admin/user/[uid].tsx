@@ -1,21 +1,21 @@
-import { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Image,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-} from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
-import { doc, updateDoc } from "firebase/firestore";
-import { firestore } from "@/firebaseConfig";
-import { Picker } from "@react-native-picker/picker";
-import { useUserInfo } from "@/hooks/useUserInfo";
 import DataLoader from "@/components/DataLoader";
 import { capitalize } from "@/constants/helpers";
 import { ProfileAdminValidationSchema } from "@/constants/validationForms";
+import { firestore } from "@/firebaseConfig";
+import { useUserInfo } from "@/hooks/user/useUserInfo";
+import { Picker } from "@react-native-picker/picker";
+import { router, useLocalSearchParams } from "expo-router";
+import { doc, updateDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import * as Yup from "yup";
 
 const USER_ROLES_MAPPER = {
@@ -83,8 +83,6 @@ export default function AdminUserProfile() {
         return acc;
       }, errors);
       setFormErrors(errors);
-      console.error("Validation error:", err);
-      Alert.alert("Error", "Por favor, verifica los campos.");
       return false;
     }
     return true;
