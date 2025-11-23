@@ -8,7 +8,7 @@ import {
   uploadImage,
 } from "@/components/enrollment/askCameraPermision";
 import { useCreateEnrollment } from "@/hooks/enrollment/useCreateEnrollment";
-import { useActiveUser } from "@/hooks/UseActiveUser";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useRouter } from "expo-router";
 import { useEnrollmentByUserId } from "@/hooks/enrollment/useEnrollmentByUserId";
 import { Enrollment as EnrollmentType } from "@/hooks/enrollment/schema";

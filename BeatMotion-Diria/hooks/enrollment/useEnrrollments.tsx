@@ -5,7 +5,7 @@ import { collection, getDocs, onSnapshot } from "@firebase/firestore";
 import { Alert } from "react-native";
 import { enrollmentSchema } from "./schema";
 import { useCourses } from "../courses/useCourses";
-import { useUsers } from "../useUsers";
+import { useUsers } from "../user/useUsers";
 
 export const useEnrollments = () => {
   const queryClient = useQueryClient();

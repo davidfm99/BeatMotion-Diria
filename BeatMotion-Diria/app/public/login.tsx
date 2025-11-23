@@ -24,10 +24,6 @@ const LogIn = () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-
-      Alert.alert("Éxito", "Inicio de sesión exitoso", [
-        { text: "OK", onPress: () => router.push("/private/home") },
-      ]);
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert(
@@ -81,3 +77,5 @@ const LogIn = () => {
 };
 
 export default LogIn;
+
+

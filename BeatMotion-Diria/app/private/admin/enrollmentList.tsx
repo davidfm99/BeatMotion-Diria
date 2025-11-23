@@ -16,7 +16,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { useUpdateEnrollment } from "@/hooks/enrollment/useUpdateEnrollment";
-import { useActiveUser } from "@/hooks/UseActiveUser";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { Enrollment as Enrollmentype } from "@/hooks/enrollment/schema";
 import { serverTimestamp } from "firebase/database";
 
@@ -52,7 +52,7 @@ const EnrollmentList = () => {
     try {
       await updateEnrollment.mutateAsync({
         ...rest,
-        status: action === "accept" ? "accepted" : "rejected",
+        status: action === "accept" ? "approved" : "rejected",
         reviewedBy: activeUser?.uid || null,
         reviewedAt: serverTimestamp(),
       });
