@@ -36,7 +36,10 @@ export default function AdminLayout() {
   return (
     <Stack initialRouteName="coursesMenu">
       {/* Menú principal sin colisiones */}
-      <Stack.Screen name="coursesMenu" options={{ title: "Cursos" }} />
+      <Stack.Screen
+        name="coursesMenu"
+        options={{ title: "Cursos", headerShown: false }}
+      />
 
       {/* Cursos */}
       <Stack.Screen
@@ -85,7 +88,6 @@ export default function AdminLayout() {
         name="notifications/notificationsHistory"
         options={{ headerShown: false }}
       />
-      
     </Stack>
   );
 }

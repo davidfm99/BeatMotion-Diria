@@ -1,9 +1,10 @@
-import { View, Text, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
+import { Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CoursesMenuScreen() {
   return (
-    <View className="flex-1 bg-black px-6 py-10">
+    <SafeAreaView className="flex-1 bg-black px-6 py-10">
       <Text className="text-white text-2xl font-bold mb-6">
         Gestión de cursos y clases
       </Text>
@@ -37,7 +38,6 @@ export default function CoursesMenuScreen() {
           <Text className="text-center font-semibold">Crear Clase</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
-

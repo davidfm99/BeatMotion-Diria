@@ -1,12 +1,20 @@
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
-import { useCourses } from "@/hooks/courses/useCourses";
-import { collection, query, where, onSnapshot, deleteDoc, doc } from "firebase/firestore";
-import { firestore } from "@/firebaseConfig";
 import DataLoader from "@/components/DataLoader";
+import { firestore } from "@/firebaseConfig";
+import { useCourses } from "@/hooks/courses/useCourses";
+import { Ionicons } from "@expo/vector-icons";
 import type { Href } from "expo-router";
+import { router } from "expo-router";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type ClassItem = {
   id: string;
@@ -20,8 +28,12 @@ type ClassItem = {
 
 export default function CoursesMenuScreen() {
   const coursesQuery = useCourses();
-  const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
-  const [classesByCourse, setClassesByCourse] = useState<Record<string, ClassItem[]>>({});
+  const [expandedCourses, setExpandedCourses] = useState<Set<string>>(
+    new Set()
+  );
+  const [classesByCourse, setClassesByCourse] = useState<
+    Record<string, ClassItem[]>
+  >({});
 
   useEffect(() => {
     if (!coursesQuery.data) return;
@@ -90,39 +102,33 @@ export default function CoursesMenuScreen() {
   };
 
   const handleDeleteClass = (classId: string, className: string) => {
-    Alert.alert(
-      "Eliminar clase",
-      `¿Estás seguro de eliminar "${className}"?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteDoc(doc(firestore, "classes", classId));
-              Alert.alert("Éxito", "Clase eliminada correctamente");
-            } catch (error) {
-              console.error(error);
-              Alert.alert("Error", "No se pudo eliminar la clase");
-            }
-          },
+    Alert.alert("Eliminar clase", `¿Estás seguro de eliminar "${className}"?`, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Eliminar",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await deleteDoc(doc(firestore, "classes", classId));
+            Alert.alert("Éxito", "Clase eliminada correctamente");
+          } catch (error) {
+            console.error(error);
+            Alert.alert("Error", "No se pudo eliminar la clase");
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
-    <View className="flex-1 bg-black">
+    <SafeAreaView className="flex-1 bg-black">
       {/* Header */}
       <View className="px-6 pt-10 pb-4 flex-row items-center justify-between">
         <View className="flex-1">
           <Text className="text-white text-2xl font-bold">
             Gestión de cursos
           </Text>
-          <Text className="text-gray-400 text-sm mt-1">
-            Cursos y clases
-          </Text>
+          <Text className="text-gray-400 text-sm mt-1">Cursos y clases</Text>
         </View>
         <TouchableOpacity
           className="bg-gray-900 rounded-full p-3"
@@ -180,7 +186,8 @@ export default function CoursesMenuScreen() {
                           {course.title}
                         </Text>
                         <Text className="text-gray-400 text-xs mt-1">
-                          {course.teacher} • {course.level} • {classes.length} clase(s)
+                          {course.teacher} • {course.level} • {classes.length}{" "}
+                          clase(s)
                         </Text>
                       </View>
                       <View className="flex-row gap-2">
@@ -193,13 +200,23 @@ export default function CoursesMenuScreen() {
                             } as Href)
                           }
                         >
-                          <Ionicons name="create-outline" size={18} color="#40E0D0" />
+                          <Ionicons
+                            name="create-outline"
+                            size={18}
+                            color="#40E0D0"
+                          />
                         </TouchableOpacity>
                         <TouchableOpacity
                           className="bg-gray-800 rounded-full p-2"
-                          onPress={() => handleDeleteCourse(course.id, course.title)}
+                          onPress={() =>
+                            handleDeleteCourse(course.id, course.title)
+                          }
                         >
-                          <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                          <Ionicons
+                            name="trash-outline"
+                            size={18}
+                            color="#ef4444"
+                          />
                         </TouchableOpacity>
                         <Ionicons
                           name={isExpanded ? "chevron-up" : "chevron-down"}
@@ -246,10 +263,13 @@ export default function CoursesMenuScreen() {
                               </View>
                               <View className="flex-1">
                                 <Text className="text-white text-sm">
-                                  {classItem.title || classItem.date || "Sin título"}
+                                  {classItem.title ||
+                                    classItem.date ||
+                                    "Sin título"}
                                 </Text>
                                 <Text className="text-gray-500 text-xs mt-0.5">
-                                  {classItem.date} • {classItem.startTime}-{classItem.endTime}
+                                  {classItem.date} • {classItem.startTime}-
+                                  {classItem.endTime}
                                   {classItem.room && ` • ${classItem.room}`}
                                 </Text>
                               </View>
@@ -263,18 +283,28 @@ export default function CoursesMenuScreen() {
                                     } as Href)
                                   }
                                 >
-                                  <Ionicons name="create-outline" size={16} color="#40E0D0" />
+                                  <Ionicons
+                                    name="create-outline"
+                                    size={16}
+                                    color="#40E0D0"
+                                  />
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                   className="bg-gray-800 rounded-full p-1.5"
                                   onPress={() =>
                                     handleDeleteClass(
                                       classItem.id,
-                                      classItem.title || classItem.date || "esta clase"
+                                      classItem.title ||
+                                        classItem.date ||
+                                        "esta clase"
                                     )
                                   }
                                 >
-                                  <Ionicons name="trash-outline" size={16} color="#ef4444" />
+                                  <Ionicons
+                                    name="trash-outline"
+                                    size={16}
+                                    color="#ef4444"
+                                  />
                                 </TouchableOpacity>
                               </View>
                             </View>
@@ -289,6 +319,6 @@ export default function CoursesMenuScreen() {
           </ScrollView>
         )}
       </DataLoader>
-    </View>
+    </SafeAreaView>
   );
 }
