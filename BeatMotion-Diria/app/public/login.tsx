@@ -1,14 +1,15 @@
-import { useActiveUser } from "@/hooks/user/UseActiveUser";
+﻿import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useRouter } from "expo-router";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Button,
+  Image,
   Text,
   TextInput,
   TouchableHighlight,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -35,41 +36,72 @@ const LogIn = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 justify-center items-center p-4 w-full">
+    <SafeAreaView className="flex-1 justify-center items-center px-5 bg-black w-full">
       {isLoading ? (
         <ActivityIndicator size="large" color="#40E0D0" className="mb-4" />
       ) : (
-        <View className="bg-white p-4 rounded-lg gap-8 w-72">
-          <Text className="text-xl font-bold text-primary">Iniciar sesión</Text>
-          <TextInput
-            placeholder="Email"
-            className="border border-gray-100 p-2 rounded text-black placeholder:text-gray-400"
-            value={email}
-            onChangeText={setEmail}
+        <View className="w-full max-w-md gap-6 items-center">
+          <Image
+            source={require("../../assets/images/LogoDiria.jpg")}
+            className="w-30 h-80"
+            resizeMode="contain"
           />
-          <TextInput
-            placeholder="Contraseña"
-            value={password}
-            className="border border-gray-100 p-2 rounded text-black placeholder:text-gray-400"
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-          <View className="flex-col gap-3">
-            <TouchableHighlight
-              onPress={() => router.push("/public/resetPassword")}
+
+          <View className="bg-gray-900 w-full rounded-3xl p-7 gap-5 shadow-lg border border-gray-800">
+            <View className="gap-1">
+              <Text className="text-2xl font-bold text-white">Iniciar sesión</Text>
+              <Text className="text-gray-400 text-sm">
+                Accede con tu correo y contraseña
+              </Text>
+            </View>
+            <TextInput
+              placeholder="Email"
+              className="border border-gray-800 bg-gray-950 text-white rounded-xl px-4 py-3 placeholder:text-gray-500"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <TextInput
+              placeholder="Contraseña"
+              value={password}
+              className="border border-gray-800 bg-gray-950 text-white rounded-xl px-4 py-3 placeholder:text-gray-500"
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+
+            <TouchableOpacity
+              className="bg-emerald-400 rounded-xl py-3 active:opacity-80"
+              onPress={handleLogin}
             >
-              <Text className="text-sm text-secondary underline">
+              <Text className="text-center font-semibold text-black">Ingresar</Text>
+            </TouchableOpacity>
+
+            <TouchableHighlight onPress={() => router.push("/public/resetPassword")}>
+              <Text className="text-sm text-blue-400 underline">
                 ¿Olvidaste tu contraseña?
               </Text>
             </TouchableHighlight>
-            <TouchableHighlight onPress={() => router.push("/public/signIn")}>
-              <Text className="text-sm text-secondary underline">
-                ¿No tienes una cuenta? Regístrate
-              </Text>
-            </TouchableHighlight>
+
+            <View className="gap-2">
+              <Text className="text-sm text-gray-300">¿Aún no tienes una cuenta?</Text>
+              <TouchableOpacity
+                className="bg-emerald-700 rounded-xl py-3 active:opacity-80"
+                onPress={() => router.push("/public/signIn")}
+              >
+                <Text className="text-center font-semibold text-white">
+                  Regístrate
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
-          <Button title="Ingresar" onPress={handleLogin} />
+          <Image
+            source={require("../../assets/images/BeatMotionLogo.png")}
+            className="w-30 h-20 mt-4"
+            resizeMode="contain"
+          />
         </View>
       )}
     </SafeAreaView>
@@ -77,5 +109,3 @@ const LogIn = () => {
 };
 
 export default LogIn;
-
-
