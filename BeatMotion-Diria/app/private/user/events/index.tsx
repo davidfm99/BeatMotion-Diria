@@ -29,6 +29,7 @@ import {
   useEventActiveAttendees,
   useMyEventSignup,
 } from "@/hooks/eventSignups/useEventSignups";
+import { useCancelEventSignup } from "@/hooks/eventSignups/useUpdateEventSignup";
 import { pickEventReceiptImage, uploadEventReceiptImage } from "@/hooks/eventSignups/media";
 
 type Tab = "mes" | "proximos" | "pasados";
@@ -215,6 +216,7 @@ const SignupModal = ({
   const [receiptUri, setReceiptUri] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const createSignup = useCreateEventSignup();
+  const cancelSignup = useCancelEventSignup();
 
   const isVisible = !!event;
   const isMembersOnly = event ? !event.isPublic : false;
@@ -225,6 +227,7 @@ const SignupModal = ({
   const mySignup = useMyEventSignup(event?.id, currentUserId);
   const alreadyRegistered =
     !!mySignup.data && isActiveSignup(mySignup.data.status);
+  const isPending = mySignup.data?.status === "pending";
 
   const { totalAttendees, totalPrice } = computeTotals({
     inviteeCount: event && event.isPublic ? inviteeCount : 0,
@@ -328,9 +331,40 @@ const SignupModal = ({
     !event ||
     isPast ||
     isClosed ||
-    alreadyRegistered ||
+    (alreadyRegistered && !isPending) ||
     createSignup.isLoading ||
     uploading;
+
+  const handleCancel = async () => {
+    if (!event || !mySignup.data || !isPending) return;
+    Alert.alert(
+      "Cancelar registro",
+      "Si es necesario un reembolso, favor contactar al director.",
+      [
+        { text: "No", style: "cancel" },
+        {
+          text: "Si, cancelar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await cancelSignup.mutateAsync({
+                signupId: mySignup.data.id,
+                eventId: event.id,
+                userId: currentUserId,
+              });
+              setInviteeCount(0);
+              setReceiptUri(null);
+              onClose();
+              Alert.alert("Registro cancelado", "Tu registro ha sido cancelado.");
+            } catch (error) {
+              console.error("Error cancelando registro de evento:", error);
+              Alert.alert("Error", "No se pudo cancelar el registro. Intenta de nuevo.");
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <Modal visible={isVisible} animationType="slide" transparent onRequestClose={onClose}>
@@ -420,28 +454,48 @@ const SignupModal = ({
             </View>
           )}
 
-          {alreadyRegistered && (
-            <Text className="text-green-400">
-              Ya te registraste para este evento. (Estado: {mySignup.data?.status})
-            </Text>
+          {alreadyRegistered ? (
+            <View className="gap-2">
+              <Text className="text-green-400">
+                Ya te registraste para este evento. (Estado: {mySignup.data?.status})
+              </Text>
+              {isPending ? (
+                <TouchableOpacity
+                  className="rounded-full px-4 py-3 flex-row items-center justify-center gap-2 bg-red-600"
+                  onPress={handleCancel}
+                  disabled={cancelSignup.isLoading}
+                >
+                  {cancelSignup.isLoading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Icon name="trash-outline" size={18} color="#fff" />
+                  )}
+                  <Text className="text-white font-semibold">Cancelar registro</Text>
+                </TouchableOpacity>
+              ) : (
+                <Text className="text-gray-400 text-sm">
+                  El registro ya fue procesado. Contacta al director si necesitas cambios.
+                </Text>
+              )}
+            </View>
+          ) : (
+            <TouchableOpacity
+              className={`mt-2 rounded-full px-4 py-3 flex-row items-center justify-center gap-2 ${
+                disableSubmit ? "bg-gray-700" : "bg-yellow-400"
+              }`}
+              onPress={handleSubmit}
+              disabled={disableSubmit}
+            >
+              {createSignup.isLoading || uploading ? (
+                <ActivityIndicator color={disableSubmit ? "#ccc" : "#000"} />
+              ) : (
+                <Icon name="checkmark-circle-outline" size={18} color={disableSubmit ? "#ccc" : "#000"} />
+              )}
+              <Text className={disableSubmit ? "text-gray-300 font-semibold" : "text-black font-semibold"}>
+                Registrarme
+              </Text>
+            </TouchableOpacity>
           )}
-
-          <TouchableOpacity
-            className={`mt-2 rounded-full px-4 py-3 flex-row items-center justify-center gap-2 ${
-              disableSubmit ? "bg-gray-700" : "bg-yellow-400"
-            }`}
-            onPress={handleSubmit}
-            disabled={disableSubmit}
-          >
-            {createSignup.isLoading || uploading ? (
-              <ActivityIndicator color={disableSubmit ? "#ccc" : "#000"} />
-            ) : (
-              <Icon name="checkmark-circle-outline" size={18} color={disableSubmit ? "#ccc" : "#000"} />
-            )}
-            <Text className={disableSubmit ? "text-gray-300 font-semibold" : "text-black font-semibold"}>
-              {alreadyRegistered ? "Ya registrado" : "Registrarme"}
-            </Text>
-          </TouchableOpacity>
         </View>
       </View>
     </Modal>
