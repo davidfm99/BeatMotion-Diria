@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import {
   Alert,
+  ActivityIndicator,
+  Linking,
   ScrollView,
   Switch,
   Text,
@@ -19,6 +21,9 @@ import { useUpdateEvent } from "@/hooks/events/useUpdateEvent";
 import { pickEventBanner, uploadEventBanner } from "@/hooks/events/eventMedia";
 import { formatEventCapacity, formatEventDateTime, formatEventPrice } from "@/hooks/events/utils";
 import { useDeleteEvent } from "@/hooks/events/useDeleteEvent";
+import { useEventSignupsByEvent } from "@/hooks/eventSignups/useEventSignups";
+import { useUpdateEventSignupStatus } from "@/hooks/eventSignups/useUpdateEventSignup";
+import { ACTIVE_SIGNUP_STATUSES } from "@/hooks/eventSignups/utils";
 
 const EditEvent = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -26,6 +31,8 @@ const EditEvent = () => {
   const eventQuery = useEventById(id);
   const updateEvent = useUpdateEvent();
   const deleteEvent = useDeleteEvent();
+  const signupsQuery = useEventSignupsByEvent(id);
+  const updateSignupStatus = useUpdateEventSignupStatus();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -101,6 +108,121 @@ const EditEvent = () => {
     } catch (error: any) {
       Alert.alert("Error", error?.message ?? "No se pudo actualizar el evento.");
     }
+  };
+
+  const renderSignups = () => {
+    const signups = signupsQuery.data ?? [];
+    const activeTotal = signups.reduce((sum, s) => {
+      if (!ACTIVE_SIGNUP_STATUSES.includes(s.status as (typeof ACTIVE_SIGNUP_STATUSES)[number])) {
+        return sum;
+      }
+      return sum + Number(s.totalAttendees ?? 0);
+    }, 0);
+
+    const handleReceipt = (url?: string | null) => {
+      if (!url) {
+        Alert.alert("Sin comprobante", "No hay comprobante para esta inscripcion.");
+        return;
+      }
+      Linking.openURL(url).catch(() => Alert.alert("Error", "No se pudo abrir el comprobante."));
+    };
+
+    const handleDecision = async (signupId: string, status: "approved" | "rejected") => {
+      try {
+        await updateSignupStatus.mutateAsync({
+          signupId,
+          eventId: id,
+          status,
+        });
+      } catch (error) {
+        console.error("Error actualizando inscripcion:", error);
+        Alert.alert("Error", "No se pudo actualizar la inscripcion.");
+      }
+    };
+
+    const statusStyles = (status: string) => {
+      switch (status) {
+        case "approved":
+        case "autoApproved":
+          return { bg: "bg-green-800", text: "Aprobado" };
+        case "pending":
+          return { bg: "bg-yellow-700", text: "Pendiente" };
+        case "rejected":
+          return { bg: "bg-red-700", text: "Rechazado" };
+        case "canceled":
+          return { bg: "bg-gray-700", text: "Cancelado" };
+        default:
+          return { bg: "bg-gray-700", text: status };
+      }
+    };
+
+    return (
+      <View className="bg-gray-900 rounded-2xl p-4 gap-3">
+        <View className="flex-row items-center justify-between">
+          <Text className="text-white text-lg font-semibold">Inscripciones</Text>
+          <Text className="text-gray-300">Total personas: {activeTotal}</Text>
+        </View>
+
+        {signups.length === 0 ? (
+          <Text className="text-gray-400">Aun no hay inscripciones.</Text>
+        ) : signupsQuery.isLoading ? (
+          <ActivityIndicator color="#facc15" />
+        ) : (
+          signups.map((signup) => {
+            const status = statusStyles(signup.status);
+            const invitees = Number(signup.inviteeCount ?? 0);
+            const totalPersons = Number(signup.totalAttendees ?? 0);
+            return (
+              <View
+                key={signup.id}
+                className="border border-gray-800 rounded-xl p-3 mb-2 bg-gray-950"
+              >
+                <View className="flex-row justify-between items-center">
+                  <View className="flex-1 pr-3 gap-1">
+                    <Text className="text-white font-semibold">
+                      {signup.userName || "Usuario"}
+                      {invitees > 0 ? ` (+${invitees})` : ""}
+                    </Text>
+                    <Text className="text-gray-400 text-sm">{signup.userEmail}</Text>
+                    <Text className="text-gray-400 text-sm">
+                      Personas: {totalPersons} · Monto: {formatEventPrice(signup.totalPrice)}
+                    </Text>
+                  </View>
+                  <View className={`px-2 py-1 rounded-full ${status.bg}`}>
+                    <Text className="text-white text-xs">{status.text}</Text>
+                  </View>
+                </View>
+
+                <View className="flex-row gap-2 mt-3">
+                  <TouchableOpacity
+                    className="flex-1 bg-gray-800 rounded-full px-3 py-2 items-center"
+                    onPress={() => handleReceipt(signup.receiptUrl)}
+                  >
+                    <Text className="text-white text-sm font-semibold">
+                      {signup.receiptUrl ? "Ver comprobante" : "Sin comprobante"}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="flex-1 bg-green-700 rounded-full px-3 py-2 items-center"
+                    onPress={() => handleDecision(signup.id, "approved")}
+                    disabled={updateSignupStatus.isLoading || signup.status === "approved" || signup.status === "autoApproved"}
+                  >
+                    <Text className="text-white text-sm font-semibold">Aprobar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="flex-1 bg-red-700 rounded-full px-3 py-2 items-center"
+                    onPress={() => handleDecision(signup.id, "rejected")}
+                    disabled={updateSignupStatus.isLoading || signup.status === "rejected"}
+                  >
+                    <Text className="text-white text-sm font-semibold">Rechazar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            );
+          })
+        )}
+      </View>
+    );
   };
 
   return (
@@ -334,6 +456,8 @@ const EditEvent = () => {
             {updateEvent.isLoading ? "Guardando..." : "Guardar cambios"}
           </Text>
         </TouchableOpacity>
+
+        {renderSignups()}
 
         <TouchableOpacity
           className="bg-red-600 rounded-2xl px-4 py-3 items-center"
