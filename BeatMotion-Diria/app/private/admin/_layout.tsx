@@ -37,6 +37,10 @@ export default function AdminLayout() {
     <Stack initialRouteName="coursesMenu">
       {/* Menú principal sin colisiones */}
       <Stack.Screen
+        name="users"
+        options={{ title: "Users", headerShown: false }}
+      />
+      <Stack.Screen
         name="coursesMenu"
         options={{ title: "Cursos", headerShown: false }}
       />
