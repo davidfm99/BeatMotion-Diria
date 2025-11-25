@@ -10,7 +10,7 @@ const timestampSchema = zod
       const parsed = new Date(value);
       return Number.isNaN(parsed.getTime()) ? null : parsed;
     }
-    if (typeof value === "object") {
+    if (typeof value === "object" && value !== null) {
       if (typeof (value as { toDate?: () => Date }).toDate === "function") {
         return (value as { toDate: () => Date }).toDate();
       }

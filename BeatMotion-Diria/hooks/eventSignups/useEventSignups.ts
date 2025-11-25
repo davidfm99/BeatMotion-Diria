@@ -73,21 +73,31 @@ export const fetchMySignupForEvent = async (eventId: string, userId: string) => 
 };
 
 export const fetchActiveAttendeeCount = async (eventId: string) => {
-  const q = query(
-    collectionRef,
-    where("eventId", "==", eventId),
-    where("status", "in", ACTIVE_SIGNUP_STATUSES)
-  );
-  const snapshot = await getDocs(q);
-  const signups = snapshot.docs.map(
-    (doc) =>
-      ({
-        id: doc.id,
-        ...doc.data(),
-      }) as Record<string, unknown>
-  );
-  const parsed = eventSignupCollectionSchema.parse(signups);
-  return sumActiveAttendees(parsed);
+  try {
+    const q = query(
+      collectionRef,
+      where("eventId", "==", eventId),
+      where("status", "in", ACTIVE_SIGNUP_STATUSES)
+    );
+    const snapshot = await getDocs(q);
+    const signups = snapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        }) as Record<string, unknown>
+    );
+    const parsed = eventSignupCollectionSchema.parse(signups);
+    return sumActiveAttendees(parsed);
+  } catch (error: any) {
+    if (error?.code === "permission-denied") {
+      console.warn("Sin permisos para leer inscripciones del evento; usando 0.", error);
+      return 0;
+    }
+    // Gracefully handle other unexpected errors to avoid crashing UI
+    console.warn("No se pudo calcular cupos usados, asumiendo 0.", error);
+    return 0;
+  }
 };
 
 export const useEventSignupsByEvent = (eventId?: string, statuses?: EventSignupStatus[]) =>

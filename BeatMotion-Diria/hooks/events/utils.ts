@@ -7,12 +7,12 @@ export const formatEventPrice = (price: Event["price"]) => {
 };
 
 export const formatEventCapacity = (capacity: Event["capacity"]) => {
-  if (capacity === null) return "Sin límite";
+  if (capacity === null) return "Cupos ilimitados";
   return `Cupos: ${capacity}`;
 };
 
 export const formatEventAudience = (isPublic: boolean) =>
-  isPublic ? "Abierto al público" : "Solo miembros";
+  isPublic ? "Abierto al publico" : "Solo miembros";
 
 export const formatEventDateTime = (date: Date) =>
   date.toLocaleString("es-CR", {

@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Alert } from "react-native";
 import {
+  addDoc,
   collection,
-  doc,
+  getDocs,
   query,
-  runTransaction,
   serverTimestamp,
   where,
 } from "firebase/firestore";
@@ -37,50 +37,45 @@ export const createEventSignup = async (input: CreateEventSignupInput) => {
   const status: EventSignupStatus = input.isFree ? "autoApproved" : "pending";
   const safeInviteeCount = Math.max(0, Math.floor(input.inviteeCount ?? 0));
 
-  const result = await runTransaction(firestore, async (tx) => {
-    // Capacity check when capacity is defined and > 0
-    if (input.capacity && input.capacity > 0) {
-      const activeQuery = query(
-        collectionRef,
-        where("eventId", "==", input.eventId),
-        where("status", "in", ACTIVE_SIGNUP_STATUSES)
-      );
-      const snapshot = await tx.get(activeQuery);
-      const used = snapshot.docs.reduce((sum, docSnap) => {
-        const data = docSnap.data() as { totalAttendees?: number };
-        const attendees = Number(data.totalAttendees ?? 0);
-        return sum + (Number.isFinite(attendees) ? attendees : 0);
-      }, 0);
+  // Capacity guard (best effort without transaction to avoid unsupported query-in-transaction issues)
+  if (input.capacity && input.capacity > 0) {
+    const activeQuery = query(
+      collectionRef,
+      where("eventId", "==", input.eventId),
+      where("status", "in", ACTIVE_SIGNUP_STATUSES)
+    );
+    const snapshot = await getDocs(activeQuery);
+    const used = snapshot.docs.reduce((sum, docSnap) => {
+      const data = docSnap.data() as { totalAttendees?: number };
+      const attendees = Number(data.totalAttendees ?? 0);
+      return sum + (Number.isFinite(attendees) ? attendees : 0);
+    }, 0);
 
-      if (used + totalAttendees > input.capacity) {
-        throw new Error("NO_AVAILABLE_SLOTS");
-      }
+    if (used + totalAttendees > input.capacity) {
+      throw new Error("NO_AVAILABLE_SLOTS");
     }
+  }
 
-    const ref = doc(collectionRef);
-    tx.set(ref, {
-      eventId: input.eventId,
-      userId: input.userId,
-      userName: input.userName,
-      userEmail: input.userEmail,
-      inviteeCount: safeInviteeCount,
-      totalAttendees,
-      pricePerHead,
-      totalPrice,
-      status,
-      receiptUrl: input.receiptUrl ?? null,
-      isFree: input.isFree,
-      isPublic: input.isPublic,
-      reviewedBy: null,
-      reviewedAt: null,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-
-    return { id: ref.id, status };
+  const ref = await addDoc(collectionRef, {
+    eventId: input.eventId,
+    userId: input.userId,
+    userName: input.userName,
+    userEmail: input.userEmail,
+    inviteeCount: safeInviteeCount,
+    totalAttendees,
+    pricePerHead,
+    totalPrice,
+    status,
+    receiptUrl: input.receiptUrl ?? null,
+    isFree: input.isFree,
+    isPublic: input.isPublic,
+    reviewedBy: null,
+    reviewedAt: null,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
   });
 
-  return result;
+  return { id: ref.id, status };
 };
 
 export const useCreateEventSignup = () => {
