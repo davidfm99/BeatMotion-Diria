@@ -1,7 +1,7 @@
 import DataLoader from "@/components/DataLoader";
 import { firestore } from "@/firebaseConfig";
 import { useCourses } from "@/hooks/courses/useCourses";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Octicons } from "@expo/vector-icons";
 import type { Href } from "expo-router";
 import { router } from "expo-router";
 import {
@@ -274,6 +274,24 @@ export default function CoursesMenuScreen() {
                                 </Text>
                               </View>
                               <View className="flex-row gap-2">
+                                <TouchableOpacity
+                                  className="bg-gray-800 rounded-full p-1.5"
+                                  onPress={async () => {
+                                    router.push({
+                                      pathname: `/private/admin/attendance/[courseId]/[classId]/attendance`,
+                                      params: {
+                                        courseId: course.id,
+                                        classId: classItem.id,
+                                      },
+                                    } as Href);
+                                  }}
+                                >
+                                  <Octicons
+                                    name="tasklist"
+                                    size={16}
+                                    color="#40E0D0"
+                                  />
+                                </TouchableOpacity>
                                 <TouchableOpacity
                                   className="bg-gray-800 rounded-full p-1.5"
                                   onPress={() =>

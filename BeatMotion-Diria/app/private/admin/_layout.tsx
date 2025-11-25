@@ -68,6 +68,10 @@ export default function AdminLayout() {
         name="classes/[id]"
         options={{ title: "Editar clase", headerShown: false }}
       />
+      <Stack.Screen
+        name="attendance/[courseId]/[classId]/attendance"
+        options={{ headerShown: false }}
+      />
 
       {/* Matriculas */}
       <Stack.Screen
