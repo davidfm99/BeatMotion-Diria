@@ -227,7 +227,10 @@ const SignupModal = ({
   const mySignup = useMyEventSignup(event?.id, currentUserId);
   const alreadyRegistered =
     !!mySignup.data && isActiveSignup(mySignup.data.status);
-  const isPending = mySignup.data?.status === "pending";
+  const status = mySignup.data?.status;
+  const isPending = status === "pending";
+  const isApprovedLike = status === "approved" || status === "autoApproved";
+  const isCancelable = isPending || isApprovedLike;
 
   const { totalAttendees, totalPrice } = computeTotals({
     inviteeCount: event && event.isPublic ? inviteeCount : 0,
@@ -237,6 +240,7 @@ const SignupModal = ({
   const capacity = event?.capacity ?? null;
   const used = activeAttendees.data ?? 0;
   const available = capacity ? Math.max(capacity - used, 0) : null;
+  const isFull = capacity !== null && available !== null && available <= 0;
   const isPast = event ? event.datetime < new Date() : false;
   const isClosed = event ? event.status !== "published" : false;
 
@@ -331,12 +335,13 @@ const SignupModal = ({
     !event ||
     isPast ||
     isClosed ||
-    (alreadyRegistered && !isPending) ||
+    isFull ||
+    alreadyRegistered ||
     createSignup.isLoading ||
     uploading;
 
   const handleCancel = async () => {
-    if (!event || !mySignup.data || !isPending) return;
+    if (!event || !mySignup.data || !isCancelable) return;
     Alert.alert(
       "Cancelar registro",
       "Si es necesario un reembolso, favor contactar al director.",
@@ -387,7 +392,9 @@ const SignupModal = ({
               <Text className="text-gray-300">
                 {available === null
                   ? "Cupos ilimitados"
-                  : `Cupos disponibles: ${available}`}
+                  : available > 0
+                  ? `Cupos disponibles: ${available}`
+                  : "Cupos agotados"}
               </Text>
               {isPast && (
                 <Text className="text-red-400">Evento finalizado. No es posible registrarse.</Text>
@@ -459,7 +466,7 @@ const SignupModal = ({
               <Text className="text-green-400">
                 Ya te registraste para este evento. (Estado: {mySignup.data?.status})
               </Text>
-              {isPending ? (
+              {isCancelable ? (
                 <TouchableOpacity
                   className="rounded-full px-4 py-3 flex-row items-center justify-center gap-2 bg-red-600"
                   onPress={handleCancel}
@@ -470,7 +477,9 @@ const SignupModal = ({
                   ) : (
                     <Icon name="trash-outline" size={18} color="#fff" />
                   )}
-                  <Text className="text-white font-semibold">Cancelar registro</Text>
+                  <Text className="text-white font-semibold">
+                    {isApprovedLike ? "Cancelar y contactar por reembolso" : "Cancelar registro"}
+                  </Text>
                 </TouchableOpacity>
               ) : (
                 <Text className="text-gray-400 text-sm">
@@ -492,7 +501,7 @@ const SignupModal = ({
                 <Icon name="checkmark-circle-outline" size={18} color={disableSubmit ? "#ccc" : "#000"} />
               )}
               <Text className={disableSubmit ? "text-gray-300 font-semibold" : "text-black font-semibold"}>
-                Registrarme
+                {isFull ? "Cupos agotados" : "Registrarme"}
               </Text>
             </TouchableOpacity>
           )}
