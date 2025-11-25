@@ -22,7 +22,7 @@ const NotificationsHistory = () => {
           data={data}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <View className="gap-2 p-2.5 bg-gray-800 rounded-xl">
+            <View className="gap-2 p-2.5 bg-gray-800 rounded-xl mb-2">
               <View className="flex-row gap-2 items-center">
                 <SimpleLineIcons
                   name="envelope-open"

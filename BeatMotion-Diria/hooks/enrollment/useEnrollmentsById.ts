@@ -1,10 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
 import { firestore } from "@/firebaseConfig";
+import { useQuery } from "@tanstack/react-query";
 import { doc, getDoc } from "firebase/firestore";
 import { Alert } from "react-native";
-import { enrollmentSchema } from "./schema";
 import { useCourses } from "../courses/useCourses";
-import { useUsers } from "../useUsers";
+import { useUsers } from "../user/useUsers";
+import { enrollmentSchema } from "./schema";
 
 export const useEnrollmentById = (id?: string) => {
   const { data: courses } = useCourses();

@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, FlatList, Alert } from "react-native";
-import {
-  getFirestore,
-  collection,
-  query,
-  onSnapshot,
-  where,
-  orderBy,
-  doc,
-  deleteDoc,
-} from "firebase/firestore";
 import { router } from "expo-router";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getFirestore,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ClassesBrowserScreen() {
   const [courses, setCourses] = useState<any[]>([]);
@@ -82,7 +83,7 @@ export default function ClassesBrowserScreen() {
   };
 
   return (
-    <View className="flex-1 bg-black px-6 py-10">
+    <SafeAreaView className="flex-1 bg-black px-6 py-10">
       <Text className="text-white text-2xl font-bold mb-6">Ver clases</Text>
 
       {courses.length === 0 ? (
@@ -173,6 +174,6 @@ export default function ClassesBrowserScreen() {
       >
         <Text className="text-center text-white font-semibold">Volver</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }

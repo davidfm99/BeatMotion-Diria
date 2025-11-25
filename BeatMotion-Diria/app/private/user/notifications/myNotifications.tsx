@@ -31,11 +31,12 @@ const MyNotifications = () => {
         {(data) => (
           <FlatList
             data={data}
+            contentContainerStyle={{ paddingHorizontal: 5 }}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator
             renderItem={({ item }) => (
               <Pressable
-                className={`px-4 py-2 ${
+                className={`px-4 py-2 mb-3 ${
                   item.read ? "bg-gray-900" : "bg-gray-700"
                 } active:bg-secondary rounded-xl`}
                 onPress={() => handleMarkNotification(item)}
@@ -57,7 +58,6 @@ const MyNotifications = () => {
                 </Text>
               </Pressable>
             )}
-            ItemSeparatorComponent={() => <hr color="" />}
           />
         )}
       </DataLoader>

@@ -86,7 +86,6 @@ const CreateEnrollment = () => {
         },
       });
     } catch (error: any) {
-      console.log("Error uploading enrollment:", error);
       alert("Error al subir la matricula. Por favor, intenta de nuevo.");
       setPaymentInProcess(false);
       return;
