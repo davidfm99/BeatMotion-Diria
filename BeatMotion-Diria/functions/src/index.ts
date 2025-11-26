@@ -7,11 +7,19 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
+import { Timestamp } from "firebase-admin/firestore";
 import { setGlobalOptions } from "firebase-functions";
-import { HttpsError, onCall } from "firebase-functions/https";
+import { onCall } from "firebase-functions/https";
+import * as logger from "firebase-functions/logger";
+import { onSchedule } from "firebase-functions/scheduler";
 import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 
 import * as admin from "firebase-admin";
+
+import {
+  sendOverdueNotification,
+  sendPaymentReminderNotification,
+} from "./utils/notifications";
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -45,12 +53,12 @@ export const onEnrollmentAccepted = onDocumentUpdated(
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         })
         .then(() => {
-          console.log(
+          logger.info(
             `CourseMember document created for enrollment ID: ${enrollmentId}`
           );
         })
         .catch((error) => {
-          console.error(
+          logger.error(
             `Error creating CourseMember document for enrollment ID: ${enrollmentId}`,
             error
           );
@@ -119,10 +127,90 @@ export const sendExpoPushNotification = onCall(async (data) => {
     }
     return { success: tokens.length, failed: 0 };
   } catch (er: any) {
-    console.error("Error sending push notification", er);
-    throw new HttpsError("internal", "Error sending push notification");
+    logger.error("Error sending push notification", er);
   }
 });
+
+export const checkPaymentStatus = onSchedule(
+  {
+    schedule: "0 12 * * *", //every day at 12pm
+    timeZone: "America/Costa_Rica",
+  },
+  async (event) => {
+    logger.info("Check Payment Status function is starting process", {
+      scheduledTime: event.scheduleTime,
+    });
+    const today = new Date();
+    const sevenDaysFromNow = new Date();
+    sevenDaysFromNow.setDate(today.getDate() + 7);
+    const courseMembersSnapshot = await db.collection("courseMember").get();
+
+    if (courseMembersSnapshot.empty) {
+      logger.info("No members found. courseMember is empty");
+      return;
+    }
+    const updates: Promise<any>[] = [];
+    const notifications: Promise<any>[] = [];
+    courseMembersSnapshot.docs.forEach(async (member) => {
+      courseMembersSnapshot.forEach((doc) => {
+        const memberData = doc.data();
+        const userId = doc.id;
+
+        if (memberData.nextPaymentDate instanceof Timestamp) {
+          const paymentDate: Date = memberData.nextPaymentDate.toDate();
+
+          //look if the payment is in the next 7 days so the user will be notice that the payment is pending
+          if (
+            paymentDate > today &&
+            paymentDate <= sevenDaysFromNow &&
+            memberData.paymentStatus !== "pending"
+          ) {
+            logger.info(
+              `User ${userId} has a next payment: ${paymentDate.toISOString()}`
+            );
+
+            updates.push(
+              doc.ref.update({
+                paymentStatus: "pending",
+                updatedAt: Timestamp.now(),
+              })
+            );
+
+            notifications.push(
+              sendPaymentReminderNotification(userId, paymentDate, db)
+            );
+          } else if (
+            //look if the payment is already late after the next payment date
+            paymentDate < today &&
+            memberData.paymentStatus !== "late"
+          ) {
+            logger.warn(
+              `User ${userId} has an overdue payment: ${paymentDate.toISOString()}`
+            );
+            updates.push(
+              doc.ref.update({
+                paymentStatus: "late",
+                updatedAt: Timestamp.now(),
+              })
+            );
+            notifications.push(
+              sendOverdueNotification(userId, paymentDate, db)
+            );
+          }
+        } else {
+          logger.warn(
+            `User ${userId} does not have a nextPaymentDate valid or the data type has an error.`
+          );
+        }
+      });
+
+      await Promise.all(updates);
+      await Promise.all(notifications); //send notifications
+
+      logger.info("Next payment check function is finished");
+    });
+  }
+);
 
 // For cost control, you can set the maximum number of containers that can be
 // running at the same time. This helps mitigate the impact of unexpected
