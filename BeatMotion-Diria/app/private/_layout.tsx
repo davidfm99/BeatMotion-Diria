@@ -19,6 +19,22 @@ export default function PrivateLayout() {
         name="user/notifications/myNotifications"
         options={{ headerShown: false }}
       />
+      {/* Encuestas */}
+       <Stack.Screen 
+        name="surveys/list" 
+        options={{ 
+          headerShown: false,
+          title: "Encuestas Disponibles" 
+        }} 
+      />
+      <Stack.Screen 
+        name="surveys/take/[surveyId]" 
+        options={{ 
+          headerShown: false,
+          title: "Responder Encuesta",
+          presentation: "card"
+        }} 
+      />
     </Stack>
   );
 }

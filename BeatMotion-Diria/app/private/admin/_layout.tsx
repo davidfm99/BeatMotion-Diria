@@ -96,6 +96,36 @@ export default function AdminLayout() {
         name="notifications/notificationsHistory"
         options={{ headerShown: false }}
       />
+      <Stack.Screen 
+        name="surveys/list" 
+        options={{ 
+          headerShown: false,
+          title: "Gestión de Encuestas" 
+        }} 
+      />
+      {/* Encuestas*/}
+      <Stack.Screen 
+        name="surveys/create" 
+        options={{ 
+          headerShown: false,
+          title: "Nueva Encuesta",
+          presentation: "modal" 
+        }} 
+      />
+      <Stack.Screen 
+        name="surveys/edit/[surveyId]" 
+        options={{ 
+          headerShown: false,
+          title: "Editar Encuesta" 
+        }} 
+      />
+      <Stack.Screen 
+        name="surveys/results/[surveyId]" 
+        options={{ 
+          headerShown: false,
+          title: "Resultados de Encuesta" 
+        }} 
+      />
     </Stack>
   );
 }

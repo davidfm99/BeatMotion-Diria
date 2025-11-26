@@ -15,6 +15,10 @@ const HomeAdmin = () => {
     router.push("/private/admin/Dashboard" as Href); 
   };
 
+  const handleOpenSurveys = () => {
+    router.push("/private/admin/surveys/list" as Href);
+  };
+
   return (
     <View className="gap-6">
       {/* Botón para la tienda */}
@@ -34,6 +38,16 @@ const HomeAdmin = () => {
         <Icon name="analytics-outline" size={20} color="#FFFFFF" />
         <Text className="text-white font-semibold">Ver Dashboard</Text>
       </TouchableOpacity>
+
+      {/* Botón para gestionar encuestas */}
+      <TouchableOpacity
+        className="bg-primary rounded-full px-4 py-3 self-end flex-row items-center gap-2 active:opacity-80"
+        onPress={handleOpenSurveys}
+      >
+        <Icon name="bar-chart-outline" size={20} color="#000000" />
+        <Text className="text-black font-semibold">Encuestas</Text>
+      </TouchableOpacity>
+
 
       {/* Componente existente */}
       <EnrollmentAvailable />
