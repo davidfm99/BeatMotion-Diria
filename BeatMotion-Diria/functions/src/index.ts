@@ -20,6 +20,7 @@ import {
   sendOverdueNotification,
   sendPaymentReminderNotification,
 } from "./utils/notifications";
+import { getNextPaymentDate } from "./utils/payment";
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -33,10 +34,6 @@ export const onEnrollmentAccepted = onDocumentUpdated(
     const enrollmentId = event.params.enrollmentId;
 
     if (!before || !after) return;
-
-    const oneMonthLater = admin.firestore.Timestamp.fromDate(
-      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-    );
     if (before.status !== "approved" && after.status === "approved") {
       await db
         .collection("courseMember")
@@ -47,8 +44,7 @@ export const onEnrollmentAccepted = onDocumentUpdated(
           joinedAt: admin.firestore.FieldValue.serverTimestamp(),
           active: true,
           paymentStatus: "ok", // pending | late | ok
-          attendanceCount: 0,
-          nextPaymentDate: oneMonthLater,
+          nextPaymentDate: getNextPaymentDate(),
           createdBy: after.reviewedBy || null,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         })
@@ -141,8 +137,8 @@ export const checkPaymentStatus = onSchedule(
       scheduledTime: event.scheduleTime,
     });
     const today = new Date();
-    const sevenDaysFromNow = new Date();
-    sevenDaysFromNow.setDate(today.getDate() + 7);
+    const tenDaysFromNow = new Date();
+    tenDaysFromNow.setDate(today.getDate() + 10);
     const courseMembersSnapshot = await db.collection("courseMember").get();
 
     if (courseMembersSnapshot.empty) {
@@ -151,64 +147,80 @@ export const checkPaymentStatus = onSchedule(
     }
     const updates: Promise<any>[] = [];
     const notifications: Promise<any>[] = [];
-    courseMembersSnapshot.docs.forEach(async (member) => {
-      courseMembersSnapshot.forEach((doc) => {
-        const memberData = doc.data();
-        const userId = doc.id;
+    const batch = db.batch();
+    const refNotifications = db.collection("notifications").doc();
 
-        if (memberData.nextPaymentDate instanceof Timestamp) {
-          const paymentDate: Date = memberData.nextPaymentDate.toDate();
+    courseMembersSnapshot.forEach((doc) => {
+      const memberData = doc.data();
+      const userId = doc.id;
 
-          //look if the payment is in the next 7 days so the user will be notice that the payment is pending
-          if (
-            paymentDate > today &&
-            paymentDate <= sevenDaysFromNow &&
-            memberData.paymentStatus !== "pending"
-          ) {
-            logger.info(
-              `User ${userId} has a next payment: ${paymentDate.toISOString()}`
-            );
+      if (memberData.nextPaymentDate instanceof Timestamp) {
+        const paymentDate: Date = memberData.nextPaymentDate.toDate();
 
-            updates.push(
-              doc.ref.update({
-                paymentStatus: "pending",
-                updatedAt: Timestamp.now(),
-              })
-            );
-
-            notifications.push(
-              sendPaymentReminderNotification(userId, paymentDate, db)
-            );
-          } else if (
-            //look if the payment is already late after the next payment date
-            paymentDate < today &&
-            memberData.paymentStatus !== "late"
-          ) {
-            logger.warn(
-              `User ${userId} has an overdue payment: ${paymentDate.toISOString()}`
-            );
-            updates.push(
-              doc.ref.update({
-                paymentStatus: "late",
-                updatedAt: Timestamp.now(),
-              })
-            );
-            notifications.push(
-              sendOverdueNotification(userId, paymentDate, db)
-            );
-          }
-        } else {
-          logger.warn(
-            `User ${userId} does not have a nextPaymentDate valid or the data type has an error.`
+        //look if the payment is in the next 7 days so the user will be notice that the payment is pending
+        if (
+          paymentDate > today &&
+          paymentDate <= tenDaysFromNow &&
+          memberData.paymentStatus !== "pending"
+        ) {
+          logger.info(
+            `User ${userId} has a next payment: ${paymentDate.toISOString()}`
           );
+
+          updates.push(
+            doc.ref.update({
+              paymentStatus: "pending",
+              updatedAt: Timestamp.now(),
+            })
+          );
+
+          notifications.push(
+            sendPaymentReminderNotification(userId, paymentDate, db)
+          );
+          //send notifications to firebase, so the user can see it in the menu in case don't have the user login in a device
+          batch.set(refNotifications, {
+            userId,
+            title: "Tu próximo pago se acerca",
+            content: `Solo un recordatorio: tu pago vence el día ${paymentDate}.`,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            read: false,
+          });
+        } else if (
+          //look if the payment is already late after the next payment date
+          paymentDate < today &&
+          memberData.paymentStatus !== "late"
+        ) {
+          logger.warn(
+            `User ${userId} has an overdue payment: ${paymentDate.toISOString()}`
+          );
+          updates.push(
+            doc.ref.update({
+              paymentStatus: "late",
+              updatedAt: Timestamp.now(),
+            })
+          );
+          notifications.push(sendOverdueNotification(userId, paymentDate, db));
+          //send notifications to firebase, so the user can see it in the menu in case don't have the user login in a device
+          batch.set(refNotifications, {
+            userId,
+            title: "Ooops… pequeño tropiezo",
+            content: `Tu pago está atrasado… pero prometemos no contárselo al resto del grupo.`,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            read: false,
+          });
         }
-      });
-
-      await Promise.all(updates);
-      await Promise.all(notifications); //send notifications
-
-      logger.info("Next payment check function is finished");
+      } else {
+        logger.warn(
+          `User ${userId} does not have a nextPaymentDate valid or the data type has an error.`
+        );
+      }
     });
+
+    await Promise.all(updates);
+    await Promise.all(notifications); //send notifications
+    batch.commit();
+
+    logger.info("Next payment check function is finished");
   }
 );
 
