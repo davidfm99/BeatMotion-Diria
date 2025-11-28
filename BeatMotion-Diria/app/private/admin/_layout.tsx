@@ -59,6 +59,20 @@ export default function AdminLayout() {
         options={{ title: "Editar curso", headerShown: false }}
       />
 
+      {/* Eventos */}
+      <Stack.Screen
+        name="events/index"
+        options={{ title: "Eventos", headerShown: false }}
+      />
+      <Stack.Screen
+        name="events/new"
+        options={{ title: "Nuevo evento", headerShown: false }}
+      />
+      <Stack.Screen
+        name="events/[id]"
+        options={{ title: "Editar evento", headerShown: false }}
+      />
+
       {/* Clases */}
       <Stack.Screen
         name="classes/list"

@@ -15,6 +15,10 @@ const HomeAdmin = () => {
     router.push("/private/admin/Dashboard" as Href); 
   };
 
+  const handleOpenEvents = () => {
+    router.push("/private/admin/events" as Href);
+  };
+
   return (
     <View className="gap-6">
       {/* Botón para la tienda */}
@@ -33,6 +37,14 @@ const HomeAdmin = () => {
       >
         <Icon name="analytics-outline" size={20} color="#FFFFFF" />
         <Text className="text-white font-semibold">Ver Dashboard</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        className="bg-blue-500 rounded-full px-4 py-3 self-end flex-row items-center gap-2 active:opacity-80"
+        onPress={handleOpenEvents}
+      >
+        <Icon name="calendar-outline" size={20} color="#FFFFFF" />
+        <Text className="text-white font-semibold">Eventos</Text>
       </TouchableOpacity>
 
       {/* Componente existente */}
