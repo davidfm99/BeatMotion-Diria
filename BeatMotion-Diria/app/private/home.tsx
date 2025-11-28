@@ -20,7 +20,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View className="flex-1 bg-black px-6 py-12 justify-center">
+      <View className="flex-1 bg-black px-6 py-12">
         {user?.role === "user" && <HomeUser />}
         {user?.role === "admin" && <HomeAdmin />}
 

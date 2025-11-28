@@ -24,7 +24,9 @@ export const sendPaymentReminderNotification = async (
       to: token,
       sound: "default",
       title: "Tu próximo pago se acerca",
-      body: `Solo un recordatorio: tu pago vence el día ${paymentDate}.`,
+      body: `Solo un recordatorio: tu pago vence el proximo ${formatDate(
+        paymentDate
+      )}.`,
     }));
 
     await fetch("https://exp.host/--/api/v2/push/send", {
@@ -81,4 +83,13 @@ export const sendOverdueNotification = async (
   } catch (er: any) {
     logger.error("Error sending push notification", er);
   }
+};
+
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat("es-ES", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(date);
 };

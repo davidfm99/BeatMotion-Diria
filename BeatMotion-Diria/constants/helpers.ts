@@ -13,11 +13,11 @@ const getEnrollmentColor = (status: string) => {
   if (!status) return "text-gray-100";
 
   switch (status) {
-    case "pending":
-      return "text-yellow-400";
     case "approved":
     case "ok":
-      return "text-green-400";
+      return "text-green-500";
+    case "pending":
+      return "text-yellow-400";
     case "rejected":
     case "late":
       return "text-red-400";

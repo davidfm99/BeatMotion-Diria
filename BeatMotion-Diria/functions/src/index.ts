@@ -152,7 +152,7 @@ export const checkPaymentStatus = onSchedule(
 
     courseMembersSnapshot.forEach((doc) => {
       const memberData = doc.data();
-      const userId = doc.id;
+      const userId = memberData.userId;
 
       if (memberData.nextPaymentDate instanceof Timestamp) {
         const paymentDate: Date = memberData.nextPaymentDate.toDate();

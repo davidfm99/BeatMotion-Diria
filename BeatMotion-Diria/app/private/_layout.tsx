@@ -19,6 +19,10 @@ export default function PrivateLayout() {
         name="user/notifications/myNotifications"
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="user/payment/paymentCenter"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

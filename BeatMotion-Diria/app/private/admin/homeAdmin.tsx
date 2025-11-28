@@ -1,45 +1,70 @@
-import { View, TouchableOpacity, Text } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
-import { useRouter } from "expo-router";
+import MenuButton from "@/components/MenuButton";
+import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import type { Href } from "expo-router";
+import { useRouter } from "expo-router";
+import { JSX } from "react";
+import { ScrollView, View } from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
 import EnrollmentAvailable from "../admin/enrollmentsAvailable";
+
+type MenuProps = {
+  icon: JSX.Element;
+  label: string;
+  route: string;
+};
+const MENU: MenuProps[] = [
+  {
+    icon: <FontAwesome5 name="money-check" size={36} color="turquoise" />,
+    label: "Administrar cobros",
+    route: "/private/admin/payment/paymentCenter",
+  },
+  {
+    icon: (
+      <MaterialCommunityIcons
+        name="clipboard-check-outline"
+        size={44}
+        color="turquoise"
+      />
+    ),
+    label: "Encuesta",
+    route: "/private/user/payment/paymentCenter",
+  },
+  {
+    icon: <Icon name="bag-outline" size={44} color="turquoise" />,
+    label: "Gestionar tienda",
+    route: "/private/marketplace/MarketplaceList",
+  },
+  {
+    icon: <Icon name="analytics-outline" size={44} color="turquoise" />,
+    label: "Ver estádisticas",
+    route: "/private/admin/Dashboard",
+  },
+];
 
 const HomeAdmin = () => {
   const router = useRouter();
 
-  const handleOpenMarketplace = () => {
-    router.push("/private/marketplace/MarketplaceList" as Href);
-  };
-
-  const handleOpenDashboard = () => {
-    router.push("/private/admin/Dashboard" as Href); 
+  const handleGoToRoute = (route: string) => {
+    router.push(route as Href);
   };
 
   return (
     <View className="gap-6">
-      {/* Botón para la tienda */}
-      <TouchableOpacity
-        className="bg-yellow-400 rounded-full px-4 py-3 self-end flex-row items-center gap-2 active:opacity-80"
-        onPress={handleOpenMarketplace}
-      >
-        <Icon name="bag-handle-outline" size={20} color="#000000" />
-        <Text className="text-black font-semibold">Gestionar Tienda</Text>
-      </TouchableOpacity>
-
-      {/* Botón para el dashboard */}
-      <TouchableOpacity
-        className="bg-green-500 rounded-full px-4 py-3 self-end flex-row items-center gap-2 active:opacity-80"
-        onPress={handleOpenDashboard}
-      >
-        <Icon name="analytics-outline" size={20} color="#FFFFFF" />
-        <Text className="text-white font-semibold">Ver Dashboard</Text>
-      </TouchableOpacity>
-
-      {/* Componente existente */}
       <EnrollmentAvailable />
+      <ScrollView className="h-96">
+        <View className="flex-row flex-wrap">
+          {MENU.map((item: MenuProps) => (
+            <View key={item.label} className="w-1/2 p-2">
+              <MenuButton
+                {...item}
+                onPress={() => handleGoToRoute(item.route)}
+              />
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 };
 
 export default HomeAdmin;
-
