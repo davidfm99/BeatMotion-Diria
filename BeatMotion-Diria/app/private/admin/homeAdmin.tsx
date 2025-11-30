@@ -1,5 +1,11 @@
 import MenuButton from "@/components/MenuButton";
-import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  FontAwesome5,
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import type { Href } from "expo-router";
 import { useRouter } from "expo-router";
 import { JSX } from "react";
@@ -14,9 +20,19 @@ type MenuProps = {
 };
 const MENU: MenuProps[] = [
   {
-    icon: <FontAwesome5 name="money-check" size={36} color="turquoise" />,
+    icon: <FontAwesome5 name="money-check" size={34} color="turquoise" />,
     label: "Administrar cobros",
     route: "/private/admin/payment/paymentCenter",
+  },
+  {
+    icon: <Ionicons name="people-outline" size={34} color="turquoise" />,
+    label: "Usuarios",
+    route: "/private/admin/users",
+  },
+  {
+    icon: <Ionicons name="book-outline" size={40} color="turquoise" />,
+    label: "Cursos",
+    route: "/private/admin/coursesMenu",
   },
   {
     icon: (
@@ -28,6 +44,16 @@ const MENU: MenuProps[] = [
     ),
     label: "Encuesta",
     route: "/private/user/payment/paymentCenter",
+  },
+  {
+    icon: <MaterialIcons name="event" size={44} color="turquoise" />,
+    label: "Eventos",
+    route: "/private/admin/events",
+  },
+  {
+    icon: <AntDesign name="notification" size={34} color="turquoise" />,
+    label: "Centro notificaciones",
+    route: "/private/admin/notifications/notificationCenter",
   },
   {
     icon: <Icon name="bag-outline" size={44} color="turquoise" />,
@@ -46,10 +72,6 @@ const HomeAdmin = () => {
 
   const handleGoToRoute = (route: string) => {
     router.push(route as Href);
-  };
-
-  const handleOpenEvents = () => {
-    router.push("/private/admin/events" as Href);
   };
 
   return (

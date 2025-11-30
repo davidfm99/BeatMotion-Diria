@@ -26,7 +26,18 @@ const MENU: MenuProps[] = [
       />
     ),
     label: "Encuesta",
-    route: "/private/user/payment/paymentCenter",
+    route: "/private/user/events",
+  },
+  {
+    icon: (
+      <MaterialCommunityIcons
+        name="clipboard-check-outline"
+        size={44}
+        color="turquoise"
+      />
+    ),
+    label: "Eventos",
+    route: "/private/user/events",
   },
   {
     icon: <Icon name="bag-outline" size={44} color="turquoise" />,
