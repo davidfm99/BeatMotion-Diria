@@ -5,7 +5,6 @@ import { PaymentSchema } from "./schema";
 
 export const usePaymentsByUser = (userId?: string) => {
   const fetchPayment = async () => {
-    console.log("user", userId);
     if (!userId) return [];
     try {
       const qRef = query(
@@ -13,7 +12,6 @@ export const usePaymentsByUser = (userId?: string) => {
         where("userId", "==", userId)
       );
       const snapShots = await getDocs(qRef);
-      console.log("Snapshot", qRef);
 
       const payments = snapShots.docs.map((doc) => ({
         id: doc.id,

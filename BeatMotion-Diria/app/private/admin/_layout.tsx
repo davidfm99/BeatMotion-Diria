@@ -96,6 +96,11 @@ export default function AdminLayout() {
         name="notifications/notificationsHistory"
         options={{ headerShown: false }}
       />
+
+      <Stack.Screen
+        name="payment/paymentCenter"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

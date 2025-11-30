@@ -17,6 +17,8 @@ export const PaymentSchema = zod.array(
   })
 );
 
+export type PaymentType = zod.infer<typeof PaymentSchema>[number];
+
 export enum PaymentStatus {
   "approved" = "approved",
   "rejected" = "rejected",

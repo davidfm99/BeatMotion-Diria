@@ -5,7 +5,7 @@ import { Image, Text, TouchableHighlight, View } from "react-native";
 type PhotoCardProps = {
   onClickImage: (img: string) => void;
   showStatusApprovement?: boolean;
-  onConfirmation?: (item: string, status: string) => void;
+  onConfirmation?: (item: any, status: "approve" | "reject") => void;
   children: JSX.Element;
   item: any;
   image: string;

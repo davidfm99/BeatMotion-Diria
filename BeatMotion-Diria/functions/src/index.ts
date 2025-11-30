@@ -63,6 +63,45 @@ export const onEnrollmentAccepted = onDocumentUpdated(
   }
 );
 
+// Triggered when an payment document is updated
+export const onPaymentAccepted = onDocumentUpdated(
+  "payments/{paymentId}",
+  async (event) => {
+    logger.log("onPaymentAccepted starts running");
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+
+    if (!before || !after) return;
+
+    if (before.status !== "approved" && after.status === "approved") {
+      logger.log("A Payment has been accepted", after);
+
+      const courseMemberSnap = await db
+        .collection("courseMember")
+        .where("userId", "==", after.userId)
+        .where("active", "==", true)
+        .get();
+
+      if (!courseMemberSnap.empty) {
+        logger.log("User is member of courses", courseMemberSnap.docs);
+
+        const batch = db.batch();
+
+        courseMemberSnap.docs.forEach((doc) => {
+          batch.update(doc.ref, {
+            paymentStatus: "ok",
+            nextPaymentDate: getNextPaymentDate(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        });
+        await batch.commit();
+      }
+
+      logger.log("onPaymentAccepted finished running successfully");
+    }
+  }
+);
+
 interface NotificationPayload {
   title: string;
   content: string;
@@ -159,9 +198,10 @@ export const checkPaymentStatus = onSchedule(
 
         //look if the payment is in the next 7 days so the user will be notice that the payment is pending
         if (
-          paymentDate > today &&
-          paymentDate <= tenDaysFromNow &&
-          memberData.paymentStatus !== "pending"
+          (paymentDate > today &&
+            paymentDate <= tenDaysFromNow &&
+            memberData.paymentStatus !== "pending",
+          memberData.active)
         ) {
           logger.info(
             `User ${userId} has a next payment: ${paymentDate.toISOString()}`
@@ -187,8 +227,8 @@ export const checkPaymentStatus = onSchedule(
           });
         } else if (
           //look if the payment is already late after the next payment date
-          paymentDate < today &&
-          memberData.paymentStatus !== "late"
+          (paymentDate < today && memberData.paymentStatus !== "late",
+          memberData.active)
         ) {
           logger.warn(
             `User ${userId} has an overdue payment: ${paymentDate.toISOString()}`

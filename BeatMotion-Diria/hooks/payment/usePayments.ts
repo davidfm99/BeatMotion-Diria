@@ -12,7 +12,7 @@ export const usePayments = (status?: "pending" | "approved" | "rejected") => {
         orderBy("createdAt", "desc")
       );
       const snapShots = await getDocs(qRef);
-      const payments = snapShots.docs.forEach((doc) => ({
+      const payments = snapShots.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
