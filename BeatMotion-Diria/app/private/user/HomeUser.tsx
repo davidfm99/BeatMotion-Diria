@@ -46,18 +46,22 @@ const HomeUser = () => {
     router.push(uri as Href);
   };
 
+  const handleOpenEvents = () => {
+    router.push("/private/user/events" as Href);
+  };
+
   return (
     <View>
       <TouchableHighlight
-        className="bg-primary self-end text-gray-950 w-1/2 rounded-full px-3 py-3  justify-center active:opacity-80 mb-8 flex-row gap-2 items-center"
+        className="bg-primary self-end text-gray-950 w-1/2 rounded-full px-3 py-3 justify-center active:opacity-80 mb-8"
         onPress={handleClickEnroll}
       >
-        <>
+        <View className="flex-row gap-2 items-center justify-center">
           <Icon name="add-circle-outline" size={20} />
           <Text className="text-darkText gap-2 font-bold">
             Matricular Curso
           </Text>
-        </>
+        </View>
       </TouchableHighlight>
 
       <MyCourses />

@@ -48,6 +48,10 @@ const HomeAdmin = () => {
     router.push(route as Href);
   };
 
+  const handleOpenEvents = () => {
+    router.push("/private/admin/events" as Href);
+  };
+
   return (
     <View className="gap-6">
       <EnrollmentAvailable />
