@@ -1,4 +1,5 @@
 import DataLoader from "@/components/DataLoader";
+import HeaderTitle from "@/components/headerTitle";
 import { firestore } from "@/firebaseConfig";
 import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useUsers } from "@/hooks/user/useUsers";
@@ -6,6 +7,7 @@ import { useRouter } from "expo-router";
 import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { useEffect } from "react";
 import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AdminUsersScreen() {
   const { user } = useActiveUser();
@@ -93,10 +95,8 @@ export default function AdminUsersScreen() {
   );
 
   return (
-    <View className="flex-1 bg-black px-6 py-10">
-      <Text className="text-white text-2xl font-bold mb-6">
-        Gestión de usuarios
-      </Text>
+    <SafeAreaView className="flex-1 bg-black">
+      <HeaderTitle title="Gestión de usuarios" />
       <DataLoader
         query={usersQuery}
         emptyMessage="No hay usuarios registrados."
@@ -106,9 +106,10 @@ export default function AdminUsersScreen() {
             data={data}
             keyExtractor={(item) => item.id}
             renderItem={renderUser}
+            contentContainerStyle={{ paddingHorizontal: 10 }}
           />
         )}
       </DataLoader>
-    </View>
+    </SafeAreaView>
   );
 }

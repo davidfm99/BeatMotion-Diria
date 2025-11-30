@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Alert } from "react-native";
 import { courseMemberSchema } from "./schema";
 
+// Fetch courses member collection by UserID
 const useCourseMemberByUser = (userId: string) => {
   const getCourseMemberByUser = async () => {
     try {

@@ -104,7 +104,7 @@ const EnrollmentList = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-black">
+    <SafeAreaView className="flex-1 bg-gray-950">
       <HeaderTitle title="Centro de Matriculas" />
       <View className="items-center mb-2">
         <FilterPills
