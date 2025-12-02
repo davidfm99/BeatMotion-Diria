@@ -65,6 +65,11 @@ const MENU: MenuProps[] = [
     label: "Ver estádisticas",
     route: "/private/admin/Dashboard",
   },
+  {
+    icon: <Ionicons name="document-text-outline" size={44} color="turquoise" />,
+    label: "Reportes",
+    route: "/private/admin/reports",
+  },
 ];
 
 const HomeAdmin = () => {

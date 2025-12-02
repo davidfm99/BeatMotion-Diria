@@ -119,6 +119,12 @@ export default function AdminLayout() {
         name="payment/paymentCenter"
         options={{ headerShown: false }}
       />
+
+      {/* Reports */}
+      <Stack.Screen
+        name="reports/index"
+        options={{ title: "Reportes", headerShown: false }}
+      />
     </Stack>
   );
 }
