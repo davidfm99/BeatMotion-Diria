@@ -13,6 +13,8 @@ import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Text, TouchableHighlight, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 const INITIAL_PRICE = 20000;
@@ -95,7 +97,7 @@ const CreateEnrollment = () => {
   };
 
   return (
-    <View className="mt-4">
+    <SafeAreaView>
       <HeaderTitle title="Cursos Disponibles" />
       <DataLoader query={coursesQuery} emptyMessage="No hay cursos disponibles">
         {/* TODO: fix this filter for something better */}
@@ -114,8 +116,7 @@ const CreateEnrollment = () => {
                       </Text>
                       <Text className="text-gray-500">{course.level}</Text>
                       <Text className="text-gray-500">
-                        {capitalize(course.day || "")}-{" "}
-                        {new Date(course.startDate || "").toLocaleDateString()}
+                        {capitalize(course.day || "")}
                       </Text>
                     </View>
                   }
@@ -136,7 +137,7 @@ const CreateEnrollment = () => {
 
         <TouchableHighlight
           onPress={handleImagePick}
-          className="bg-blue-600 rounded-md p-5 mt-10 w-50 self-center text-center"
+          className="bg-blue-600 rounded-lg p-5 mt-10 w-50 self-center text-center"
         >
           <Text className="text-white">Subir comprobante de pago</Text>
         </TouchableHighlight>
@@ -148,10 +149,10 @@ const CreateEnrollment = () => {
         )}
         <TouchableHighlight
           disabled={!image || selectedCourses.length === 0 || paymentInProcess}
-          className="bg-secondary rounded-md p-5 mt-4 w-50 self-center text-center disabled:bg-gray-500 disabled:opacity-50"
+          className="bg-primary rounded-lg p-5 mt-4 w-50 self-center text-center disabled:bg-gray-500 disabled:opacity-50"
           onPress={handleConfirmEnrollment}
         >
-          <Text className="text-white">
+          <Text>
             {paymentInProcess
               ? "Confirmando matrícula..."
               : "Confirmar matrícula"}
@@ -162,7 +163,7 @@ const CreateEnrollment = () => {
           cursos a los que se está matriculando.
         </Text>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 export default CreateEnrollment;

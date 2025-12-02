@@ -82,9 +82,7 @@ const EnrollmentList = () => {
       `Confirmar ${action === "approve" ? "aprobar" : "rechazar"}`,
       `¿Estás seguro de que deseas ${
         action === "approve" ? "aprobar" : "rechazar"
-      } la matrícula de ${enrollment.user?.firstName} ${
-        enrollment.user?.lastName
-      }?`,
+      } la matrícula de ${enrollment.user?.name} ${enrollment.user?.lastName}?`,
       [
         {
           text: "Cancelar",
@@ -132,7 +130,7 @@ const EnrollmentList = () => {
             }
             renderItem={({ item }) => (
               <TouchableHighlight
-                className="bg-gray-900 rounded-3xl overflow-hidden flex-1"
+                className="bg-gray-900 rounded-3xl overflow-hidden flex-1 mb-3"
                 onPress={() => {
                   onClickImage(item.paymentProofImage || "");
                 }}
@@ -203,7 +201,7 @@ const EnrollmentList = () => {
                         }
                       >
                         <Text className=" text-primary">
-                          {item.user?.firstName} {item.user?.lastName}
+                          {item.user?.name} {item.user?.lastName}
                         </Text>
                       </TouchableHighlight>
                     </View>

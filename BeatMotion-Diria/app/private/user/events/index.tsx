@@ -1,4 +1,28 @@
+import DataLoader from "@/components/DataLoader";
+import type { Event } from "@/hooks/events/schema";
+import { useEvents } from "@/hooks/events/useEvents";
 import {
+  formatEventAudience,
+  formatEventCapacity,
+  formatEventDateTime,
+  formatEventPrice,
+} from "@/hooks/events/utils";
+import {
+  pickEventReceiptImage,
+  uploadEventReceiptImage,
+} from "@/hooks/eventSignups/media";
+import { useCreateEventSignup } from "@/hooks/eventSignups/useCreateEventSignup";
+import {
+  useEventActiveAttendees,
+  useMyEventSignup,
+} from "@/hooks/eventSignups/useEventSignups";
+import { useCancelEventSignup } from "@/hooks/eventSignups/useUpdateEventSignup";
+import { computeTotals, isActiveSignup } from "@/hooks/eventSignups/utils";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
+import { useRouter } from "expo-router";
+import { useMemo, useState } from "react";
+import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Image,
@@ -6,31 +30,10 @@ import {
   RefreshControl,
   Text,
   TouchableOpacity,
-  ActivityIndicator,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
-import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
-import DataLoader from "@/components/DataLoader";
-import { useEvents } from "@/hooks/events/useEvents";
-import type { Event } from "@/hooks/events/schema";
-import {
-  formatEventAudience,
-  formatEventCapacity,
-  formatEventDateTime,
-  formatEventPrice,
-} from "@/hooks/events/utils";
-import { useActiveUser } from "@/hooks/user/UseActiveUser";
-import { computeTotals, isActiveSignup } from "@/hooks/eventSignups/utils";
-import { useCreateEventSignup } from "@/hooks/eventSignups/useCreateEventSignup";
-import {
-  useEventActiveAttendees,
-  useMyEventSignup,
-} from "@/hooks/eventSignups/useEventSignups";
-import { useCancelEventSignup } from "@/hooks/eventSignups/useUpdateEventSignup";
-import { pickEventReceiptImage, uploadEventReceiptImage } from "@/hooks/eventSignups/media";
 
 type Tab = "mes" | "proximos" | "pasados";
 
@@ -48,7 +51,8 @@ const EventsList = () => {
   }, [now]);
 
   const categorized = useMemo(() => {
-    if (!eventsQuery.data) return { proximos: [], mes: [], pasados: [] as Event[] };
+    if (!eventsQuery.data)
+      return { proximos: [], mes: [], pasados: [] as Event[] };
     const events = eventsQuery.data as Event[];
     return {
       proximos: events
@@ -101,8 +105,12 @@ const EventsList = () => {
           )}
         </View>
 
-        <Text className="text-gray-300">{formatEventDateTime(item.datetime)}</Text>
-        <Text className="text-gray-300">{item.location || "Sin ubicacion"}</Text>
+        <Text className="text-gray-300">
+          {formatEventDateTime(item.datetime)}
+        </Text>
+        <Text className="text-gray-300">
+          {item.location || "Sin ubicacion"}
+        </Text>
         <Text className="text-gray-300">
           {formatEventPrice(item.price)} - {formatEventCapacity(item.capacity)}
         </Text>
@@ -140,7 +148,11 @@ const EventsList = () => {
             }`}
             onPress={() => setTab(item.key as Tab)}
           >
-            <Text className={active ? "text-black font-semibold" : "text-white text-sm"}>
+            <Text
+              className={
+                active ? "text-black font-semibold" : "text-white text-sm"
+              }
+            >
               {item.label}
             </Text>
           </TouchableOpacity>
@@ -171,7 +183,11 @@ const EventsList = () => {
           <FlatList
             data={categorized[tab]}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32, gap: 12 }}
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingBottom: 32,
+              gap: 12,
+            }}
             renderItem={({ item }) => renderCard(item)}
             refreshControl={
               <RefreshControl
@@ -189,8 +205,8 @@ const EventsList = () => {
         onClose={() => setSelectedEvent(null)}
         currentUserEmail={user?.email ?? ""}
         currentUserName={
-          user?.firstName || user?.lastName
-            ? `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim()
+          user?.name || user?.lastName
+            ? `${user?.name ?? ""} ${user?.lastName ?? ""}`.trim()
             : user?.email ?? "Invitado"
         }
         currentUserId={user?.uid ?? ""}
@@ -252,7 +268,10 @@ const SignupModal = ({
   const handleSubmit = async () => {
     if (!event) return;
     if (!currentUserId) {
-      Alert.alert("Sesion requerida", "Inicia sesion para registrarte al evento.");
+      Alert.alert(
+        "Sesion requerida",
+        "Inicia sesion para registrarte al evento."
+      );
       return;
     }
 
@@ -271,7 +290,10 @@ const SignupModal = ({
     }
 
     if (!isFree && !receiptUri) {
-      Alert.alert("Comprobante requerido", "Sube la imagen del comprobante de pago.");
+      Alert.alert(
+        "Comprobante requerido",
+        "Sube la imagen del comprobante de pago."
+      );
       return;
     }
 
@@ -304,7 +326,9 @@ const SignupModal = ({
       onClose();
       Alert.alert(
         "Registro enviado",
-        isFree ? "Registro confirmado." : "Solicitud enviada. Espera la validacion del pago."
+        isFree
+          ? "Registro confirmado."
+          : "Solicitud enviada. Espera la validacion del pago."
       );
     } catch (error) {
       console.error("Error enviando registro de evento:", error);
@@ -315,11 +339,20 @@ const SignupModal = ({
           "Ya se agotaron los cupos disponibles, pero favor contactar al director de la academia para consultar disponibilidad."
         );
       } else if (message === "missing-receipt-uri") {
-        Alert.alert("Comprobante requerido", "La imagen del comprobante es obligatoria para este evento.");
+        Alert.alert(
+          "Comprobante requerido",
+          "La imagen del comprobante es obligatoria para este evento."
+        );
       } else if (message === "missing-user-id") {
-        Alert.alert("Sesion requerida", "Inicia sesion para registrarte al evento.");
+        Alert.alert(
+          "Sesion requerida",
+          "Inicia sesion para registrarte al evento."
+        );
       } else if (message === "storage-not-initialized") {
-        Alert.alert("Error", "No se pudo acceder al almacenamiento. Intenta de nuevo.");
+        Alert.alert(
+          "Error",
+          "No se pudo acceder al almacenamiento. Intenta de nuevo."
+        );
       } else {
         Alert.alert(
           "Error",
@@ -360,10 +393,16 @@ const SignupModal = ({
               setInviteeCount(0);
               setReceiptUri(null);
               onClose();
-              Alert.alert("Registro cancelado", "Tu registro ha sido cancelado.");
+              Alert.alert(
+                "Registro cancelado",
+                "Tu registro ha sido cancelado."
+              );
             } catch (error) {
               console.error("Error cancelando registro de evento:", error);
-              Alert.alert("Error", "No se pudo cancelar el registro. Intenta de nuevo.");
+              Alert.alert(
+                "Error",
+                "No se pudo cancelar el registro. Intenta de nuevo."
+              );
             }
           },
         },
@@ -372,7 +411,12 @@ const SignupModal = ({
   };
 
   return (
-    <Modal visible={isVisible} animationType="slide" transparent onRequestClose={onClose}>
+    <Modal
+      visible={isVisible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}
+    >
       <View className="flex-1 bg-black/70 justify-end">
         <View className="bg-gray-900 rounded-t-3xl p-5 gap-4">
           <View className="flex-row justify-between items-center">
@@ -386,9 +430,15 @@ const SignupModal = ({
 
           {event && (
             <>
-              <Text className="text-gray-300">{formatEventDateTime(event.datetime)}</Text>
-              <Text className="text-gray-300">{event.location || "Sin ubicacion"}</Text>
-              <Text className="text-gray-300">{formatEventPrice(event.price)}</Text>
+              <Text className="text-gray-300">
+                {formatEventDateTime(event.datetime)}
+              </Text>
+              <Text className="text-gray-300">
+                {event.location || "Sin ubicacion"}
+              </Text>
+              <Text className="text-gray-300">
+                {formatEventPrice(event.price)}
+              </Text>
               <Text className="text-gray-300">
                 {available === null
                   ? "Cupos ilimitados"
@@ -397,10 +447,14 @@ const SignupModal = ({
                   : "Cupos agotados"}
               </Text>
               {isPast && (
-                <Text className="text-red-400">Evento finalizado. No es posible registrarse.</Text>
+                <Text className="text-red-400">
+                  Evento finalizado. No es posible registrarse.
+                </Text>
               )}
               {isClosed && !isPast && (
-                <Text className="text-red-400">El evento no esta publicado.</Text>
+                <Text className="text-red-400">
+                  El evento no esta publicado.
+                </Text>
               )}
             </>
           )}
@@ -415,7 +469,9 @@ const SignupModal = ({
               >
                 <Text className="text-white text-lg">-</Text>
               </TouchableOpacity>
-              <Text className="text-white text-lg">{event?.isPublic ? inviteeCount : 0}</Text>
+              <Text className="text-white text-lg">
+                {event?.isPublic ? inviteeCount : 0}
+              </Text>
               <TouchableOpacity
                 className="px-3 py-2 rounded-full bg-gray-800"
                 onPress={() => setInviteeCount((prev) => prev + 1)}
@@ -425,7 +481,8 @@ const SignupModal = ({
               </TouchableOpacity>
               {isMembersOnly && (
                 <Text className="text-gray-400 flex-1 text-sm">
-                  Este es un evento para miembros de la academia, los cuales deben registrarse por medio de la aplicacion.
+                  Este es un evento para miembros de la academia, los cuales
+                  deben registrarse por medio de la aplicacion.
                 </Text>
               )}
             </View>
@@ -433,10 +490,14 @@ const SignupModal = ({
 
           <View className="gap-1">
             <Text className="text-white">
-              Total personas: <Text className="font-semibold">{totalAttendees}</Text>
+              Total personas:{" "}
+              <Text className="font-semibold">{totalAttendees}</Text>
             </Text>
             <Text className="text-white">
-              Total a pagar: <Text className="font-semibold">{formatEventPrice(totalPrice)}</Text>
+              Total a pagar:{" "}
+              <Text className="font-semibold">
+                {formatEventPrice(totalPrice)}
+              </Text>
             </Text>
           </View>
 
@@ -448,7 +509,9 @@ const SignupModal = ({
                 disabled={uploading}
               >
                 <Text className="text-white font-semibold">
-                  {receiptUri ? "Cambiar comprobante" : "Subir comprobante de pago"}
+                  {receiptUri
+                    ? "Cambiar comprobante"
+                    : "Subir comprobante de pago"}
                 </Text>
               </TouchableOpacity>
               {receiptUri && (
@@ -464,7 +527,8 @@ const SignupModal = ({
           {alreadyRegistered ? (
             <View className="gap-2">
               <Text className="text-green-400">
-                Ya te registraste para este evento. (Estado: {mySignup.data?.status})
+                Ya te registraste para este evento. (Estado:{" "}
+                {mySignup.data?.status})
               </Text>
               {isCancelable ? (
                 <TouchableOpacity
@@ -478,12 +542,15 @@ const SignupModal = ({
                     <Icon name="trash-outline" size={18} color="#fff" />
                   )}
                   <Text className="text-white font-semibold">
-                    {isApprovedLike ? "Cancelar y contactar por reembolso" : "Cancelar registro"}
+                    {isApprovedLike
+                      ? "Cancelar y contactar por reembolso"
+                      : "Cancelar registro"}
                   </Text>
                 </TouchableOpacity>
               ) : (
                 <Text className="text-gray-400 text-sm">
-                  El registro ya fue procesado. Contacta al director si necesitas cambios.
+                  El registro ya fue procesado. Contacta al director si
+                  necesitas cambios.
                 </Text>
               )}
             </View>
@@ -498,9 +565,19 @@ const SignupModal = ({
               {createSignup.isLoading || uploading ? (
                 <ActivityIndicator color={disableSubmit ? "#ccc" : "#000"} />
               ) : (
-                <Icon name="checkmark-circle-outline" size={18} color={disableSubmit ? "#ccc" : "#000"} />
+                <Icon
+                  name="checkmark-circle-outline"
+                  size={18}
+                  color={disableSubmit ? "#ccc" : "#000"}
+                />
               )}
-              <Text className={disableSubmit ? "text-gray-300 font-semibold" : "text-black font-semibold"}>
+              <Text
+                className={
+                  disableSubmit
+                    ? "text-gray-300 font-semibold"
+                    : "text-black font-semibold"
+                }
+              >
                 {isFull ? "Cupos agotados" : "Registrarme"}
               </Text>
             </TouchableOpacity>

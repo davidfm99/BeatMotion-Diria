@@ -65,7 +65,7 @@ const EnrollmentAvailable = () => {
                     {new Date(enrollment.submittedAt).toLocaleDateString()}
                   </Text>
                   <Text className="text-gray-400">
-                    Estudiante: {enrollment?.user?.firstName}{" "}
+                    Estudiante: {enrollment?.user?.name}{" "}
                     {enrollment?.user?.lastName}
                   </Text>
                 </View>

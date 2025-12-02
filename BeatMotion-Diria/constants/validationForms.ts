@@ -17,9 +17,16 @@ export const signInValidationSchema = {
 };
 
 export const ProfileAdminValidationSchema = {
-  name: string().required("El nombre es obligatorio"),
-  lastName: string().required("El apellido es obligatorio"),
-  phone: string().required("El teléfono es obligatorio"),
+  name: string()
+    .required("El nombre es obligatorio")
+    .min(2, "El nombre debe de contener un mínimo de 2 letras"),
+  lastName: string()
+    .required("El apellido es obligatorio")
+    .min(2, "El apellido debe de contener un mínimo de 2 letras"),
+  phone: string()
+    .required("El teléfono es obligatorio")
+    .min(8, "Debe de ingresar un número válido")
+    .max(8, "Debe de ingresar un número válido"),
   role: string()
     .oneOf(["user", "admin", "teacher"], "Rol no válido")
     .required("El rol es obligatorio"),
@@ -28,4 +35,17 @@ export const ProfileAdminValidationSchema = {
 export const DraftValidationSchema = {
   title: string().required("El título es obligatorio"),
   content: string().required("El contenido es obligatorio"),
+};
+
+export const UserProfileValidationSchema = {
+  name: string()
+    .required("El nombre es obligatorio")
+    .min(2, "El nombre debe de contener un mínimo de 2 letras"),
+  lastName: string()
+    .required("El apellido es obligatorio")
+    .min(2, "El apellido debe de contener un mínimo de 2 letras"),
+  phone: string()
+    .required("El teléfono es obligatorio")
+    .min(8, "Debe de ingresar un número válido")
+    .max(8, "Debe de ingresar un número válido"),
 };

@@ -1,6 +1,13 @@
 import DataLoader from "@/components/DataLoader";
+import HeaderTitle from "@/components/headerTitle";
+import VimeoVideoPlayer from "@/components/VimeoVideoPlayer";
 import YouTubeVideoPlayer from "@/components/YoutubeVideoPlayer";
-import { getEnrollmentColor, statusTranslations } from "@/constants/helpers";
+import {
+  getEnrollmentColor,
+  sanitizeVimeoUrl,
+  sanitizeYouTubeUrl,
+  statusTranslations,
+} from "@/constants/helpers";
 import { useAttendanceByUser } from "@/hooks/attendance/useAttendanceByUser";
 import { useClassesByCourseId } from "@/hooks/classes/useClassesByCourseId";
 import { useCourseDetail } from "@/hooks/courses/useCourseDetail";
@@ -40,9 +47,7 @@ const CourseDetail = () => {
       >
         {(course) => (
           <View className="flex-col gap-2">
-            <Text className="text-white text-3xl font-bold mb-2">
-              {course?.title}
-            </Text>
+            <HeaderTitle title={course?.title || ""} />
             <Text className="text-white text-lg mb-2">
               {course?.description}
             </Text>
@@ -130,12 +135,17 @@ const CourseDetail = () => {
                                   key={`${link.title}-${index}`}
                                   className="mt-3"
                                 >
-                                  <YouTubeVideoPlayer
-                                    videoURL={link.url.replace(
-                                      "https://youtu.be/",
-                                      ""
-                                    )}
-                                  />
+                                  {link.platform === "youtube" ? (
+                                    <YouTubeVideoPlayer
+                                      videoURL={
+                                        sanitizeYouTubeUrl(link.url) || ""
+                                      }
+                                    />
+                                  ) : (
+                                    <VimeoVideoPlayer
+                                      videoId={sanitizeVimeoUrl(link.url) || ""}
+                                    />
+                                  )}
                                 </View>
                               ))}
                           </ScrollView>
