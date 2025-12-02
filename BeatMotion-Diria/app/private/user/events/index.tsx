@@ -1,4 +1,6 @@
 import DataLoader from "@/components/DataLoader";
+import FilterPills from "@/components/FilterPills";
+import HeaderTitle from "@/components/headerTitle";
 import type { Event } from "@/hooks/events/schema";
 import { useEvents } from "@/hooks/events/useEvents";
 import {
@@ -34,9 +36,14 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
-import HeaderTitle from "@/components/headerTitle";
 
 type Tab = "mes" | "proximos" | "pasados";
+
+const TABS = [
+  { label: "Próximos", value: "proximos" },
+  { label: "Mes actual", value: "mes" },
+  { label: "Pasados", value: "pasados" },
+];
 
 const EventsList = () => {
   const router = useRouter();
@@ -122,62 +129,30 @@ const EventsList = () => {
           {item.description || "Sin descripcion"}
         </Text>
 
-        <TouchableOpacity
-          className="mt-2 bg-yellow-400 rounded-full px-4 py-3 flex-row items-center justify-center gap-2 active:opacity-80"
-          onPress={() => setSelectedEvent(item)}
-        >
-          <Icon name="heart-outline" size={18} color="#000" />
-          <Text className="text-black font-semibold">Quiero ir!</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
-  const renderTabs = () => (
-    <View className="flex-row gap-2 px-5 pb-4">
-      {[
-        { key: "proximos", label: "Eventos proximos" },
-        { key: "mes", label: "Eventos este mes" },
-        { key: "pasados", label: "Eventos pasados" },
-      ].map((item) => {
-        const active = tab === item.key;
-        return (
+        {tab !== "pasados" && (
           <TouchableOpacity
-            key={item.key}
-            className={`px-3 py-2 rounded-full border ${
-              active ? "bg-yellow-400 border-yellow-400" : "border-gray-700"
-            }`}
-            onPress={() => setTab(item.key as Tab)}
+            className="mt-2 bg-primary rounded-full px-4 py-3 flex-row items-center justify-center gap-2 active:opacity-80"
+            onPress={() => setSelectedEvent(item)}
           >
-            <Text
-              className={
-                active ? "text-black font-semibold" : "text-white text-sm"
-              }
-            >
-              {item.label}
-            </Text>
+            <Icon name="heart-outline" size={18} color="#000" />
+            <Text className="text-black font-semibold">Quiero ir!</Text>
           </TouchableOpacity>
-        );
-      })}
+        )}
+      </View>
     </View>
   );
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      <View className="px-5 pt-6 pb-2 flex-row items-center gap-3">
-        <TouchableOpacity
-          onPress={() => router.push("/private/home")}
-          className="w-10 h-10 rounded-full bg-gray-800 items-center justify-center"
-        >
-          <Icon name="home-outline" size={20} color="#fff" />
-        </TouchableOpacity>
-        <View>
-          <Text className="text-white text-2xl font-bold">Eventos</Text>
-          <Text className="text-gray-400 mt-1">Explora eventos publicados</Text>
-        </View>
-      </View>
+      <HeaderTitle title="Eventos" subtitle="Explora eventos publicados" />
 
-      {renderTabs()}
+      <View className="items-center ">
+        <FilterPills
+          options={TABS}
+          onSelect={(value: string) => setTab(value as Tab)}
+          selected={tab}
+        />
+      </View>
 
       <DataLoader query={eventsQuery} emptyMessage="No hay eventos disponibles">
         {(data, isRefetching, refetch) => (
@@ -558,7 +533,7 @@ const SignupModal = ({
           ) : (
             <TouchableOpacity
               className={`mt-2 rounded-full px-4 py-3 flex-row items-center justify-center gap-2 ${
-                disableSubmit ? "bg-gray-700" : "bg-yellow-400"
+                disableSubmit ? "bg-gray-700" : "bg-primary"
               }`}
               onPress={handleSubmit}
               disabled={disableSubmit}
