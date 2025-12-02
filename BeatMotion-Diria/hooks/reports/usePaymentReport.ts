@@ -79,7 +79,7 @@ export const usePaymentReport = () => {
   };
 
   return useQuery({
-    queryKey: ["reports", "payments"],
+    queryKey: ["reportsPayments"],
     queryFn: fetchPaymentReport,
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
