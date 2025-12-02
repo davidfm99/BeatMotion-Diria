@@ -35,6 +35,8 @@ export const onEnrollmentAccepted = onDocumentUpdated(
 
     if (!before || !after) return;
     if (before.status !== "approved" && after.status === "approved") {
+      const paymentDate: Date = after.submittedAt.toDate();
+
       await db
         .collection("courseMember")
         .add({
@@ -44,7 +46,7 @@ export const onEnrollmentAccepted = onDocumentUpdated(
           joinedAt: admin.firestore.FieldValue.serverTimestamp(),
           active: true,
           paymentStatus: "ok", // pending | late | ok
-          nextPaymentDate: getNextPaymentDate(),
+          nextPaymentDate: getNextPaymentDate(paymentDate),
           createdBy: after.reviewedBy || null,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         })
@@ -87,10 +89,12 @@ export const onPaymentAccepted = onDocumentUpdated(
 
         const batch = db.batch();
 
+        const paymentDate: Date = after.nextPaymentDate.toDate();
+
         courseMemberSnap.docs.forEach((doc) => {
           batch.update(doc.ref, {
             paymentStatus: "ok",
-            nextPaymentDate: getNextPaymentDate(),
+            nextPaymentDate: getNextPaymentDate(paymentDate),
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
           });
         });

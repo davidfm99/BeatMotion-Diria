@@ -1,5 +1,7 @@
+import HeaderTitle from "@/components/headerTitle";
 import { auth } from "@/firebaseConfig";
 import { useActiveUser } from "@/hooks/user/UseActiveUser";
+import { useUserInfo } from "@/hooks/user/useUserInfo";
 import { QueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { signOut, updateProfile } from "firebase/auth";
@@ -16,46 +18,37 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type UserProfile = {
-  firstName: string;
-  lastName: string;
-  phone: string;
-  email: string;
-};
-
 export default function ProfileScreen() {
-  const { user } = useActiveUser();
+  const { user: activeUser } = useActiveUser();
+  const userInfo = useUserInfo(activeUser?.uid as string);
 
-  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [editing, setEditing] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [photoUrl, setPhotoUrl] = useState<string | null>("");
+  const [email, setEmail] = useState<string | null>("");
 
   useEffect(() => {
-    if (user) {
-      setFirstName(user.firstName);
-      setLastName(user.lastName);
-      setPhone(user.phone);
-      setProfile({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        phone: user.phone || "",
-        email: user.email || "",
-      });
+    if (userInfo.data) {
+      console.log(userInfo.data);
+      setFirstName(userInfo.data.name);
+      setLastName(userInfo.data.lastName);
+      setPhone(userInfo.data.phone || "");
+      setPhotoUrl(userInfo.data?.photoURL || null);
+      setEmail(userInfo.data.email);
     }
-  }, [user]);
+  }, [userInfo.data]);
 
   // Guardar cambios del perfil
   const handleSave = async () => {
     try {
-      if (!user) return;
+      if (!activeUser) return;
       const dbFs = getFirestore();
-      await updateDoc(doc(dbFs, "users", user.uid), {
-        firstName: firstName.trim(),
+      await updateDoc(doc(dbFs, "users", activeUser?.uid || ""), {
+        name: firstName.trim(),
         lastName: lastName.trim(),
         phone: phone.trim(),
-        email: user.email ?? "",
       });
 
       try {
@@ -87,11 +80,17 @@ export default function ProfileScreen() {
     }
   };
 
-  const goHome = () => {
-    router.replace("/private/home");
+  const resetState = () => {
+    if (userInfo.data) {
+      setFirstName(userInfo.data.name);
+      setLastName(userInfo.data.lastName);
+      setPhone(userInfo.data.phone || "");
+      setPhotoUrl(userInfo.data?.photoURL || null);
+      setEmail(userInfo.data.email);
+    }
   };
 
-  if (!user || !profile) {
+  if (userInfo.isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-black px-6">
         <Text className="text-white text-lg">Cargando usuario...</Text>
@@ -99,33 +98,28 @@ export default function ProfileScreen() {
     );
   }
 
-  // UI del perfil
   return (
-    <SafeAreaView className="flex-1 bg-black px-4">
-      <ScrollView>
-        <Text className="text-white text-2xl font-bold mb-6">Mi perfil</Text>
+    <SafeAreaView className="flex-1 bg-black">
+      <HeaderTitle title="Mi Perfil" />
 
+      <ScrollView className="px-4">
         <View className="items-center mb-8">
-          {user.photoURL ? (
+          {photoUrl ? (
             <Image
-              source={{ uri: user.photoURL }}
+              source={{ uri: photoUrl }}
               className="w-28 h-28 rounded-full mb-4"
             />
           ) : (
             <View className="w-28 h-28 rounded-full bg-gray-800 mb-4 items-center justify-center">
               <Text className="text-white text-xl">
-                {(
-                  profile.firstName?.[0] ??
-                  user.email?.[0] ??
-                  "U"
-                ).toUpperCase()}
+                {(firstName?.[0] ?? email?.[0] ?? "U").toUpperCase()}
               </Text>
             </View>
           )}
           <Text className="text-white text-xl font-semibold">
-            {`${profile.firstName} ${profile.lastName}`.trim() || "Sin nombre"}
+            {`${firstName} ${lastName}`.trim() || "Sin nombre"}
           </Text>
-          <Text className="text-gray-400">{profile.email || "Sin correo"}</Text>
+          <Text className="text-gray-400">{email || "Sin correo"}</Text>
         </View>
 
         {!editing ? (
@@ -133,15 +127,15 @@ export default function ProfileScreen() {
             <Text className="text-white font-semibold mb-3">Datos</Text>
             <View className="mb-3">
               <Text className="text-gray-400 text-xs mb-1">Nombre</Text>
-              <Text className="text-white">{profile.firstName || "—"}</Text>
+              <Text className="text-white">{firstName || "—"}</Text>
             </View>
             <View className="mb-3">
               <Text className="text-gray-400 text-xs mb-1">Apellido</Text>
-              <Text className="text-white">{profile.lastName || "—"}</Text>
+              <Text className="text-white">{lastName || "—"}</Text>
             </View>
             <View className="mb-3">
               <Text className="text-gray-400 text-xs mb-1">Teléfono</Text>
-              <Text className="text-white">{profile.phone || "—"}</Text>
+              <Text className="text-white">{phone || "—"}</Text>
             </View>
 
             <View className="gap-3 mt-2">
@@ -190,7 +184,7 @@ export default function ProfileScreen() {
 
             <View className="gap-3 mt-2">
               <TouchableOpacity
-                className="bg-white rounded-2xl px-5 py-4 active:opacity-80"
+                className="bg-primary rounded-2xl px-5 py-4 active:opacity-80"
                 onPress={handleSave}
               >
                 <Text className="text-center font-semibold">Guardar</Text>
@@ -199,11 +193,7 @@ export default function ProfileScreen() {
                 className="bg-gray-700 rounded-2xl px-5 py-4 active:opacity-80"
                 onPress={() => {
                   setEditing(false);
-                  if (profile) {
-                    setFirstName(profile.firstName);
-                    setLastName(profile.lastName);
-                    setPhone(profile.phone);
-                  }
+                  resetState();
                 }}
               >
                 <Text className="text-center font-semibold text-white">
@@ -214,25 +204,15 @@ export default function ProfileScreen() {
           </View>
         )}
 
-        <View className="gap-3">
-          <TouchableOpacity
-            className="bg-white rounded-2xl px-5 py-4 active:opacity-80"
-            onPress={goHome}
-            accessibilityLabel="Volver a inicio"
-          >
-            <Text className="text-center font-semibold">Volver</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="bg-red-500 rounded-2xl px-5 py-4 active:opacity-80"
-            onPress={handleLogout}
-            accessibilityLabel="Cerrar sesión"
-          >
-            <Text className="text-center font-semibold text-white">
-              Cerrar sesión
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          className="bg-red-500 rounded-2xl px-5 py-4 active:opacity-80"
+          onPress={handleLogout}
+          accessibilityLabel="Cerrar sesión"
+        >
+          <Text className="text-center font-semibold text-white">
+            Cerrar sesión
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );

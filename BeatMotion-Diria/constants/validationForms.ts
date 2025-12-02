@@ -29,3 +29,5 @@ export const DraftValidationSchema = {
   title: string().required("El título es obligatorio"),
   content: string().required("El contenido es obligatorio"),
 };
+
+

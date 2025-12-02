@@ -1,4 +1,5 @@
 import DataLoader from "@/components/DataLoader";
+import HeaderTitle from "@/components/headerTitle";
 import { capitalize } from "@/constants/helpers";
 import { ProfileAdminValidationSchema } from "@/constants/validationForms";
 import { firestore } from "@/firebaseConfig";
@@ -112,9 +113,7 @@ export default function AdminUserProfile() {
 
   return (
     <ScrollView className="flex-1 bg-black px-6 py-10">
-      <Text className="text-white text-2xl font-bold mb-6">
-        Perfil de usuario
-      </Text>
+      <HeaderTitle title="Perfil de usuario" />
 
       <DataLoader query={userQuery}>
         {(data) => {
