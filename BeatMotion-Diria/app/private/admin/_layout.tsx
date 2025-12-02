@@ -44,8 +44,24 @@ export default function AdminLayout() {
         name="coursesMenu"
         options={{ title: "Cursos", headerShown: false }}
       />
+<Stack.Screen
+  name="user/dataUsersComparison"
+  options={{ title: "Estadisticas",
+    headerShown: true,headerStyle: { backgroundColor: "#000" },
+    headerTintColor: "#fff",
+  }}
+/>
 
-      {/* Cursos */}
+<Stack.Screen
+  name="user/progress"
+  options={{ title: "Estudiante",
+    headerShown: true,headerStyle: { backgroundColor: "#000" },
+    headerTintColor: "#fff",
+  }}
+   />
+
+
+  {/* Cursos */}
       <Stack.Screen
         name="courses/list"
         options={{ title: "Ver cursos", headerShown: false }}
@@ -111,5 +127,7 @@ export default function AdminLayout() {
         options={{ headerShown: false }}
       />
     </Stack>
+
+   
   );
 }

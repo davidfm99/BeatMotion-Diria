@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
 import { getOrCreateUserProgress } from "@/services/userprogress";
+import { useState } from "react";
 
 export default function AdminUsersScreen() {
   const { user } = useActiveUser();
@@ -79,29 +80,35 @@ export default function AdminUsersScreen() {
       </Text>
     </TouchableOpacity>
   );
- 
+
+  const [loadingUser, setLoadingUser] = useState<string | null>(null);
   const renderUser = ({ item }: any) => (
     <View className="bg-gray-900 rounded-2xl p-4 mb-3 relative">
    {user?.role === "admin" && item.role === "user" && (
   <TouchableOpacity
+  disabled={loadingUser === item.uid}  
     onPress={async () => {
-      try {
-        await getOrCreateUserProgress(item.uid);
-        router.push(`/private/admin/user/progress?uid=${item.uid}`);
-      } catch (error) {
-        console.error("Error creando o recuperando progreso:", error);
-        Alert.alert(
-          "Error",
-          "No se pudo acceder al progreso del usuario"
-        );
-      }
-    }}
+     if (loadingUser === item.uid) return; // seguridad extra
+
+    try {
+      setLoadingUser(item.uid);
+
+      await getOrCreateUserProgress(item.uid);
+      router.push(`/private/admin/user/progress?uid=${item.uid}`);
+    } catch (error) {
+      console.error("Error creando o recuperando progreso:", error);
+      Alert.alert("Error", "No se pudo acceder al progreso del usuario");
+    } finally {
+      setLoadingUser(null); 
+    }
+  }}
     style={{
       position: "absolute",
       top: 10,
       right: 10,
       zIndex: 10,
       padding: 6,
+      opacity: loadingUser === item.uid ? 0.4 : 1,
     }}
   >
     <Icon name="analytics" size={28} color="white" />
