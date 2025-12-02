@@ -180,8 +180,7 @@ export const checkPaymentStatus = onSchedule(
       scheduledTime: event.scheduleTime,
     });
     const today = new Date();
-    const tenDaysFromNow = new Date();
-    tenDaysFromNow.setDate(today.getDate() + 10);
+
     const courseMembersSnapshot = await db.collection("courseMember").get();
 
     if (courseMembersSnapshot.empty) {
@@ -199,13 +198,15 @@ export const checkPaymentStatus = onSchedule(
 
       if (memberData.nextPaymentDate instanceof Timestamp) {
         const paymentDate: Date = memberData.nextPaymentDate.toDate();
+        const tenDaysBeforePayment = paymentDate;
+        tenDaysBeforePayment.setDate(today.getDate() - 10);
 
         //look if the payment is in the next 7 days so the user will be notice that the payment is pending
         if (
-          (paymentDate > today &&
-            paymentDate <= tenDaysFromNow &&
-            memberData.paymentStatus !== "pending",
-          memberData.active)
+          paymentDate > today &&
+          today >= tenDaysBeforePayment &&
+          memberData.paymentStatus === "ok" &&
+          memberData.active
         ) {
           logger.info(
             `User ${userId} has a next payment: ${paymentDate.toISOString()}`
@@ -231,8 +232,9 @@ export const checkPaymentStatus = onSchedule(
           });
         } else if (
           //look if the payment is already late after the next payment date
-          (paymentDate < today && memberData.paymentStatus !== "late",
-          memberData.active)
+          paymentDate < today &&
+          memberData.paymentStatus !== "late" &&
+          memberData.active
         ) {
           logger.warn(
             `User ${userId} has an overdue payment: ${paymentDate.toISOString()}`
