@@ -1,7 +1,25 @@
+import HeaderTitle from "@/components/headerTitle";
+import { eventSchema } from "@/constants/validationForms";
+import { pickEventBanner, uploadEventBanner } from "@/hooks/events/eventMedia";
+import { useDeleteEvent } from "@/hooks/events/useDeleteEvent";
+import { useEventById } from "@/hooks/events/useEventById";
+import { useUpdateEvent } from "@/hooks/events/useUpdateEvent";
+import {
+  formatEventCapacity,
+  formatEventDateTime,
+  formatEventPrice,
+} from "@/hooks/events/utils";
+import { useEventSignupsByEvent } from "@/hooks/eventSignups/useEventSignups";
+import { useUpdateEventSignupStatus } from "@/hooks/eventSignups/useUpdateEventSignup";
+import { ACTIVE_SIGNUP_STATUSES } from "@/hooks/eventSignups/utils";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Picker } from "@react-native-picker/picker";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Alert,
   ActivityIndicator,
+  Alert,
+  Image,
   Linking,
   ScrollView,
   Switch,
@@ -9,21 +27,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { Picker } from "@react-native-picker/picker";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEventById } from "@/hooks/events/useEventById";
-import { useUpdateEvent } from "@/hooks/events/useUpdateEvent";
-import { pickEventBanner, uploadEventBanner } from "@/hooks/events/eventMedia";
-import { formatEventCapacity, formatEventDateTime, formatEventPrice } from "@/hooks/events/utils";
-import { useDeleteEvent } from "@/hooks/events/useDeleteEvent";
-import { useEventSignupsByEvent } from "@/hooks/eventSignups/useEventSignups";
-import { useUpdateEventSignupStatus } from "@/hooks/eventSignups/useUpdateEventSignup";
-import { ACTIVE_SIGNUP_STATUSES } from "@/hooks/eventSignups/utils";
 
 const EditEvent = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -49,6 +55,20 @@ const EditEvent = () => {
   const [location, setLocation] = useState("");
   const [bannerUrl, setBannerUrl] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [formError, setFormError] = useState({
+    title: "",
+    description: "",
+    datetime: "",
+    unlimited: "",
+    capacityInput: "",
+    isFree: "",
+    priceInput: "",
+    isPublic: "",
+    status: "",
+    category: "",
+    location: "",
+    bannerUrl: "",
+  });
 
   useEffect(() => {
     if (!eventQuery.data) return;
@@ -83,37 +103,104 @@ const EditEvent = () => {
     }
   };
 
-  const handleSave = async () => {
+  const validation = () => {
     try {
-      if (!id) throw new Error("Evento no encontrado");
-      const capacity = unlimited ? null : Number(capacityInput) || null;
-      const price = isFree ? null : Number(priceInput) || 0;
-
-      await updateEvent.mutateAsync({
-        id,
-        title: title.trim(),
-        description: description.trim(),
-        bannerUrl: bannerUrl || undefined,
-        datetime,
-        capacity,
-        isPublic,
-        price,
-        status,
-        category,
-        location: location.trim(),
+      eventSchema.validateSync(
+        {
+          title,
+          description,
+          datetime,
+          unlimited,
+          capacityInput,
+          isFree,
+          priceInput,
+          isPublic,
+          status,
+          category,
+          location,
+          bannerUrl,
+        },
+        { abortEarly: false }
+      );
+      setFormError({
+        title: "",
+        description: "",
+        datetime: "",
+        unlimited: "",
+        capacityInput: "",
+        isFree: "",
+        priceInput: "",
+        isPublic: "",
+        status: "",
+        category: "",
+        location: "",
+        bannerUrl: "",
       });
+    } catch (err: any) {
+      const errors = {
+        title: "",
+        description: "",
+        datetime: "",
+        unlimited: "",
+        capacityInput: "",
+        isFree: "",
+        priceInput: "",
+        isPublic: "",
+        status: "",
+        category: "",
+        location: "",
+        bannerUrl: "",
+      };
+      err.inner.reduce((acc: any, curr: any) => {
+        acc[curr.path] = curr.message;
+        return acc;
+      }, errors);
+      setFormError(errors);
+      return false;
+    }
+    return true;
+  };
 
-      Alert.alert("Evento", "Evento actualizado correctamente.");
-      router.replace("/private/admin/events");
-    } catch (error: any) {
-      Alert.alert("Error", error?.message ?? "No se pudo actualizar el evento.");
+  const handleSave = async () => {
+    if (validation()) {
+      try {
+        if (!id) throw new Error("Evento no encontrado");
+        const capacity = unlimited ? null : Number(capacityInput) || null;
+        const price = isFree ? null : Number(priceInput) || 0;
+
+        await updateEvent.mutateAsync({
+          id,
+          title: title.trim(),
+          description: description.trim(),
+          bannerUrl: bannerUrl || undefined,
+          datetime,
+          capacity,
+          isPublic,
+          price,
+          status,
+          category,
+          location: location.trim(),
+        });
+
+        Alert.alert("Evento", "Evento actualizado correctamente.");
+        router.replace("/private/admin/events");
+      } catch (error: any) {
+        Alert.alert(
+          "Error",
+          error?.message ?? "No se pudo actualizar el evento."
+        );
+      }
     }
   };
 
   const renderSignups = () => {
     const signups = signupsQuery.data ?? [];
     const activeTotal = signups.reduce((sum, s) => {
-      if (!ACTIVE_SIGNUP_STATUSES.includes(s.status as (typeof ACTIVE_SIGNUP_STATUSES)[number])) {
+      if (
+        !ACTIVE_SIGNUP_STATUSES.includes(
+          s.status as (typeof ACTIVE_SIGNUP_STATUSES)[number]
+        )
+      ) {
         return sum;
       }
       return sum + Number(s.totalAttendees ?? 0);
@@ -121,13 +208,21 @@ const EditEvent = () => {
 
     const handleReceipt = (url?: string | null) => {
       if (!url) {
-        Alert.alert("Sin comprobante", "No hay comprobante para esta inscripcion.");
+        Alert.alert(
+          "Sin comprobante",
+          "No hay comprobante para esta inscripcion."
+        );
         return;
       }
-      Linking.openURL(url).catch(() => Alert.alert("Error", "No se pudo abrir el comprobante."));
+      Linking.openURL(url).catch(() =>
+        Alert.alert("Error", "No se pudo abrir el comprobante.")
+      );
     };
 
-    const handleDecision = async (signupId: string, status: "approved" | "rejected") => {
+    const handleDecision = async (
+      signupId: string,
+      status: "approved" | "rejected"
+    ) => {
       try {
         await updateSignupStatus.mutateAsync({
           signupId,
@@ -159,7 +254,9 @@ const EditEvent = () => {
     return (
       <View className="bg-gray-900 rounded-2xl p-4 gap-3">
         <View className="flex-row items-center justify-between">
-          <Text className="text-white text-lg font-semibold">Inscripciones</Text>
+          <Text className="text-white text-lg font-semibold">
+            Inscripciones
+          </Text>
           <Text className="text-gray-300">Total personas: {activeTotal}</Text>
         </View>
 
@@ -183,9 +280,12 @@ const EditEvent = () => {
                       {signup.userName || "Usuario"}
                       {invitees > 0 ? ` (+${invitees})` : ""}
                     </Text>
-                    <Text className="text-gray-400 text-sm">{signup.userEmail}</Text>
                     <Text className="text-gray-400 text-sm">
-                      Personas: {totalPersons} · Monto: {formatEventPrice(signup.totalPrice)}
+                      {signup.userEmail}
+                    </Text>
+                    <Text className="text-gray-400 text-sm">
+                      Personas: {totalPersons} · Monto:{" "}
+                      {formatEventPrice(signup.totalPrice)}
                     </Text>
                   </View>
                   <View className={`px-2 py-1 rounded-full ${status.bg}`}>
@@ -193,28 +293,41 @@ const EditEvent = () => {
                   </View>
                 </View>
 
-                <View className="flex-row gap-2 mt-3">
+                <View className="flex-col gap-2 mt-3">
                   <TouchableOpacity
-                    className="flex-1 bg-gray-800 rounded-full px-3 py-2 items-center"
+                    className="flex-1 bg-gray-800 rounded-lg px-3 py-2 items-center"
                     onPress={() => handleReceipt(signup.receiptUrl)}
                   >
                     <Text className="text-white text-sm font-semibold">
-                      {signup.receiptUrl ? "Ver comprobante" : "Sin comprobante"}
+                      {signup.receiptUrl
+                        ? "Ver comprobante"
+                        : "Sin comprobante"}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    className="flex-1 bg-green-700 rounded-full px-3 py-2 items-center"
+                    className="flex-1 bg-green-700 rounded-lg px-3 py-2 items-center"
                     onPress={() => handleDecision(signup.id, "approved")}
-                    disabled={updateSignupStatus.isLoading || signup.status === "approved" || signup.status === "autoApproved"}
+                    disabled={
+                      updateSignupStatus.isLoading ||
+                      signup.status === "approved" ||
+                      signup.status === "autoApproved"
+                    }
                   >
-                    <Text className="text-white text-sm font-semibold">Aprobar</Text>
+                    <Text className="text-white text-sm font-semibold">
+                      Aprobar
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    className="flex-1 bg-red-700 rounded-full px-3 py-2 items-center"
+                    className="flex-1 bg-red-700 rounded-lg px-3 py-2 items-center"
                     onPress={() => handleDecision(signup.id, "rejected")}
-                    disabled={updateSignupStatus.isLoading || signup.status === "rejected"}
+                    disabled={
+                      updateSignupStatus.isLoading ||
+                      signup.status === "rejected"
+                    }
                   >
-                    <Text className="text-white text-sm font-semibold">Rechazar</Text>
+                    <Text className="text-white text-sm font-semibold">
+                      Rechazar
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -227,9 +340,11 @@ const EditEvent = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      <ScrollView className="flex-1 px-5 py-6" contentContainerStyle={{ gap: 12, paddingBottom: 32 }}>
-        <Text className="text-white text-2xl font-bold">Editar evento</Text>
-
+      <HeaderTitle title="Editar evento" />
+      <ScrollView
+        className="flex-1 px-5 py-6"
+        contentContainerStyle={{ gap: 12, paddingBottom: 32 }}
+      >
         <View className="gap-2">
           <Text className="text-white font-semibold">Título *</Text>
           <TextInput
@@ -239,6 +354,9 @@ const EditEvent = () => {
             placeholderTextColor="#9CA3AF"
             className="bg-gray-900 text-white rounded-xl px-4 py-3"
           />
+          {formError.title && (
+            <Text className="text-red-500">{formError.title}</Text>
+          )}
         </View>
 
         <View className="gap-2">
@@ -251,6 +369,9 @@ const EditEvent = () => {
             className="bg-gray-900 text-white rounded-xl px-4 py-3"
             multiline
           />
+          {formError.description && (
+            <Text className="text-red-500">{formError.description}</Text>
+          )}
         </View>
 
         <View className="gap-2">
@@ -260,7 +381,9 @@ const EditEvent = () => {
               className="flex-1 bg-gray-900 rounded-xl px-4 py-3 flex-row items-center justify-between active:opacity-80"
               onPress={() => setShowDatePicker(true)}
             >
-              <Text className="text-white">{formatEventDateTime(datetime).split(",")[0]}</Text>
+              <Text className="text-white">
+                {formatEventDateTime(datetime).split(",")[0]}
+              </Text>
               <Icon name="calendar-outline" size={18} color="#fff" />
             </TouchableOpacity>
             <TouchableOpacity
@@ -268,10 +391,17 @@ const EditEvent = () => {
               onPress={() => setShowTimePicker(true)}
             >
               <Text className="text-white">
-                {datetime.toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                {datetime.toLocaleTimeString("es-CR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
               </Text>
               <Icon name="time-outline" size={18} color="#fff" />
             </TouchableOpacity>
+            {formError.datetime && (
+              <Text className="text-red-500">{formError.title}</Text>
+            )}
           </View>
           {showDatePicker && (
             <View className="bg-gray-900 rounded-xl mt-3 p-2">
@@ -326,7 +456,9 @@ const EditEvent = () => {
           <View>
             <Text className="text-white font-semibold">Sin límite</Text>
             <Text className="text-gray-400 text-sm">
-              {formatEventCapacity(unlimited ? null : Number(capacityInput) || null)}
+              {formatEventCapacity(
+                unlimited ? null : Number(capacityInput) || null
+              )}
             </Text>
           </View>
           <Switch value={unlimited} onValueChange={setUnlimited} />
@@ -343,6 +475,9 @@ const EditEvent = () => {
               placeholderTextColor="#9CA3AF"
               className="bg-gray-900 text-white rounded-xl px-4 py-3"
             />
+            {formError.capacityInput && (
+              <Text className="text-red-500">{formError.capacityInput}</Text>
+            )}
           </View>
         )}
 
@@ -368,7 +503,9 @@ const EditEvent = () => {
 
         {!isFree && (
           <View className="gap-2">
-            <Text className="text-white font-semibold">Costo de entrada (CRC)</Text>
+            <Text className="text-white font-semibold">
+              Costo de entrada (CRC)
+            </Text>
             <TextInput
               value={priceInput}
               onChangeText={setPriceInput}
@@ -377,6 +514,9 @@ const EditEvent = () => {
               placeholderTextColor="#9CA3AF"
               className="bg-gray-900 text-white rounded-xl px-4 py-3"
             />
+            {formError.priceInput && (
+              <Text className="text-red-500">{formError.priceInput}</Text>
+            )}
           </View>
         )}
 
@@ -406,13 +546,18 @@ const EditEvent = () => {
             placeholderTextColor="#9CA3AF"
             className="bg-gray-900 text-white rounded-xl px-4 py-3"
           />
+          {formError.location && (
+            <Text className="text-red-500">{formError.location}</Text>
+          )}
         </View>
 
         <View className="flex-row items-center justify-between bg-gray-900 rounded-xl px-4 py-3">
           <View>
             <Text className="text-white font-semibold">Publicado</Text>
             <Text className="text-gray-400 text-sm">
-              {status === "published" ? "Visible en listados" : "Queda como borrador"}
+              {status === "published"
+                ? "Visible en listados"
+                : "Queda como borrador"}
             </Text>
           </View>
           <Switch
@@ -477,7 +622,10 @@ const EditEvent = () => {
                       Alert.alert("Evento eliminado");
                       router.replace("/private/admin/events");
                     } catch (error: any) {
-                      Alert.alert("Error", error?.message ?? "No se pudo eliminar el evento.");
+                      Alert.alert(
+                        "Error",
+                        error?.message ?? "No se pudo eliminar el evento."
+                      );
                     }
                   },
                 },

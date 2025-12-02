@@ -80,9 +80,12 @@ const HomeAdmin = () => {
   };
 
   return (
-    <View className="gap-6">
+    <View className="gap-6 flex-1">
       <EnrollmentAvailable />
-      <ScrollView className="h-96">
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 120 }}
+      >
         <View className="flex-row flex-wrap">
           {MENU.map((item: MenuProps) => (
             <View key={item.label} className="w-1/2 p-2">

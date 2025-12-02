@@ -1,5 +1,5 @@
-export function getNextPaymentDate() {
-  const now = new Date();
+export function getNextPaymentDate(prevPaymentDate: Date) {
+  const now = prevPaymentDate ? prevPaymentDate : new Date();
   const day = now.getDate();
   const month = now.getMonth();
   const year = now.getFullYear();

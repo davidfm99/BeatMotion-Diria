@@ -41,6 +41,10 @@ export default function AdminLayout() {
         options={{ title: "Users", headerShown: false }}
       />
       <Stack.Screen
+        name="user/[uid]"
+        options={{ title: "Users", headerShown: false }}
+      />
+      <Stack.Screen
         name="coursesMenu"
         options={{ title: "Cursos", headerShown: false }}
       />

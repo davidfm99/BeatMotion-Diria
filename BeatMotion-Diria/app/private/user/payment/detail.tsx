@@ -133,7 +133,10 @@ const Detail = () => {
       </View>
     );
 
-  if (!coursesByUserQuery.isLoading && coursesByUserQuery.data?.length === 0)
+  if (
+    (!coursesByUserQuery.isLoading && coursesByUserQuery.data?.length === 0) ||
+    paymentStatus === "ok"
+  )
     return (
       <View className="flex-1 items-center justify-center p-4">
         <MaterialCommunityIcons

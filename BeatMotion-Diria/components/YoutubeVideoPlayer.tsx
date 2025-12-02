@@ -15,7 +15,7 @@ function YouTubeVideoPlayer({ videoURL }: { videoURL: string }) {
       <YoutubePlayer
         height={200}
         play={playing}
-        videoId={"wOOzajNBQ-M"}
+        videoId={videoURL}
         onChangeState={onStateChange}
       />
     </View>
