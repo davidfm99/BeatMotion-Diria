@@ -3,6 +3,7 @@ import {
   askForCameraPermission,
   uploadImage,
 } from "@/components/enrollment/askCameraPermision";
+import HeaderTitle from "@/components/headerTitle";
 import { capitalize } from "@/constants/helpers";
 import { useCourses } from "@/hooks/courses/useCourses";
 import { Enrollment as EnrollmentType } from "@/hooks/enrollment/schema";
@@ -13,6 +14,7 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Text, TouchableHighlight, View } from "react-native";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const INITIAL_PRICE = 20000;
 const PRICE_PER_COURSE = 5000;
@@ -95,10 +97,8 @@ const Enrollment = () => {
   };
 
   return (
-    <View className="mt-4">
-      <Text className="text-white pl-4 text-2xl font-bold">
-        Cursos disponibles
-      </Text>
+    <SafeAreaView>
+      <HeaderTitle title="Cursos disponibles" />
       <DataLoader query={coursesQuery} emptyMessage="No hay cursos disponibles">
         {/* TODO: fix this filter for something better */}
         {(data) =>
@@ -116,8 +116,7 @@ const Enrollment = () => {
                       </Text>
                       <Text className="text-gray-500">{course.level}</Text>
                       <Text className="text-gray-500">
-                        {capitalize(course.day || "")}-{" "}
-                        {new Date(course.startDate || "").toLocaleDateString()}
+                        {capitalize(course.day || "")}
                       </Text>
                     </View>
                   }
@@ -138,7 +137,7 @@ const Enrollment = () => {
 
         <TouchableHighlight
           onPress={handleImagePick}
-          className="bg-blue-600 rounded-md p-5 mt-10 w-50 self-center text-center"
+          className="bg-blue-600 rounded-lg p-5 mt-10 w-50 self-center text-center"
         >
           <Text className="text-white">Subir comprobante de pago</Text>
         </TouchableHighlight>
@@ -150,10 +149,10 @@ const Enrollment = () => {
         )}
         <TouchableHighlight
           disabled={!image || selectedCourses.length === 0 || paymentInProcess}
-          className="bg-secondary rounded-md p-5 mt-4 w-50 self-center text-center disabled:bg-gray-500 disabled:opacity-50"
+          className="bg-primary rounded-lg p-5 mt-4 w-50 self-center text-center disabled:bg-gray-500 disabled:opacity-50"
           onPress={handleConfirmEnrollment}
         >
-          <Text className="text-white">
+          <Text className="">
             {paymentInProcess
               ? "Confirmando matrícula..."
               : "Confirmar matrícula"}
@@ -164,7 +163,7 @@ const Enrollment = () => {
           cursos a los que se está matriculando.
         </Text>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 export default Enrollment;

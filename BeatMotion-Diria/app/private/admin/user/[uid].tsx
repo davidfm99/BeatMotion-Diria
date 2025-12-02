@@ -2,14 +2,12 @@ import DataLoader from "@/components/DataLoader";
 import HeaderTitle from "@/components/headerTitle";
 import { capitalize } from "@/constants/helpers";
 import { ProfileAdminValidationSchema } from "@/constants/validationForms";
-import { firestore } from "@/firebaseConfig";
+import { useUpdateProfile } from "@/hooks/user/useUpdateProfile";
 import { useUserInfo } from "@/hooks/user/useUserInfo";
 import { Picker } from "@react-native-picker/picker";
 import { router, useLocalSearchParams } from "expo-router";
-import { doc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
-  Alert,
   Image,
   ScrollView,
   Text,
@@ -29,6 +27,7 @@ export default function AdminUserProfile() {
   const { uid } = useLocalSearchParams();
   const [editing, setEditing] = useState(false);
   const userQuery = useUserInfo(uid as string);
+  const updateProfileMutation = useUpdateProfile();
   const [form, setForm] = useState({
     name: "",
     lastName: "",
@@ -92,22 +91,17 @@ export default function AdminUserProfile() {
   // Save updates
   const handleSave = async () => {
     if (validation()) {
-      try {
-        const ref = doc(firestore, "users", uid as string);
-
-        await updateDoc(ref, {
-          name: form.name.trim(), // "Nombre" updates the 'name' field
-          lastName: form.lastName.trim(), // "Apellido" updates the 'lastName' field
+      updateProfileMutation.mutate({
+        uid: uid as string,
+        body: {
+          name: form.name.trim(),
+          lastName: form.lastName.trim(),
           phone: form.phone.trim(),
           role: form.role,
-        });
+        },
+      });
 
-        Alert.alert("Éxito", "Información actualizada correctamente.");
-        setEditing(false);
-      } catch (err) {
-        console.error("Error saving user:", err);
-        Alert.alert("Error", "No se pudo actualizar el usuario.");
-      }
+      setEditing(false);
     }
   };
 
