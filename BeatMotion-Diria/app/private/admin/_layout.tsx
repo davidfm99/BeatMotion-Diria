@@ -41,11 +41,31 @@ export default function AdminLayout() {
         options={{ title: "Users", headerShown: false }}
       />
       <Stack.Screen
+        name="user/[uid]"
+        options={{ title: "Users", headerShown: false }}
+      />
+      <Stack.Screen
         name="coursesMenu"
         options={{ title: "Cursos", headerShown: false }}
       />
+<Stack.Screen
+  name="user/dataUsersComparison"
+  options={{ title: "Estadisticas",
+    headerShown: true,headerStyle: { backgroundColor: "#000" },
+    headerTintColor: "#fff",
+  }}
+/>
 
-      {/* Cursos */}
+<Stack.Screen
+  name="user/progress"
+  options={{ title: "Estudiante",
+    headerShown: true,headerStyle: { backgroundColor: "#000" },
+    headerTintColor: "#fff",
+  }}
+   />
+
+
+  {/* Cursos */}
       <Stack.Screen
         name="courses/list"
         options={{ title: "Ver cursos", headerShown: false }}
@@ -57,6 +77,20 @@ export default function AdminLayout() {
       <Stack.Screen
         name="courses/[id]"
         options={{ title: "Editar curso", headerShown: false }}
+      />
+
+      {/* Eventos */}
+      <Stack.Screen
+        name="events/index"
+        options={{ title: "Eventos", headerShown: false }}
+      />
+      <Stack.Screen
+        name="events/new"
+        options={{ title: "Nuevo evento", headerShown: false }}
+      />
+      <Stack.Screen
+        name="events/[id]"
+        options={{ title: "Editar evento", headerShown: false }}
       />
 
       {/* Clases */}
@@ -125,7 +159,19 @@ export default function AdminLayout() {
           headerShown: false,
           title: "Resultados de Encuesta" 
         }} 
+        />
+      <Stack.Screen
+        name="payment/paymentCenter"
+        options={{ headerShown: false }}
+      />
+
+      {/* Reports */}
+      <Stack.Screen
+        name="reports/index"
+        options={{ title: "Reportes", headerShown: false }}
       />
     </Stack>
+
+   
   );
 }

@@ -1,4 +1,5 @@
 import DataLoader from "@/components/DataLoader";
+import HeaderTitle from "@/components/headerTitle";
 import { firestore } from "@/firebaseConfig";
 import { useCourses } from "@/hooks/courses/useCourses";
 import { Ionicons, Octicons } from "@expo/vector-icons";
@@ -122,22 +123,7 @@ export default function CoursesMenuScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      {/* Header */}
-      <View className="px-6 pt-10 pb-4 flex-row items-center justify-between">
-        <View className="flex-1">
-          <Text className="text-white text-2xl font-bold">
-            Gestión de cursos
-          </Text>
-          <Text className="text-gray-400 text-sm mt-1">Cursos y clases</Text>
-        </View>
-        <TouchableOpacity
-          className="bg-gray-900 rounded-full p-3"
-          onPress={() => router.push("/private/home")}
-          accessibilityLabel="Volver al inicio"
-        >
-          <Ionicons name="home-outline" size={22} color="white" />
-        </TouchableOpacity>
-      </View>
+      <HeaderTitle title="Gestión de cursos" subtitle="Cursos y clases" />
 
       {/* Action Buttons */}
       <View className="px-6 pb-4 flex-row gap-3">

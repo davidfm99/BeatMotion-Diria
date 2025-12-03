@@ -19,3 +19,13 @@ export const userSchema = zod
   }));
 
 export const userListSchema = zod.array(userSchema);
+
+export type ProfilePayload = {
+  uid: string;
+  body: {
+    phone: string;
+    name: string;
+    lastName: string;
+    role?: string;
+  };
+};

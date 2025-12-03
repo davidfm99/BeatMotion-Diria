@@ -28,6 +28,16 @@ type Teacher = {
   email: string;
 };
 
+const DAYS_OF_WEEK = [
+  { label: "Lunes", value: "lunes" },
+  { label: "Martes", value: "martes" },
+  { label: "Miércoles", value: "miércoles" },
+  { label: "Jueves", value: "jueves" },
+  { label: "Viernes", value: "viernes" },
+  { label: "Sábado", value: "sábado" },
+  { label: "Domingo", value: "domingo" },
+];
+
 export default function NewCourseScreen() {
   const [title, setTitle] = useState("");
   const [teacher, setTeacher] = useState("");
@@ -35,6 +45,7 @@ export default function NewCourseScreen() {
   const [level, setLevel] = useState("Inicial");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [day, setDay] = useState("lunes");
   const [isSaving, setIsSaving] = useState(false);
   const [loadingTeachers, setLoadingTeachers] = useState(true);
 
@@ -104,6 +115,7 @@ export default function NewCourseScreen() {
         imageUrl: imageUrl.trim() || undefined,
         isActive: true,
         createdBy: uid,
+        day: day,
       });
       Alert.alert("Curso", "Curso agregado correctamente.");
       router.back();
@@ -173,6 +185,20 @@ export default function NewCourseScreen() {
             <Picker.Item label="Inicial" value="Inicial" />
             <Picker.Item label="Intermedio" value="Intermedio" />
             <Picker.Item label="Avanzado" value="Avanzado" />
+          </Picker>
+        </View>
+
+        <Text className="text-white mb-2 font-semibold">Día del curso *</Text>
+        <View className="bg-gray-900 rounded-xl mb-4">
+          <Picker
+            selectedValue={day}
+            onValueChange={(v) => setDay(String(v))}
+            dropdownIconColor="#ffffff"
+            style={{ color: "white" }}
+          >
+            {DAYS_OF_WEEK.map((d) => (
+              <Picker.Item key={d.value} label={d.label} value={d.value} />
+            ))}
           </Picker>
         </View>
 
