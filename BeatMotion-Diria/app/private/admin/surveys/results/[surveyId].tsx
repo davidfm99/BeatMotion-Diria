@@ -1,15 +1,13 @@
 import DataLoader from "@/components/DataLoader";
 import HeaderTitle from "@/components/headerTitle";
+import {
+  useSurveyResponses,
+  useSurveyResults,
+} from "@/hooks/surveys/useSurveyResponses";
 import { useSurveyById } from "@/hooks/surveys/useSurveys";
-import { useSurveyResults, useSurveyResponses } from "@/hooks/surveys/useSurveyResponses";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import {
-  RefreshControl,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SurveyResultsScreen() {
@@ -54,14 +52,14 @@ export default function SurveyResultsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      <HeaderTitle title="Resultados de Encuesta" subtitle="Análisis de respuestas" />
+      <HeaderTitle
+        title="Resultados de Encuesta"
+        subtitle="Análisis de respuestas"
+      />
 
       <DataLoader query={surveyQuery} emptyMessage="Encuesta no encontrada">
         {(survey) => (
-          <DataLoader
-            query={resultsQuery}
-            emptyMessage="No hay respuestas aún"
-          >
+          <DataLoader query={resultsQuery} emptyMessage="No hay respuestas aún">
             {(results, isRefetching, refetch) => (
               <ScrollView
                 className="flex-1 px-6"
@@ -93,7 +91,7 @@ export default function SurveyResultsScreen() {
                         {results.completionRate.toFixed(0)}%
                       </Text>
                       <Text className="text-gray-400 text-sm mt-1">
-                        Completitud
+                        Completado
                       </Text>
                     </View>
                   </View>
@@ -101,7 +99,10 @@ export default function SurveyResultsScreen() {
 
                 {/* Preguntas y resultados */}
                 {survey.questions.map((question, index) => (
-                  <View key={question.id} className="bg-gray-900 rounded-3xl p-5 mb-4">
+                  <View
+                    key={question.id}
+                    className="bg-gray-900 rounded-3xl p-5 mb-4"
+                  >
                     <Text className="text-primary font-semibold mb-2">
                       Pregunta {index + 1}
                     </Text>
@@ -174,8 +175,7 @@ export default function SurveyResultsScreen() {
                                   key={idx}
                                   className="bg-gray-800 rounded-xl p-3"
                                 >
-                                  <Text className="text-white">
-                                  </Text>
+                                  <Text className="text-white"></Text>
                                 </View>
                               )
                             )}
@@ -193,7 +193,7 @@ export default function SurveyResultsScreen() {
                 {/* Lista de respondientes */}
                 <View className="bg-gray-900 rounded-3xl p-5 mb-6">
                   <Text className="text-white text-lg font-bold mb-4">
-                    Respondientes ({responsesQuery.data?.length || 0})
+                    Respuestas ({responsesQuery.data?.length || 0})
                   </Text>
                   <DataLoader
                     query={responsesQuery}
@@ -222,8 +222,9 @@ export default function SurveyResultsScreen() {
                             </View>
                             {response.completionTimeSeconds && (
                               <Text className="text-gray-500 text-xs">
-                                ⏱️{" "}
-                                {Math.round(response.completionTimeSeconds / 60)}
+                                {Math.round(
+                                  response.completionTimeSeconds / 60
+                                )}
                                 min
                               </Text>
                             )}
