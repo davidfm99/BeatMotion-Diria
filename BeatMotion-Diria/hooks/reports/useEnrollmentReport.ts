@@ -99,7 +99,7 @@ export const useEnrollmentReport = () => {
   };
 
   return useQuery({
-    queryKey: ["reportsPayments"],
+    queryKey: ["enrollmentReport"],
     queryFn: fetchEnrollmentReport,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
