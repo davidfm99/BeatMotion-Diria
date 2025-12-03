@@ -5,6 +5,9 @@ import { JSX } from "react";
 import { ScrollView, Text, TouchableHighlight, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import MyCourses from "./myCourses";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
+import { useCourseMemberByUser } from "@/hooks/courseMember/useCourseMemberByUser";
+import { useAvailableSurveys } from "@/hooks/surveys/useSurveys";
 
 type MenuProps = {
   icon: JSX.Element;
@@ -26,7 +29,7 @@ const MENU: MenuProps[] = [
       />
     ),
     label: "Encuesta",
-    route: "/private/user/events",
+    route: "/private/user/surveys/list",
   },
   {
     icon: (
@@ -48,6 +51,12 @@ const MENU: MenuProps[] = [
 
 const HomeUser = () => {
   const router = useRouter();
+  const { user } = useActiveUser();
+
+  const courseMemberQuery = useCourseMemberByUser(user?.uid || "");
+  const courseIds = courseMemberQuery.data?.map((cm) => cm.courseId) || [];
+  const surveysQuery = useAvailableSurveys(user?.uid || "", courseIds);
+  const pendingSurveys = surveysQuery.data?.length || 0;
 
   const handleClickEnroll = () => {
     router.push("/private/user/enrollment/createEnrollment");
@@ -55,10 +64,6 @@ const HomeUser = () => {
 
   const handleGoToRoute = (uri: string) => {
     router.push(uri as Href);
-  };
-
-  const handleOpenEvents = () => {
-    router.push("/private/user/events" as Href);
   };
 
   return (

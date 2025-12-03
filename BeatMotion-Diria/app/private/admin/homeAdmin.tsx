@@ -43,7 +43,7 @@ const MENU: MenuProps[] = [
       />
     ),
     label: "Encuesta",
-    route: "/private/user/payment/paymentCenter",
+    route: "/private/admin/surveys/list",
   },
   {
     icon: <MaterialIcons name="event" size={44} color="turquoise" />,
@@ -78,7 +78,7 @@ const HomeAdmin = () => {
   const handleGoToRoute = (route: string) => {
     router.push(route as Href);
   };
-
+  
   return (
     <View className="gap-6 flex-1">
       <EnrollmentAvailable />
