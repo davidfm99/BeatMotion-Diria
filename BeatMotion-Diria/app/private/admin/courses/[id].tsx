@@ -14,6 +14,13 @@ type Teacher = {
   email: string;
 };
 
+type Teacher = {
+  id: string;
+  name: string;
+  lastName: string;
+  email: string;
+};
+
 export default function EditCourseScreen() {
   const { id, tab } = useLocalSearchParams<{ id?: string; tab?: string | string[] }>();
 
