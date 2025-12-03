@@ -1,9 +1,16 @@
-import React from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Alert } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEnrollmentsByStatus } from "@/hooks/enrollment/useEnrollmentsByStatus";
-import { useClassesByCourse } from "@/hooks/classes/useClassesByCourse";
 import { useAssignClass } from "@/hooks/classes/useAssignClass";
+import { useClassesByCourse } from "@/hooks/classes/useClassesByCourse";
+import { useEnrollmentsByStatus } from "@/hooks/enrollment/useEnrollmentsByStatus";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 //TODO see if this component is useful or get rid of it
 
@@ -11,7 +18,8 @@ export default function AssignClass() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const { data: enrollment, isLoading: loadingEnrollment } = useEnrollmentsByStatus("approved");
+  const { data: enrollment, isLoading: loadingEnrollment } =
+    useEnrollmentsByStatus("approved");
   const selectedEnrollment = enrollment?.find((e) => e.id === id);
 
   const { data: classes, isLoading: loadingClasses } = useClassesByCourse(
@@ -38,24 +46,20 @@ export default function AssignClass() {
   }
 
   const handleAssign = (classId: string) => {
-    Alert.alert(
-      "Asignar clase",
-      "¿Deseas asignar esta clase al estudiante?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Asignar",
-          style: "default",
-          onPress: () => {
-            assignClass.mutate({
-              enrollmentId: id!,
-              classId,
-              adminId: "admin123", 
-            });
-          },
+    Alert.alert("Asignar clase", "¿Deseas asignar esta clase al estudiante?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Asignar",
+        style: "default",
+        onPress: () => {
+          assignClass.mutate({
+            enrollmentId: id!,
+            classId,
+            adminId: "admin123",
+          });
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
@@ -64,20 +68,25 @@ export default function AssignClass() {
       <View className="bg-gray-800 rounded-2xl p-4 mb-4">
         <Text className="text-white text-xl font-bold mb-2">👤 Estudiante</Text>
         <Text className="text-gray-300">
-          {selectedEnrollment.user?.firstName} {selectedEnrollment.user?.lastName}
+          {selectedEnrollment.user?.name} {selectedEnrollment.user?.lastName}
         </Text>
         <Text className="text-gray-400">{selectedEnrollment.user?.email}</Text>
       </View>
 
-     
       <View className="bg-gray-800 rounded-2xl p-4 mb-4">
         <Text className="text-white text-xl font-bold mb-2">📘 Curso</Text>
-        <Text className="text-gray-300">{selectedEnrollment.course?.title}</Text>
-        <Text className="text-gray-400">Nivel: {selectedEnrollment.course?.level}</Text>
+        <Text className="text-gray-300">
+          {selectedEnrollment.course?.title}
+        </Text>
+        <Text className="text-gray-400">
+          Nivel: {selectedEnrollment.course?.level}
+        </Text>
       </View>
 
       <View className="bg-gray-800 rounded-2xl p-4">
-        <Text className="text-white text-xl font-bold mb-3">📅 Clases disponibles</Text>
+        <Text className="text-white text-xl font-bold mb-3">
+          📅 Clases disponibles
+        </Text>
         {classes && classes.length > 0 ? (
           classes.map((cls: any) => (
             <View key={cls.id} className="bg-gray-700 rounded-xl p-3 mb-3">
@@ -94,16 +103,19 @@ export default function AssignClass() {
                 disabled={assignClass.isPending}
               >
                 <Text className="text-black font-semibold">
-                  {assignClass.isPending ? "Asignando..." : "Asignar esta clase"}
+                  {assignClass.isPending
+                    ? "Asignando..."
+                    : "Asignar esta clase"}
                 </Text>
               </TouchableOpacity>
             </View>
           ))
         ) : (
-          <Text className="text-gray-400">No hay clases registradas para este curso.</Text>
+          <Text className="text-gray-400">
+            No hay clases registradas para este curso.
+          </Text>
         )}
       </View>
     </ScrollView>
   );
 }
-

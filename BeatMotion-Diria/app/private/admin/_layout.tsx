@@ -41,6 +41,10 @@ export default function AdminLayout() {
         options={{ title: "Users", headerShown: false }}
       />
       <Stack.Screen
+        name="user/[uid]"
+        options={{ title: "Users", headerShown: false }}
+      />
+      <Stack.Screen
         name="coursesMenu"
         options={{ title: "Cursos", headerShown: false }}
       />
@@ -124,6 +128,11 @@ export default function AdminLayout() {
       />
       <Stack.Screen
         name="notifications/notificationsHistory"
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="payment/paymentCenter"
         options={{ headerShown: false }}
       />
     </Stack>

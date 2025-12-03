@@ -1,7 +1,7 @@
 import { useCreateFCMToken } from "@/hooks/notifications/useCreateFCMToken";
 import { useMyNotifications } from "@/hooks/notifications/useMyNotifications";
 import { useActiveUser } from "@/hooks/user/UseActiveUser";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,58 +20,12 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View className="flex-1 bg-black px-6 py-12 justify-center">
+      <View className="flex-1 bg-black px-6 py-12">
         {user?.role === "user" && <HomeUser />}
         {user?.role === "admin" && <HomeAdmin />}
 
         {/* Bottom bar */}
         <View className="absolute left-0 right-0 bottom-0 bg-gray-900 h-24 flex-row items-center px-6 gap-6">
-          {user?.role === "admin" && (
-            <>
-              <View className="flex-1 items-center">
-                <TouchableOpacity
-                  onPress={() => router.push("/private/admin/users")}
-                  className="w-12 h-12 rounded-full bg-yellow-400 items-center justify-center"
-                  accessibilityLabel="Gestión de usuarios"
-                >
-                  <Ionicons name="people-outline" size={24} color="black" />
-                </TouchableOpacity>
-                <Text className="text-xs text-white mt-2">Usuarios</Text>
-              </View>
-
-              <View className="flex-1 items-center">
-                <TouchableOpacity
-                  onPress={() =>
-                    router.push(
-                      "/private/admin/notifications/notificationCenter"
-                    )
-                  }
-                  className="w-12 h-12 rounded-full bg-yellow-400 items-center justify-center"
-                  accessibilityLabel="Ver borradores"
-                >
-                  <AntDesign name="notification" size={24} color="black" />
-                </TouchableOpacity>
-                <Text className="text-xs text-white text-center mt-2">
-                  Centro notificaciones
-                </Text>
-              </View>
-
-              <View className="flex-1 items-center">
-                <TouchableOpacity
-                  onPress={() =>
-                    router.push("/private/admin/coursesMenu" as any)
-                  }
-                  className="w-12 h-12 rounded-full bg-yellow-400 items-center justify-center"
-                  accessibilityLabel="Gestión de cursos"
-                >
-                  <Ionicons name="book-outline" size={24} color="black" />
-                </TouchableOpacity>
-
-                <Text className="text-xs text-white mt-2">Cursos</Text>
-              </View>
-            </>
-          )}
-
           {user?.role !== "admin" && (
             <View className="flex-1 items-center">
               <TouchableOpacity

@@ -1,26 +1,34 @@
-import { useMemo, useState } from "react";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  FlatList,
-  RefreshControl,
-  Text,
-  TouchableOpacity,
-  View,
-  Image,
-} from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
 import DataLoader from "@/components/DataLoader";
-import { useEvents } from "@/hooks/events/useEvents";
+import FilterPills from "@/components/FilterPills";
+import HeaderTitle from "@/components/headerTitle";
 import type { Event } from "@/hooks/events/schema";
+import { useEvents } from "@/hooks/events/useEvents";
 import {
   formatEventAudience,
   formatEventCapacity,
   formatEventDateTime,
   formatEventPrice,
 } from "@/hooks/events/utils";
+import { useRouter } from "expo-router";
+import { useMemo, useState } from "react";
+import {
+  FlatList,
+  Image,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Icon from "react-native-vector-icons/Ionicons";
 
 type Tab = "programados" | "drafts" | "pasados";
+
+const TABS = [
+  { label: "Programados", value: "programados" },
+  { label: "Borradores", value: "drafts" },
+  { label: "Pasados", value: "pasados" },
+];
 
 const AdminEventsList = () => {
   const eventsQuery = useEvents({ includeDrafts: true, includePrivate: true });
@@ -47,37 +55,9 @@ const AdminEventsList = () => {
     }
     // pasados últimos 6 meses
     return events
-      .filter(
-        (evt) =>
-          evt.datetime < now && evt.datetime >= sixMonthsAgo
-      )
+      .filter((evt) => evt.datetime < now && evt.datetime >= sixMonthsAgo)
       .sort((a, b) => b.datetime.getTime() - a.datetime.getTime());
   };
-
-  const renderTabs = () => (
-    <View className="flex-row gap-2 px-4 pb-4">
-      {[
-        { key: "programados", label: "Programados" },
-        { key: "drafts", label: "Borradores" },
-        { key: "pasados", label: "Pasados" },
-      ].map((item) => {
-        const active = tab === item.key;
-        return (
-          <TouchableOpacity
-            key={item.key}
-            className={`px-4 py-2 rounded-full border ${
-              active ? "bg-yellow-400 border-yellow-400" : "border-gray-700"
-            }`}
-            onPress={() => setTab(item.key as Tab)}
-          >
-            <Text className={active ? "text-black font-semibold" : "text-white"}>
-              {item.label}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
 
   const renderCard = (item: Event) => (
     <TouchableOpacity
@@ -133,7 +113,9 @@ const AdminEventsList = () => {
         <Text className="text-gray-300">
           {formatEventDateTime(item.datetime)}
         </Text>
-        <Text className="text-gray-300">{item.location || "Sin ubicación"}</Text>
+        <Text className="text-gray-300">
+          {item.location || "Sin ubicación"}
+        </Text>
         <Text className="text-gray-300">
           {formatEventPrice(item.price)} • {formatEventCapacity(item.capacity)}
         </Text>
@@ -181,18 +163,10 @@ const AdminEventsList = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      <View className="flex-row items-center justify-between px-4 pt-8 pb-3">
-        <View className="flex-row items-center gap-3">
-          <TouchableOpacity
-            onPress={() => router.push("/private/home")}
-            className="w-10 h-10 rounded-full bg-gray-800 items-center justify-center"
-          >
-            <Icon name="home-outline" size={20} color="#fff" />
-          </TouchableOpacity>
-          <Text className="text-white text-2xl font-bold">Eventos</Text>
-        </View>
+      <View className="flex-row justify-between items-center">
+        <HeaderTitle title="Eventos" />
         <TouchableOpacity
-          className="bg-yellow-400 rounded-full px-4 py-2 flex-row items-center gap-2 active:opacity-80"
+          className="bg-primary h-10 rounded-full px-4 py-2 flex-row items-center gap-2 active:opacity-80"
           onPress={() => router.push("/private/admin/events/new")}
         >
           <Icon name="add-circle-outline" size={20} color="#000" />
@@ -200,7 +174,13 @@ const AdminEventsList = () => {
         </TouchableOpacity>
       </View>
 
-      {renderTabs()}
+      <View className="items-center ">
+        <FilterPills
+          options={TABS}
+          onSelect={(value: string) => setTab(value as Tab)}
+          selected={tab}
+        />
+      </View>
 
       <DataLoader query={eventsQuery} emptyMessage="No hay eventos">
         {(events, isRefetching, refetch) => {
@@ -213,7 +193,11 @@ const AdminEventsList = () => {
             <FlatList
               data={filtered}
               keyExtractor={(item) => item.id}
-              contentContainerStyle={{ padding: 16, paddingBottom: 48, gap: 12 }}
+              contentContainerStyle={{
+                padding: 16,
+                paddingBottom: 48,
+                gap: 12,
+              }}
               refreshControl={
                 <RefreshControl
                   refreshing={isRefetching}

@@ -25,7 +25,7 @@ export const enrollmentSchema = zod.array(
     courseId: zod.string(),
     status: zod.enum(["pending", "approved", "rejected"]),
     submittedAt: timestampSchema,
-    paymentProofImage: zod.string().url().optional(),
+    paymentProofImage: zod.string().url().nullish(),
     reviewedBy: zod.string().nullable(),
     reviewedAt: timestampSchema,
     totalAmount: zod.number().min(0),
@@ -35,14 +35,14 @@ export const enrollmentSchema = zod.array(
         title: zod.string(),
         description: zod.string(),
         level: zod.string(),
-        day: zod.string().nullable(),
+        day: zod.string().nullish(),
         startDate: timestampSchema,
       })
       .nullish(),
     user: zod
       .object({
         id: zod.string(),
-        firstName: zod.string(),
+        name: zod.string(),
         lastName: zod.string(),
         email: zod.string().email(),
       })
