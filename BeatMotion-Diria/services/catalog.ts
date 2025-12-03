@@ -11,6 +11,7 @@ export type NewCourse = {
   imageUrl?: string;
   isActive: boolean;
   createdBy: string;
+  day: string;
 };
 
 export async function addCourse(data: NewCourse) {

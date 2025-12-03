@@ -1,21 +1,20 @@
-import { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Image,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-} from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
-import { doc, updateDoc } from "firebase/firestore";
-import { firestore } from "@/firebaseConfig";
-import { Picker } from "@react-native-picker/picker";
-import { useUserInfo } from "@/hooks/useUserInfo";
 import DataLoader from "@/components/DataLoader";
+import HeaderTitle from "@/components/headerTitle";
 import { capitalize } from "@/constants/helpers";
 import { ProfileAdminValidationSchema } from "@/constants/validationForms";
+import { useUpdateProfile } from "@/hooks/user/useUpdateProfile";
+import { useUserInfo } from "@/hooks/user/useUserInfo";
+import { Picker } from "@react-native-picker/picker";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  Image,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import * as Yup from "yup";
 
 const USER_ROLES_MAPPER = {
@@ -28,6 +27,7 @@ export default function AdminUserProfile() {
   const { uid } = useLocalSearchParams();
   const [editing, setEditing] = useState(false);
   const userQuery = useUserInfo(uid as string);
+  const updateProfileMutation = useUpdateProfile();
   const [form, setForm] = useState({
     name: "",
     lastName: "",
@@ -83,8 +83,6 @@ export default function AdminUserProfile() {
         return acc;
       }, errors);
       setFormErrors(errors);
-      console.error("Validation error:", err);
-      Alert.alert("Error", "Por favor, verifica los campos.");
       return false;
     }
     return true;
@@ -93,30 +91,23 @@ export default function AdminUserProfile() {
   // Save updates
   const handleSave = async () => {
     if (validation()) {
-      try {
-        const ref = doc(firestore, "users", uid as string);
-
-        await updateDoc(ref, {
-          name: form.name.trim(), // "Nombre" updates the 'name' field
-          lastName: form.lastName.trim(), // "Apellido" updates the 'lastName' field
+      updateProfileMutation.mutate({
+        uid: uid as string,
+        body: {
+          name: form.name.trim(),
+          lastName: form.lastName.trim(),
           phone: form.phone.trim(),
           role: form.role,
-        });
+        },
+      });
 
-        Alert.alert("Éxito", "Información actualizada correctamente.");
-        setEditing(false);
-      } catch (err) {
-        console.error("Error saving user:", err);
-        Alert.alert("Error", "No se pudo actualizar el usuario.");
-      }
+      setEditing(false);
     }
   };
 
   return (
     <ScrollView className="flex-1 bg-black px-6 py-10">
-      <Text className="text-white text-2xl font-bold mb-6">
-        Perfil de usuario
-      </Text>
+      <HeaderTitle title="Perfil de usuario" />
 
       <DataLoader query={userQuery}>
         {(data) => {

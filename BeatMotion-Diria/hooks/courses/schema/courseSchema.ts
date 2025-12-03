@@ -11,7 +11,7 @@ export const courseSchema = zod.array(
     isActive: zod.boolean(),
     level: zod.enum(["Inicial", "Intermedio", "Avanzado"]),
     createdBy: zod.string().min(2).max(100).nullable(),
-    day: zod.string().min(2).max(50).nullable(),
+    day: zod.string().min(2).max(50).nullish(),
     startDate: timestampSchema,
   })
 );
@@ -25,3 +25,7 @@ export const courseSchemaWithMember = zod.array(
 export const courseWithMemberElement = courseSchema.element.merge(
   courseMemberSchema.element
 );
+
+export type CourseSchemaWithMember = zod.infer<
+  typeof courseSchemaWithMember
+>[number];

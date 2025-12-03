@@ -4,6 +4,15 @@ import { useLocalSearchParams, router, useRootNavigationState } from "expo-route
 import { getFirestore, doc, getDoc, updateDoc, serverTimestamp, collection, query, where, onSnapshot, getDocs, orderBy } from "firebase/firestore";
 import { Picker } from "@react-native-picker/picker";
 import type { Href } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import AssignStudentModal from "@/components/AssignStudentModal";
+
+type Teacher = {
+  id: string;
+  name: string;
+  lastName: string;
+  email: string;
+};
 
 type Teacher = {
   id: string;
@@ -17,6 +26,8 @@ export default function EditCourseScreen() {
 
   const navState = useRootNavigationState();
   const [notFound, setNotFound] = useState(false);
+
+  const [assignModalVisible, setAssignModalVisible] = useState(false);
 
   useEffect(() => {
     const invalid = [undefined, null, "", "index", "list", "new"];
@@ -241,6 +252,16 @@ export default function EditCourseScreen() {
           >
             <Text className="text-center font-semibold">Guardar cambios</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            className="bg-secondary rounded-2xl px-5 py-4 active:opacity-80 mb-4 flex-row items-center justify-center gap-2"
+            onPress={() => setAssignModalVisible(true)}
+          >
+            <Ionicons name="person-add" size={20} color="white" />
+            <Text className="text-center font-semibold text-white">
+              Asignar Estudiante al Curso
+            </Text>
+          </TouchableOpacity>
         </>
       ) : (
         <>
@@ -306,6 +327,13 @@ export default function EditCourseScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <AssignStudentModal
+        visible={assignModalVisible}
+        courseId={String(id)}
+        courseName={title}
+        onClose={() => setAssignModalVisible(false)}
+      />
     </ScrollView>
   );
 }

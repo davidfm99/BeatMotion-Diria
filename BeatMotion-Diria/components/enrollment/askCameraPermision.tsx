@@ -41,3 +41,4 @@ export const uploadImage = async (
   const downloadUrl = await getDownloadURL(fileRef);
   return downloadUrl;
 };
+

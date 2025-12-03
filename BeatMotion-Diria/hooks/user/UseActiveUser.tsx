@@ -1,9 +1,9 @@
-import { useEffect } from "react";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { useEffect } from "react";
 
-type UserType = {
+export type UserType = {
   uid: string;
   email: string;
   role: string;

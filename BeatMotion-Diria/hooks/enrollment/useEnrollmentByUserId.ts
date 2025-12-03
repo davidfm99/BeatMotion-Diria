@@ -1,20 +1,16 @@
-import { Query, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { firestore } from "@/firebaseConfig";
 import {
   collection,
   CollectionReference,
-  getDocs,
-  onSnapshot,
   query as firestoreQuery,
+  getDocs,
   where,
 } from "@firebase/firestore";
+import { useQuery } from "@tanstack/react-query";
 import { Alert } from "react-native";
-import { enrollmentSchema, Enrollment } from "./schema";
+import { Enrollment, enrollmentSchema } from "./schema";
 
 export const useEnrollmentByUserId = (userId: string) => {
-  const queryClient = useQueryClient();
-
   const enrollmentsRef = collection(
     firestore,
     "enrollments"
@@ -46,22 +42,6 @@ export const useEnrollmentByUserId = (userId: string) => {
     staleTime: 1000 * 60 * 20, // 20 minutes
     refetchOnWindowFocus: false,
   });
-
-  // Will do updates in real time
-  useEffect(() => {
-    const unsub = onSnapshot(
-      collection(firestore, "enrollments"),
-      (snapshot) => {
-        const enrollments = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        queryClient.setQueryData(["enrollments"], enrollments);
-      }
-    );
-
-    return () => unsub();
-  }, [queryClient]);
 
   return query;
 };

@@ -1,7 +1,7 @@
 import DataLoader from "@/components/DataLoader";
 import { getEnrollmentColor, statusTranslations } from "@/constants/helpers";
 import { useCoursesByUserMember } from "@/hooks/courses/useCoursesByUserMember";
-import { useActiveUser } from "@/hooks/UseActiveUser";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useRouter } from "expo-router";
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 
@@ -17,10 +17,14 @@ const MyCourses = () => {
     });
   };
 
+  const handleClickEnroll = () => {
+    router.push("/private/user/enrollment/createEnrollment");
+  };
+
   return (
     <>
       <View className="flex-row justify-between items-center mb-3">
-        <View className="flex-row gap-4 items-center">
+        <View className="flex-row gap-4 items-center justify-center">
           <Text className="text-white text-2xl font-extrabold">Mis Cursos</Text>
           <Text className="text-gray-400 text-sm font-semibold">
             {myCoursesQuery.data?.length} curso(s)

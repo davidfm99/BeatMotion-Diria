@@ -1,41 +1,98 @@
-import type { Href } from "expo-router";
-import { useRouter } from "expo-router";
-import { Text, TouchableHighlight, View } from "react-native";
+import MenuButton from "@/components/MenuButton";
+import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Href, useRouter } from "expo-router";
+import { JSX } from "react";
+import { ScrollView, Text, TouchableHighlight, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import MyCourses from "./myCourses";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
+import { useCourseMemberByUser } from "@/hooks/courseMember/useCourseMemberByUser";
+import { useAvailableSurveys } from "@/hooks/surveys/useSurveys";
+
+type MenuProps = {
+  icon: JSX.Element;
+  label: string;
+  route: string;
+};
+const MENU: MenuProps[] = [
+  {
+    icon: <FontAwesome5 name="money-check" size={36} color="turquoise" />,
+    label: "Centro de pagos",
+    route: "/private/user/payment/paymentCenter",
+  },
+  {
+    icon: (
+      <MaterialCommunityIcons
+        name="clipboard-check-outline"
+        size={44}
+        color="turquoise"
+      />
+    ),
+    label: "Encuesta",
+    route: "/private/user/surveys/list",
+  },
+  {
+    icon: (
+      <MaterialCommunityIcons
+        name="clipboard-check-outline"
+        size={44}
+        color="turquoise"
+      />
+    ),
+    label: "Eventos",
+    route: "/private/user/events",
+  },
+  {
+    icon: <Icon name="bag-outline" size={44} color="turquoise" />,
+    label: "Gestionar tienda",
+    route: "/private/marketplace/MarketplaceList",
+  },
+];
 
 const HomeUser = () => {
   const router = useRouter();
+  const { user } = useActiveUser();
+
+  const courseMemberQuery = useCourseMemberByUser(user?.uid || "");
+  const courseIds = courseMemberQuery.data?.map((cm) => cm.courseId) || [];
+  const surveysQuery = useAvailableSurveys(user?.uid || "", courseIds);
+  const pendingSurveys = surveysQuery.data?.length || 0;
 
   const handleClickEnroll = () => {
     router.push("/private/user/enrollment/createEnrollment");
   };
 
-  const handleOpenMarketplace = () => {
-    router.push("/private/marketplace/MarketplaceList" as Href);
+  const handleGoToRoute = (uri: string) => {
+    router.push(uri as Href);
   };
 
   return (
     <View>
       <TouchableHighlight
-        className="bg-primary self-end text-gray-950 w-1/2 rounded-full px-3 py-3  justify-center active:opacity-80 mb-8 flex-row gap-2 items-center"
+        className="bg-primary self-end text-gray-950 w-1/2 rounded-full px-3 py-3 justify-center active:opacity-80 mb-8"
         onPress={handleClickEnroll}
       >
-        <>
+        <View className="flex-row gap-2 items-center justify-center">
           <Icon name="add-circle-outline" size={20} />
-          <Text className="text-white gap-2 font-bold">Matricular Curso</Text>
-        </>
+          <Text className="text-darkText gap-2 font-bold">
+            Matricular Curso
+          </Text>
+        </View>
       </TouchableHighlight>
-      <TouchableHighlight
-        className="bg-yellow-400 self-end text-white w-1/2 rounded-full px-3 py-3 justify-center active:opacity-80 mb-8 flex-row gap-2 items-center"
-        onPress={handleOpenMarketplace}
-      >
-        <>
-          <Icon name="bag-outline" size={20} color="black" />
-          <Text className="text-black gap-2 font-bold">Ver Tienda</Text>
-        </>
-      </TouchableHighlight>
+
       <MyCourses />
+      <ScrollView className="h-96">
+        <View className="flex-row flex-wrap mt-3">
+          {MENU.map((item: MenuProps) => (
+            <View key={item.label} className="w-1/2 p-2">
+              <MenuButton
+                {...item}
+                onPress={() => handleGoToRoute(item.route)}
+              />
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 };

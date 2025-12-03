@@ -5,23 +5,16 @@ const statusTranslations: { [key: string]: string } = {
   pending: "Pendiente",
   approved: "Aprobada",
   rejected: "Rechazada",
-  ok: "Pago realizado",
-  late: "Pago atrasado",
+  ok: "Realizado",
+  late: "Atrasado",
 };
 
 const getEnrollmentColor = (status: string) => {
-  switch (status) {
-    case "pending":
-      return "text-yellow-400";
-    case "approved":
-    case "ok":
-      return "text-green-400";
-    case "rejected":
-    case "late":
-      return "text-red-400";
-    default:
-      return "text-gray-100";
-  }
+  if (!status) return "text-gray-100";
+  if (["approved", "ok"].includes(status)) return "text-green-400";
+  if (status === "pending") return "text-yellow-400";
+  if (["rejected", "late"].includes(status)) return "text-red-400";
+  return "text-gray-100";
 };
 
 const formatCurrency = (value: number, currency?: string) => {
@@ -38,4 +31,32 @@ const formatCurrency = (value: number, currency?: string) => {
   }
 };
 
-export { capitalize, formatCurrency, getEnrollmentColor, statusTranslations };
+const formatDate = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-CR");
+  } catch (error) {
+    console.error("No se pudo formatear la fecha:", error);
+    return dateString;
+  }
+};
+
+export const sanitizeVimeoUrl = (url: string) => {
+  const match = url.match(/(?:vimeo\.com\/(?:video\/)?)(\d+)/);
+  return match ? match[1] : null;
+};
+
+export const sanitizeYouTubeUrl = (url: string) => {
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
+  );
+  return match ? match[1] : null;
+};
+
+export {
+  capitalize,
+  formatCurrency,
+  formatDate,
+  getEnrollmentColor,
+  statusTranslations,
+};

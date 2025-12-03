@@ -1,7 +1,7 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { firestore } from "@/firebaseConfig";
 import { collection, getDocs, onSnapshot } from "@firebase/firestore";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Alert } from "react-native";
 import { courseSchema } from "./schema/courseSchema";
 
@@ -12,7 +12,6 @@ const fetchCourses = async () => {
       id: doc.id,
       ...doc.data(),
     }));
-    console.log("Fetched courses:", courses);
     return courseSchema.parse(courses);
   } catch (error) {
     console.error("Error fetching courses:", error);

@@ -1,46 +1,65 @@
-import BackButton from "@/components/backButton";
 import DataLoader from "@/components/DataLoader";
 import {
   askForCameraPermission,
   uploadImage,
 } from "@/components/enrollment/askCameraPermision";
+import HeaderTitle from "@/components/headerTitle";
 import { capitalize } from "@/constants/helpers";
 import { useCourses } from "@/hooks/courses/useCourses";
 import { Enrollment as EnrollmentType } from "@/hooks/enrollment/schema";
 import { useCreateEnrollment } from "@/hooks/enrollment/useCreateEnrollment";
 import { useEnrollmentByUserId } from "@/hooks/enrollment/useEnrollmentByUserId";
-import { useActiveUser } from "@/hooks/UseActiveUser";
+import { useFares } from "@/hooks/fares/useFares";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Text, TouchableHighlight, View } from "react-native";
-import BouncyCheckbox from "react-native-bouncy-checkbox";
+import {
+  FlatList,
+  Image,
+  ScrollView,
+  Text,
+  TouchableHighlight,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const INITIAL_PRICE = 20000;
-const PRICE_PER_COURSE = 5000;
+import HelperInfo from "@/components/HelperInfo";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 const CreateEnrollment = () => {
   const createEnrollment = useCreateEnrollment();
   const { user } = useActiveUser();
   const coursesQuery = useCourses();
   const enrollmentsQuery = useEnrollmentByUserId(user!.uid);
+  const faresQuery = useFares();
+
   const router = useRouter();
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [image, setImage] = useState<string | null>(null);
   const [paymentInProcess, setPaymentInProcess] = useState(false);
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
+  const [enrolledCourseNames, setEnrolledCourseNames] = useState<string[]>([]);
+
+  const [totalAmount, setTotalAmount] = useState(0);
 
   useEffect(() => {
     setSelectedCourses([]);
   }, []);
 
   useEffect(() => {
-    if (enrollmentsQuery.data) {
+    if (enrollmentsQuery.data && coursesQuery.data) {
       const enrolledCourseIds = enrollmentsQuery.data.map(
         (enrollment: EnrollmentType) => enrollment.courseId
       );
+      const enrolledCourseNames: string[] = [];
+      coursesQuery.data.forEach((element) => {
+        if (enrolledCourseIds.includes(element.id))
+          enrolledCourseNames.push(element.title);
+      });
+      setEnrolledCourseNames(enrolledCourseNames);
       setEnrolledCourseIds(enrolledCourseIds);
     }
-  }, [enrollmentsQuery.data]);
+  }, [enrollmentsQuery.data, coursesQuery.data]);
 
   const handleCheckboxToggle = (courseId: string, isChecked: boolean) => {
     if (isChecked) {
@@ -50,12 +69,24 @@ const CreateEnrollment = () => {
     }
   };
 
-  const getTotal = () => {
-    if (selectedCourses.length === 0) return 0;
-    if (selectedCourses.length > 0) {
-      return INITIAL_PRICE + (selectedCourses.length - 1) * PRICE_PER_COURSE;
-    }
-  };
+  useEffect(() => {
+    const enrolledCourses = selectedCourses.length + enrolledCourseIds.length;
+    //if the number is more or equal than five is the same fare
+    if (enrolledCourses >= 5)
+      return setTotalAmount(
+        faresQuery.data?.find((data) => data.type === "course_5")?.fare || 0
+      );
+    //look the fate for number of Course in fare collection
+    const fareAccumulated = faresQuery.data?.find(
+      (data) => data.numCourse === enrolledCourses
+    ) || { fare: 0 };
+    const previousFare = faresQuery.data?.find(
+      (data) => data.numCourse === enrolledCourseIds.length
+    ) || { fare: 0 };
+    const totalToPayForNewEnrollment =
+      fareAccumulated?.fare - previousFare?.fare;
+    setTotalAmount(selectedCourses.length > 0 ? totalToPayForNewEnrollment : 0);
+  }, [selectedCourses, faresQuery.data, enrolledCourseIds]);
 
   const handleImagePick = async () => {
     const imageSelected = await askForCameraPermission();
@@ -80,13 +111,12 @@ const CreateEnrollment = () => {
           status: "pending",
           paymentProofImage: imageUrl,
           userId: user?.uid,
-          totalAmount: getTotal(),
+          totalAmount,
           reviewedBy: null,
           reviewedAt: null,
         },
       });
     } catch (error: any) {
-      console.log("Error uploading enrollment:", error);
       alert("Error al subir la matricula. Por favor, intenta de nuevo.");
       setPaymentInProcess(false);
       return;
@@ -96,77 +126,104 @@ const CreateEnrollment = () => {
   };
 
   return (
-    <View className="mt-4">
-      <BackButton />
-      <Text className="text-white pl-4 text-2xl font-bold">
-        Cursos disponibles
-      </Text>
-      <DataLoader query={coursesQuery} emptyMessage="No hay cursos disponibles">
-        {/* TODO: fix this filter for something better */}
-        {(data) =>
-          data
-            ?.filter((course) => !enrolledCourseIds.includes(course.id))
-            .map((course) => (
-              <View key={course.id} className="p-4 border-b">
-                <BouncyCheckbox
-                  fillColor="turquoise"
-                  textComponent={
-                    <View className="ml-4">
-                      <Text className="text-white text-lg">{course.title}</Text>
-                      <Text className="text-gray-400">
-                        {course.description}
-                      </Text>
-                      <Text className="text-gray-500">{course.level}</Text>
-                      <Text className="text-gray-500">
-                        {capitalize(course.day || "")}-{" "}
-                        {new Date(course.startDate || "").toLocaleDateString()}
-                      </Text>
-                    </View>
-                  }
-                  isChecked={selectedCourses.includes(course.id)}
-                  onPress={(isChecked) => {
-                    handleCheckboxToggle(course.id, isChecked);
-                  }}
-                />
-              </View>
-            ))
-        }
-      </DataLoader>
-
-      <View className="ml-4 mt-5">
-        <Text className="text-white text-xl">
-          Total a pagar : <Text className="font-extrabold">₡{getTotal()}</Text>
-        </Text>
-
-        <TouchableHighlight
-          onPress={handleImagePick}
-          className="bg-blue-600 rounded-md p-5 mt-10 w-50 self-center text-center"
-        >
-          <Text className="text-white">Subir comprobante de pago</Text>
-        </TouchableHighlight>
-        {image && (
-          <Image
-            source={{ uri: image }}
-            className="self-center w-64 h-64 object-cover  mt-4"
-          />
-        )}
-        <TouchableHighlight
-          disabled={!image || selectedCourses.length === 0 || paymentInProcess}
-          className="bg-secondary rounded-md p-5 mt-4 w-50 self-center text-center disabled:bg-gray-500 disabled:opacity-50"
-          onPress={handleConfirmEnrollment}
-        >
-          <Text className="text-white">
-            {paymentInProcess
-              ? "Confirmando matrícula..."
-              : "Confirmar matrícula"}
-          </Text>
-        </TouchableHighlight>
-        <Text className="text-white text-sm mt-10">
-          Es recomendable de colocar en la descripción del pago su nombre y los
-          cursos a los que se está matriculando.
-        </Text>
+    <SafeAreaView className="bg-gray-950 flex-1">
+      <HeaderTitle title="Matricular nuevo curso" />
+      <View className="mx-5 my-1">
+        <HelperInfo info="A partir de 5 cursos matriculados, se aplicará una tarifa fija." />
       </View>
-    </View>
+      <ScrollView className="flex-1">
+        {enrolledCourseNames.length > 0 && (
+          <View className="px-3 py-2 mx-3 rounded-lg mt-4 bg-gray-800">
+            <Text className="text-white text-xl font-bold">
+              Cursos matriculados anteriormente:
+            </Text>
+            {enrolledCourseNames.map((item) => (
+              <Text key={item} className="text-primary px-6">
+                -{item}
+              </Text>
+            ))}
+          </View>
+        )}
+
+        <Text className="text-white ml-3 mt-4 text-xl font-bold">
+          Cursos disponibles para matricular:
+        </Text>
+        <DataLoader
+          query={coursesQuery}
+          emptyMessage="No hay cursos disponibles"
+        >
+          {/* TODO: fix this filter for something better */}
+          {(data) => (
+            <FlatList
+              data={data.filter(
+                (course) => !enrolledCourseIds.includes(course.id)
+              )}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View className="p-4 border-b bg-slate-800 rounded-lg mx-3 mt-2">
+                  <BouncyCheckbox
+                    fillColor="turquoise"
+                    textComponent={
+                      <View className="ml-4">
+                        <Text className="text-white text-lg">{item.title}</Text>
+                        <Text className="text-gray-400">
+                          {item.description}
+                        </Text>
+                        <Text className="text-gray-500">{item.level}</Text>
+                        <Text className="text-gray-500">
+                          {capitalize(item.day || "")}
+                        </Text>
+                      </View>
+                    }
+                    isChecked={selectedCourses.includes(item.id)}
+                    onPress={(isChecked) => {
+                      handleCheckboxToggle(item.id, isChecked);
+                    }}
+                  />
+                </View>
+              )}
+            />
+          )}
+        </DataLoader>
+
+        <View className="ml-4 mt-5">
+          <Text className="text-white text-xl">
+            Total a pagar :{" "}
+            <Text className="font-extrabold">₡{totalAmount}</Text>
+          </Text>
+
+          <TouchableHighlight
+            onPress={handleImagePick}
+            className="bg-blue-600 rounded-lg p-5 mt-10 w-50 self-center text-center"
+          >
+            <Text className="text-white">Subir comprobante de pago</Text>
+          </TouchableHighlight>
+          {image && (
+            <Image
+              source={{ uri: image }}
+              className="self-center w-64 h-64 object-cover  mt-4"
+            />
+          )}
+          <TouchableHighlight
+            disabled={
+              !image || selectedCourses.length === 0 || paymentInProcess
+            }
+            className="bg-primary rounded-lg p-5 mt-4 w-50 self-center text-center disabled:bg-gray-500 disabled:opacity-50"
+            onPress={handleConfirmEnrollment}
+          >
+            <Text>
+              {paymentInProcess
+                ? "Confirmando matrícula..."
+                : "Confirmar matrícula"}
+            </Text>
+          </TouchableHighlight>
+          <Text className="text-white text-sm mt-10">
+            Es recomendable de colocar en la descripción del pago su nombre y
+            los cursos a los que se está matriculando.
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 export default CreateEnrollment;

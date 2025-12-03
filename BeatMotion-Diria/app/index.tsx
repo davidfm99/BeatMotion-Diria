@@ -1,5 +1,5 @@
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { Redirect } from "expo-router";
-import { useActiveUser } from "@/hooks/UseActiveUser";
 
 const App = () => {
   const { user } = useActiveUser();

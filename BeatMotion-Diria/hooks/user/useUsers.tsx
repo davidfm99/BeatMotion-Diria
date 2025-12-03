@@ -1,13 +1,15 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { firestore } from "@/firebaseConfig";
 import { collection, getDocs, onSnapshot } from "@firebase/firestore";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Alert } from "react-native";
+import { userListSchema } from "./userSchema";
 
 const fetchUsers = async () => {
   try {
     const snapshot = await getDocs(collection(firestore, "users"));
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const users = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return userListSchema.parse(users);
   } catch (error) {
     console.error("Error fetching users:", error);
     Alert.alert("Error", "No se pudieron obtener los usuarios.");

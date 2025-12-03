@@ -1,9 +1,17 @@
 import DataLoader from "@/components/DataLoader";
+import HeaderTitle from "@/components/headerTitle";
+import VimeoVideoPlayer from "@/components/VimeoVideoPlayer";
 import YouTubeVideoPlayer from "@/components/YoutubeVideoPlayer";
-import { getEnrollmentColor, statusTranslations } from "@/constants/helpers";
+import {
+  getEnrollmentColor,
+  sanitizeVimeoUrl,
+  sanitizeYouTubeUrl,
+  statusTranslations,
+} from "@/constants/helpers";
+import { useAttendanceByUser } from "@/hooks/attendance/useAttendanceByUser";
 import { useClassesByCourseId } from "@/hooks/classes/useClassesByCourseId";
 import { useCourseDetail } from "@/hooks/courses/useCourseDetail";
-import { useActiveUser } from "@/hooks/UseActiveUser";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -12,15 +20,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const CourseDetail = () => {
   const [classesOpen, setClassesOpen] = useState<string[]>();
-  const { courseId } = useLocalSearchParams();
-  const classesQuery = useClassesByCourseId(courseId as string);
+  const { courseId } = useLocalSearchParams<{ courseId: string }>();
   const { user: activeUser } = useActiveUser();
+  const classesQuery = useClassesByCourseId(courseId as string);
+  const attendanceQuery = useAttendanceByUser(activeUser?.uid || "", courseId);
   const courseDetailQuery = useCourseDetail(
     activeUser?.uid || "",
     courseId as string
   );
-
-  console.log(classesQuery.data);
 
   const toggleClassOpen = (classId: string) => {
     setClassesOpen((prev) => {
@@ -40,9 +47,7 @@ const CourseDetail = () => {
       >
         {(course) => (
           <View className="flex-col gap-2">
-            <Text className="text-white text-3xl font-bold mb-2">
-              {course?.title}
-            </Text>
+            <HeaderTitle title={course?.title || ""} />
             <Text className="text-white text-lg mb-2">
               {course?.description}
             </Text>
@@ -76,9 +81,11 @@ const CourseDetail = () => {
               </Text>
             </Text>
             <Text className="text-gray-400 text-lg">
-              conteo de asistencias:{" "}
-              <Text className="text-yellow-400">
-                {course?.attendanceCount || 0}
+              Número total de asistencias:{" "}
+              <Text className="text-yellow-400 ml-3">
+                {attendanceQuery.data?.filter((data) => data.attended).length ||
+                  0}{" "}
+                de {classesQuery.data?.length} clase(s)
               </Text>
             </Text>
             <View className="mt-4">
@@ -91,7 +98,7 @@ const CourseDetail = () => {
                     data={data}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
-                      <View className="" key={item.id}>
+                      <View className="mb-3" key={item.id}>
                         <Pressable
                           className="bg-gray-900 p-4 gap-2 rounded-2xl flex-row justify-between items-center"
                           onPress={() => toggleClassOpen(item.id)}
@@ -128,12 +135,17 @@ const CourseDetail = () => {
                                   key={`${link.title}-${index}`}
                                   className="mt-3"
                                 >
-                                  <YouTubeVideoPlayer
-                                    videoURL={link.url.replace(
-                                      "https://youtu.be/",
-                                      ""
-                                    )}
-                                  />
+                                  {link.platform === "youtube" ? (
+                                    <YouTubeVideoPlayer
+                                      videoURL={
+                                        sanitizeYouTubeUrl(link.url) || ""
+                                      }
+                                    />
+                                  ) : (
+                                    <VimeoVideoPlayer
+                                      videoId={sanitizeVimeoUrl(link.url) || ""}
+                                    />
+                                  )}
                                 </View>
                               ))}
                           </ScrollView>
