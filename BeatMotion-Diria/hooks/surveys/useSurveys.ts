@@ -113,7 +113,7 @@ const fetchSurveysByCourse = async (courseId: string) => {
 
 export const useSurveysByCourse = (courseId: string) => {
   return useQuery({
-    queryKey: ["surveys", "course", courseId],
+    queryKey: ["surveys", courseId],
     queryFn: () => fetchSurveysByCourse(courseId),
     enabled: !!courseId,
     staleTime: 1000 * 60 * 5,
