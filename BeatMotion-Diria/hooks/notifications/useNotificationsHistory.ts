@@ -1,6 +1,12 @@
 import { firestore } from "@/firebaseConfig";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { collection, getDocs, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+} from "firebase/firestore";
 import { useEffect } from "react";
 import { Alert } from "react-native";
 import { draftListSchema } from "./notificationSchemas";
@@ -9,9 +15,11 @@ export const useNotificationsHistory = () => {
   const queryClient = useQueryClient();
   const getNotificationsHistory = async () => {
     try {
-      const snapshots = await getDocs(
-        collection(firestore, "notificationsHistory")
+      const queryRef = query(
+        collection(firestore, "notificationsHistory"),
+        orderBy("createdAt", "desc")
       );
+      const snapshots = await getDocs(queryRef);
       const notifications = snapshots.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -23,7 +31,7 @@ export const useNotificationsHistory = () => {
     }
   };
 
-  const query = useQuery({
+  const notificationQuery = useQuery({
     queryKey: ["notificationsHistory"],
     queryFn: getNotificationsHistory,
   });
@@ -42,5 +50,5 @@ export const useNotificationsHistory = () => {
     return () => unsub();
   }, [queryClient]);
 
-  return query;
+  return notificationQuery;
 };

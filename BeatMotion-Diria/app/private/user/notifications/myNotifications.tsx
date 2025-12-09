@@ -19,7 +19,7 @@ const MyNotifications = () => {
     markNotification.mutate(item.id);
   };
   return (
-    <SafeAreaView>
+    <SafeAreaView className="flex-1">
       <HeaderTitle
         title="Mis Notificaciones"
         subtitle="Toca la notificación para marcar como visto"
