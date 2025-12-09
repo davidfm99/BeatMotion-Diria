@@ -11,23 +11,20 @@ export const sendPaymentReminderNotification = async (
       logger.error("Missing userId or paymentDate");
     }
 
-    const snapShot = await firestore
-      .collection("pushTokens")
-      .where("userId", "==", userId)
-      .get();
-    if (snapShot.empty) {
+    const snapShot = await firestore.collection("pushTokens").doc(userId).get();
+    if (snapShot.exists) {
       logger.info(`No tokens for user ${userId}`);
       return;
     }
-    const tokens = snapShot.docs.map((doc) => doc.get("token"));
-    const messages = tokens.map((token) => ({
+    const token = snapShot.get("token");
+    const messages = {
       to: token,
       sound: "default",
       title: "Tu próximo pago se acerca",
       body: `Solo un recordatorio: tu pago vence el proximo ${formatDate(
         paymentDate
       )}.`,
-    }));
+    };
 
     await fetch("https://exp.host/--/api/v2/push/send", {
       method: "POST",
@@ -37,7 +34,7 @@ export const sendPaymentReminderNotification = async (
       body: JSON.stringify(messages),
     });
     logger.info(
-      `Payment reminder sent to ${tokens.length} device(s) for user ${userId}`
+      `Payment reminder sent to ${token} device(s) for user ${userId}`
     );
   } catch (er: any) {
     logger.error("Error sending push notification", er);
@@ -54,21 +51,18 @@ export const sendOverdueNotification = async (
       logger.error("Missing userId or paymentDate");
     }
 
-    const snapShot = await firestore
-      .collection("pushTokens")
-      .where("userId", "==", userId)
-      .get();
-    if (snapShot.empty) {
+    const snapShot = await firestore.collection("pushTokens").doc(userId).get();
+    if (snapShot.exists) {
       logger.info(`No tokens for user ${userId}`);
       return;
     }
-    const tokens = snapShot.docs.map((doc) => doc.get("token"));
-    const messages = tokens.map((token) => ({
+    const token = snapShot.get("token");
+    const messages = {
       to: token,
       sound: "default",
       title: "Ooops… pequeño tropiezo",
       body: `Tu pago está atrasado… pero prometemos no contárselo al resto del grupo.`,
-    }));
+    };
 
     await fetch("https://exp.host/--/api/v2/push/send", {
       method: "POST",
@@ -77,9 +71,7 @@ export const sendOverdueNotification = async (
       },
       body: JSON.stringify(messages),
     });
-    logger.info(
-      `Payment reminder sent to ${tokens.length} device(s) for user ${userId}`
-    );
+    logger.info(`Payment overdue sent to ${token} device for user ${userId}`);
   } catch (er: any) {
     logger.error("Error sending push notification", er);
   }

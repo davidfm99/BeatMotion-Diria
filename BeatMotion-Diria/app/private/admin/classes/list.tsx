@@ -81,7 +81,7 @@ export default function ClassesBrowserScreen() {
       },
     ]);
   };
-
+//TODO: Cambiar Vista de lista al DataLoader
   return (
     <SafeAreaView className="flex-1 bg-black px-6 py-10">
       <Text className="text-white text-2xl font-bold mb-6">Ver clases</Text>

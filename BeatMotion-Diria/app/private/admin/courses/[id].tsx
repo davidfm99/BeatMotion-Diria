@@ -1,18 +1,34 @@
-import { useEffect, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView } from "react-native";
-import { useLocalSearchParams, router, useRootNavigationState } from "expo-router";
-import { getFirestore, doc, getDoc, updateDoc, serverTimestamp, collection, query, where, onSnapshot, getDocs, orderBy } from "firebase/firestore";
+import AssignStudentModal from "@/components/AssignStudentModal";
+import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import type { Href } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import AssignStudentModal from "@/components/AssignStudentModal";
-
-type Teacher = {
-  id: string;
-  name: string;
-  lastName: string;
-  email: string;
-};
+import {
+  router,
+  useLocalSearchParams,
+  useRootNavigationState,
+} from "expo-router";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 type Teacher = {
   id: string;
@@ -22,7 +38,10 @@ type Teacher = {
 };
 
 export default function EditCourseScreen() {
-  const { id, tab } = useLocalSearchParams<{ id?: string; tab?: string | string[] }>();
+  const { id, tab } = useLocalSearchParams<{
+    id?: string;
+    tab?: string | string[];
+  }>();
 
   const navState = useRootNavigationState();
   const [notFound, setNotFound] = useState(false);
@@ -62,10 +81,10 @@ export default function EditCourseScreen() {
         where("role", "==", "teacher"),
         orderBy("name", "asc")
       );
-      
+
       const snapshot = await getDocs(q);
       const teachersList: Teacher[] = [];
-      
+
       snapshot.forEach((doc) => {
         const data = doc.data();
         teachersList.push({
@@ -79,8 +98,8 @@ export default function EditCourseScreen() {
       setTeachers(teachersList);
     } catch (error: any) {
       console.error("Error loading teachers:", error);
-      
-      if (error.code === 'failed-precondition') {
+
+      if (error.code === "failed-precondition") {
         Alert.alert(
           "Configuración requerida",
           "Se necesita crear un índice en Firestore. Revisa la consola para el enlace de creación del índice.",
@@ -119,7 +138,10 @@ export default function EditCourseScreen() {
   useEffect(() => {
     if (!id) return;
     const db = getFirestore();
-    const q = query(collection(db, "classes"), where("courseId", "==", String(id)));
+    const q = query(
+      collection(db, "classes"),
+      where("courseId", "==", String(id))
+    );
     const unsub = onSnapshot(q, (snap) => {
       const arr: any[] = [];
       snap.forEach((d) => arr.push({ id: d.id, ...d.data() }));
@@ -166,7 +188,9 @@ export default function EditCourseScreen() {
     );
   }
 
-  const showClassesTab = Array.isArray(tab) ? tab[0] === "classes" : tab === "classes";
+  const showClassesTab = Array.isArray(tab)
+    ? tab[0] === "classes"
+    : tab === "classes";
 
   return (
     <ScrollView className="flex-1 bg-black px-6 py-10">
@@ -188,7 +212,9 @@ export default function EditCourseScreen() {
           <Text className="text-white mb-2 font-semibold">Profesor *</Text>
           {teachers.length === 0 ? (
             <View className="bg-gray-900 rounded-xl px-4 py-3 mb-4">
-              <Text className="text-gray-400">No hay usuarios con rol de profesor</Text>
+              <Text className="text-gray-400">
+                No hay usuarios con rol de profesor
+              </Text>
               <Text className="text-gray-500 text-xs mt-2">
                 Asigna el rol profesor a un usuario
               </Text>
@@ -202,8 +228,8 @@ export default function EditCourseScreen() {
                 style={{ color: "white" }}
               >
                 {teachers.map((t) => (
-                  <Picker.Item 
-                    key={t.id} 
+                  <Picker.Item
+                    key={t.id}
                     label={`${t.name} ${t.lastName}`}
                     value={`${t.name} ${t.lastName}`}
                   />
@@ -268,16 +294,20 @@ export default function EditCourseScreen() {
           <TouchableOpacity
             className="bg-white rounded-2xl px-5 py-4 active:opacity-80 mb-4"
             onPress={() =>
-              router.push(
-                { pathname: "/private/admin/classes/new", params: { courseId: String(id) } } as Href
-              )
+              router.push({
+                pathname: "/private/admin/classes/new",
+                params: { courseId: String(id) },
+              } as Href)
             }
           >
             <Text className="text-center font-semibold">Crear clase</Text>
           </TouchableOpacity>
 
           {classes.map((cl) => (
-            <View key={cl.id} className="bg-gray-900 rounded-2xl px-4 py-3 mb-3">
+            <View
+              key={cl.id}
+              className="bg-gray-900 rounded-2xl px-4 py-3 mb-3"
+            >
               <Text className="text-white font-semibold">
                 {cl.title || `${cl.date} ${cl.startTime}-${cl.endTime}`}
               </Text>
@@ -291,9 +321,10 @@ export default function EditCourseScreen() {
                 <TouchableOpacity
                   className="bg-white rounded-xl px-4 py-2"
                   onPress={() =>
-                    router.push(
-                      { pathname: "/private/admin/classes/[id]", params: { id: String(cl.id) } } as Href
-                    )
+                    router.push({
+                      pathname: "/private/admin/classes/[id]",
+                      params: { id: String(cl.id) },
+                    } as Href)
                   }
                 >
                   <Text className="font-semibold">Editar</Text>
@@ -317,8 +348,14 @@ export default function EditCourseScreen() {
           onPress={() =>
             router.replace(
               showClassesTab
-                ? ({ pathname: "/private/admin/courses/[id]", params: { id: String(id) } } as Href)
-                : ({ pathname: "/private/admin/courses/[id]", params: { id: String(id), tab: "classes" } } as Href)
+                ? ({
+                    pathname: "/private/admin/courses/[id]",
+                    params: { id: String(id) },
+                  } as Href)
+                : ({
+                    pathname: "/private/admin/courses/[id]",
+                    params: { id: String(id), tab: "classes" },
+                  } as Href)
             )
           }
         >
