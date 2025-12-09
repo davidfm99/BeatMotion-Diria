@@ -126,6 +126,7 @@ const PaymentCenter = () => {
         {(data, isRefetching, refetch) => (
           <FlatList
             data={data}
+            contentContainerStyle={{ gap: 15 }}
             keyExtractor={(item) => item.id}
             refreshControl={
               <RefreshControl

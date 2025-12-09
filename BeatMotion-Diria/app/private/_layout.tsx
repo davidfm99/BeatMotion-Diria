@@ -25,21 +25,21 @@ export default function PrivateLayout() {
         options={{ headerShown: false }}
       />
       {/* Encuestas */}
-       <Stack.Screen 
-        name="surveys/list" 
-        options={{ 
+      <Stack.Screen
+        name="user/surveys/list"
+        options={{
           headerShown: false,
-          title: "Encuestas Disponibles" 
-        }} 
+          title: "Encuestas Disponibles",
+        }}
       />
-      <Stack.Screen 
-        name="surveys/take/[surveyId]" 
-        options={{ 
+      <Stack.Screen
+        name="user/surveys/take/[surveyId]"
+        options={{
           headerShown: false,
           title: "Responder Encuesta",
-          presentation: "card"
-        }} 
-        />
+          presentation: "card",
+        }}
+      />
       <Stack.Screen
         name="user/payment/paymentCenter"
         options={{ headerShown: false }}

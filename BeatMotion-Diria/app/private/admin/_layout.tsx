@@ -48,24 +48,27 @@ export default function AdminLayout() {
         name="coursesMenu"
         options={{ title: "Cursos", headerShown: false }}
       />
-<Stack.Screen
-  name="user/dataUsersComparison"
-  options={{ title: "Estadisticas",
-    headerShown: true,headerStyle: { backgroundColor: "#000" },
-    headerTintColor: "#fff",
-  }}
-/>
+      <Stack.Screen
+        name="user/dataUsersComparison"
+        options={{
+          title: "Estadisticas",
+          headerShown: true,
+          headerStyle: { backgroundColor: "#000" },
+          headerTintColor: "#fff",
+        }}
+      />
 
-<Stack.Screen
-  name="user/progress"
-  options={{ title: "Estudiante",
-    headerShown: true,headerStyle: { backgroundColor: "#000" },
-    headerTintColor: "#fff",
-  }}
-   />
+      <Stack.Screen
+        name="user/progress"
+        options={{
+          title: "Estudiante",
+          headerShown: true,
+          headerStyle: { backgroundColor: "#000" },
+          headerTintColor: "#fff",
+        }}
+      />
 
-
-  {/* Cursos */}
+      {/* Cursos */}
       <Stack.Screen
         name="courses/list"
         options={{ title: "Ver cursos", headerShown: false }}
@@ -130,36 +133,43 @@ export default function AdminLayout() {
         name="notifications/notificationsHistory"
         options={{ headerShown: false }}
       />
-      <Stack.Screen 
-        name="surveys/list" 
-        options={{ 
+      <Stack.Screen
+        name="surveys/list"
+        options={{
           headerShown: false,
-          title: "Gestión de Encuestas" 
-        }} 
+          title: "Gestión de Encuestas",
+        }}
       />
       {/* Encuestas*/}
-      <Stack.Screen 
-        name="surveys/create" 
-        options={{ 
+      <Stack.Screen
+        name="user/surveys/list"
+        options={{
+          headerShown: false,
+        }}
+      />
+      {/* Encuestas*/}
+      <Stack.Screen
+        name="surveys/create"
+        options={{
           headerShown: false,
           title: "Nueva Encuesta",
-          presentation: "modal" 
-        }} 
+          presentation: "modal",
+        }}
       />
-      <Stack.Screen 
-        name="surveys/edit/[surveyId]" 
-        options={{ 
+      <Stack.Screen
+        name="surveys/edit/[surveyId]"
+        options={{
           headerShown: false,
-          title: "Editar Encuesta" 
-        }} 
+          title: "Editar Encuesta",
+        }}
       />
-      <Stack.Screen 
-        name="surveys/results/[surveyId]" 
-        options={{ 
+      <Stack.Screen
+        name="surveys/results/[surveyId]"
+        options={{
           headerShown: false,
-          title: "Resultados de Encuesta" 
-        }} 
-        />
+          title: "Resultados de Encuesta",
+        }}
+      />
       <Stack.Screen
         name="payment/paymentCenter"
         options={{ headerShown: false }}
@@ -171,7 +181,5 @@ export default function AdminLayout() {
         options={{ title: "Reportes", headerShown: false }}
       />
     </Stack>
-
-   
   );
 }
