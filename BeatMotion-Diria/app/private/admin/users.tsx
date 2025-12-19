@@ -5,7 +5,7 @@ import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useUsers } from "@/hooks/user/useUsers";
 import { getOrCreateUserProgress } from "@/services/userprogress";
 import { useRouter } from "expo-router";
-import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -40,30 +40,6 @@ export default function AdminUsersScreen() {
     }
   };
 
-  const handleDelete = async (uid: string) => {
-    Alert.alert(
-      "Confirmar eliminación",
-      "¿Eliminar este usuario permanentemente?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteDoc(doc(firestore, "users", uid));
-              Alert.alert("Eliminado", "Usuario eliminado de Firestore");
-            } catch (error) {
-              console.error("Error deleting user:", error);
-            }
-          },
-        },
-      ]
-    );
-  };
   const renderComparisonButton = () => (
     <TouchableOpacity
       onPress={() => router.push("/private/admin/user/dataUsersComparison")}
@@ -138,12 +114,6 @@ export default function AdminUsersScreen() {
           <Text className="text-white">
             {item.active ? "Desactivar" : "Activar"}
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="bg-red-600 px-3 py-2 rounded-xl"
-          onPress={() => handleDelete(item.id)}
-        >
-          <Text className="text-white">Eliminar</Text>
         </TouchableOpacity>
       </View>
     </View>
