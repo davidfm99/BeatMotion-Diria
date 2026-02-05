@@ -25,7 +25,7 @@ const updateAttendance = async (attendance: AttendanceType[]) => {
     await batch.commit();
     Alert.alert("Éxito", "Asistencias guardadas exitosamente");
   } catch (error: any) {
-    console.log("Error in useUpdateAttendance", error.message);
+    console.error("Error in useUpdateAttendance", error.message);
     Alert.alert(
       "Error",
       "Asistencia no ha sido guardada. Intente de nuevo, por favor"

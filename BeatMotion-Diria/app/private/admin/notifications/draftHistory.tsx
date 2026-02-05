@@ -72,6 +72,11 @@ export default function DraftHistoryScreen() {
     >
       {(draft, isFetching, refetch) => (
         <FlatList
+          contentContainerStyle={{
+            paddingLeft: 8,
+            paddingEnd: 8,
+            width: 390,
+          }}
           data={draft}
           keyExtractor={(item) => item.id}
           refreshControl={

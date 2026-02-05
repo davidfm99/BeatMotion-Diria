@@ -13,7 +13,6 @@ export const useMembersByCourse = (courseId: string) => {
         where("courseId", "==", courseId)
       );
       const snapshots = await getDocs(queryRef);
-      console.log("snapshots", snapshots);
       const userList = users.data || [];
       const members = snapshots.docs.map((snap) => ({
         id: snap.id,
@@ -22,7 +21,7 @@ export const useMembersByCourse = (courseId: string) => {
       }));
       return membersByCourseSchema.parse(members);
     } catch (error) {
-      console.log("Error in useMembersByCourse", error);
+      console.error("Error in useMembersByCourse", error);
     }
   };
 

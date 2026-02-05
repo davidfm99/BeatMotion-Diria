@@ -1,6 +1,6 @@
 import { firestore } from "@/firebaseConfig";
 import { useMutation } from "@tanstack/react-query";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { Alert } from "react-native";
 import { RequestSchema } from "./notificationSchemas";
 
@@ -13,7 +13,7 @@ const updateDraft = async ({
 }) => {
   try {
     const draftRef = doc(firestore, "drafts", id);
-    await updateDoc(draftRef, body);
+    await updateDoc(draftRef, { ...body, updateAt: serverTimestamp() });
     Alert.alert("Borrador guardado correctamente.");
   } catch (err) {
     console.error("Error in draft update", err);

@@ -24,6 +24,7 @@ export const useNotificationsHistory = () => {
         id: doc.id,
         ...doc.data(),
       }));
+      console.log("notifications", notifications);
       return draftListSchema.parse(notifications);
     } catch (err) {
       console.error(err);

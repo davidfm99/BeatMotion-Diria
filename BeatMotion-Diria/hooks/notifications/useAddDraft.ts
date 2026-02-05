@@ -1,6 +1,6 @@
 import { firestore } from "@/firebaseConfig";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Alert } from "react-native";
 import { RequestSchema } from "./notificationSchemas";
 
@@ -13,7 +13,7 @@ const createDraft = async (d: RequestSchema) => {
   try {
     await addDoc(collection(firestore, "drafts"), {
       ...d,
-      createdAt: new Date().toISOString(),
+      createdAt: serverTimestamp(),
     });
 
     Alert.alert("Éxito", "Borrador ha sido guardado correctamente.");

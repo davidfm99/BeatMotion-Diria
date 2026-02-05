@@ -39,7 +39,6 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     if (userInfo.data) {
-      console.log(userInfo.data);
       setName(userInfo.data.name);
       setLastName(userInfo.data.lastName);
       setPhone(userInfo.data.phone || "");
