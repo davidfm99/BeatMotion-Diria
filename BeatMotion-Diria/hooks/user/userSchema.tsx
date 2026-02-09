@@ -10,7 +10,7 @@ export const userSchema = zod
     phone: zod.string().optional(),
     role: zod.enum(["user", "admin", "teacher"]),
     photoURL: zod.string().url().optional(),
-    active: zod.boolean(),
+    isActive: zod.boolean(),
     createdAt: timestampSchema,
   })
   .transform((user) => ({

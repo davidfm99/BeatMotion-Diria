@@ -41,7 +41,7 @@ export const useCreateEvent = () => {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         createdBy: user?.uid ?? "system",
-        isDeleted: true,
+        isDeleted: false,
       };
 
       await addDoc(collection(firestore, "events"), payload);

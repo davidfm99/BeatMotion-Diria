@@ -32,10 +32,10 @@ export const useUpdateClass = () => {
         ...patch,
         updatedAt: serverTimestamp(),
       });
-      Alert.alert("Clase", "Eliminada correctamente.");
+      Alert.alert("Clase", "Actualizada correctamente.");
     } catch (e) {
       console.error(e);
-      Alert.alert("Error", "No se pudo eliminar la clase.");
+      Alert.alert("Error", "No se pudo actualizar la clase.");
     }
   };
 

@@ -79,6 +79,7 @@ export default function EditCourseScreen() {
       const q = query(
         collection(firestore, "users"),
         where("role", "==", "teacher"),
+        where("isActive", "==", true),
         orderBy("name", "asc"),
       );
 
@@ -252,15 +253,6 @@ export default function EditCourseScreen() {
               multiline
             />
 
-            <Text className="text-white mb-2 font-semibold">Imagen (URL)</Text>
-            <TextInput
-              className="bg-gray-900 text-white rounded-xl px-4 py-3 mb-6"
-              value={imageUrl}
-              onChangeText={setImageUrl}
-              placeholder="https://..."
-              placeholderTextColor="#9CA3AF"
-            />
-
             <TouchableOpacity
               className="bg-primary rounded-2xl px-5 py-4 active:opacity-80 mb-4"
               onPress={handleUpdateCourse}
@@ -324,36 +316,6 @@ export default function EditCourseScreen() {
             ))}
           </>
         )}
-
-        <View className="flex-row gap-2 mt-4">
-          <TouchableOpacity
-            className="bg-gray-700 rounded-2xl px-5 py-3"
-            onPress={() => router.replace("/private/admin/coursesMenu")}
-          >
-            <Text className="text-center text-white font-semibold">Volver</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="bg-gray-800 rounded-2xl px-5 py-3"
-            onPress={() =>
-              router.replace(
-                showClassesTab
-                  ? ({
-                      pathname: "/private/admin/courses/[id]",
-                      params: { id: String(id) },
-                    } as Href)
-                  : ({
-                      pathname: "/private/admin/courses/[id]",
-                      params: { id: String(id), tab: "classes" },
-                    } as Href),
-              )
-            }
-          >
-            <Text className="text-center text-white font-semibold">
-              {showClassesTab ? "Editar curso" : "Ver clases"}
-            </Text>
-          </TouchableOpacity>
-        </View>
 
         <AssignStudentModal
           visible={assignModalVisible}

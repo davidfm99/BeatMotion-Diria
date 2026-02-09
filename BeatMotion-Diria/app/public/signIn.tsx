@@ -73,7 +73,7 @@ const SignIn = () => {
         createdAt: new Date(),
         uid: user.uid,
         role: "user",
-        active: true,
+        isActive: true,
       });
       handleClearValues();
       Alert.alert("Registro exitoso", "Usuario registrado y datos guardados", [

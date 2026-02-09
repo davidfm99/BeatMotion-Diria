@@ -12,7 +12,7 @@ export const useDeleteEvent = () => {
     mutationFn: async ({ id }: DeleteEventInput) => {
       if (!id) throw new Error("ID de evento faltante");
       await updateDoc(doc(firestore, "events", id), {
-        isDeleted: false,
+        isDeleted: true,
         updatedAt: serverTimestamp(),
       });
     },

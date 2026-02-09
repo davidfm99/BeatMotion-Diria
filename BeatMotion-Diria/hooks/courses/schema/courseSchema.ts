@@ -7,7 +7,7 @@ export const courseSchema = zod.array(
     id: zod.string(),
     title: zod.string().min(2).max(200),
     teacher: zod.string().min(2).max(100),
-    description: zod.string().min(10).max(1000),
+    description: zod.string().min(0).max(1000),
     isDeleted: zod.boolean(),
     level: zod.enum(["Inicial", "Intermedio", "Avanzado"]),
     createdBy: zod.string().min(2).max(100).nullable(),

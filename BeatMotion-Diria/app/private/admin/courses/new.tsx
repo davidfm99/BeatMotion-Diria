@@ -114,7 +114,7 @@ export default function NewCourseScreen() {
         level: level.trim(),
         teacher: teacher.trim(),
         // imageUrl: imageUrl.trim() || undefined,
-        isDeleted: true,
+        isDeleted: false,
         createdBy: uid,
         day: day,
       });
@@ -212,15 +212,6 @@ export default function NewCourseScreen() {
           placeholderTextColor="#9CA3AF"
           multiline
         />
-
-        <Text className="text-white mb-2 font-semibold">Imagen (URL)</Text>
-        {/* <TextInput
-          className="bg-gray-900 text-white rounded-xl px-4 py-3 mb-6"
-          value={imageUrl}
-          onChangeText={setImageUrl}
-          placeholder="https://..."
-          placeholderTextColor="#9CA3AF"
-        /> */}
 
         <TouchableOpacity
           className="bg-primary rounded-2xl px-5 py-4 active:opacity-80 mb-3"

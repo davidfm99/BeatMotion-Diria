@@ -9,7 +9,7 @@ export const useActiveStudents = () =>
       const q = query(
         collection(firestore, "users"),
         where("role", "==", "admin"),
-        where("active", "==", true),
+        where("isActive", "==", true),
       );
       const snapshot = await getDocs(q);
       return snapshot.size;
@@ -25,7 +25,7 @@ export const useActiveTeachers = () =>
       const q = query(
         collection(firestore, "users"),
         where("role", "==", "teacher"),
-        where("active", "==", true),
+        where("isActive", "==", true),
       );
       const snapshot = await getDocs(q);
       return snapshot.size;

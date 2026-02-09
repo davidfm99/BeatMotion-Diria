@@ -213,6 +213,7 @@ export default function NewClassScreen() {
         })),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+        isDeleted: false,
       });
       Alert.alert("Clase", "Creada correctamente.");
       setPendingNav(true);

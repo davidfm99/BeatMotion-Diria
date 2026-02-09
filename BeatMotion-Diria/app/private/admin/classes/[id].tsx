@@ -197,18 +197,19 @@ export default function EditClassScreen() {
     const body = {
       id,
       title: title.trim(),
-      description: description.trim() || undefined,
+      description: description.trim() || "",
       content: content.trim(),
-      objectives: objectives.trim() || undefined,
-      date: date.trim() || undefined,
-      startTime: startTime.trim() || undefined,
-      endTime: endTime.trim() || undefined,
+      objectives: objectives.trim() || "",
+      date: date.trim() || "",
+      startTime: startTime.trim() || "",
+      endTime: endTime.trim() || "",
       videoLinks: videoLinks.map((v) => ({
         url: v.url,
         platform: v.platform,
         title: v.title as string,
       })),
     };
+    console.log("update Class", body);
     updateClassMutation.mutate({ id, patch: body });
     router.back();
   };

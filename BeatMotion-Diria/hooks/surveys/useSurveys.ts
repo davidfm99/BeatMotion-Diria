@@ -68,7 +68,7 @@ const fetchSurveys = async () => {
   try {
     const q = query(
       collection(firestore, "surveys"),
-      where("isDelete", "==", false),
+      where("isDeleted", "==", false),
     );
     const snapshot = await getDocs(q);
     const surveys = snapshot.docs.map((doc) => ({
