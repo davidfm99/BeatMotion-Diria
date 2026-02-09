@@ -17,14 +17,13 @@ export const useNotificationsHistory = () => {
     try {
       const queryRef = query(
         collection(firestore, "notificationsHistory"),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "desc"),
       );
       const snapshots = await getDocs(queryRef);
       const notifications = snapshots.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      console.log("notifications", notifications);
       return draftListSchema.parse(notifications);
     } catch (err) {
       console.error(err);
@@ -46,7 +45,7 @@ export const useNotificationsHistory = () => {
           ...doc.data(),
         }));
         queryClient.setQueryData(["notificationsHistory"], notificaciones);
-      }
+      },
     );
     return () => unsub();
   }, [queryClient]);

@@ -209,7 +209,6 @@ export default function EditClassScreen() {
         title: v.title as string,
       })),
     };
-    console.log("update Class", body);
     updateClassMutation.mutate({ id, patch: body });
     router.back();
   };

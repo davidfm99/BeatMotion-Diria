@@ -13,7 +13,6 @@ const DICTIONARY_SENTS = {
 const NotificationsHistory = () => {
   const notificationsQuery = useNotificationsHistory();
 
-  // console.log("query", notificationsQuery.data);
   return (
     <DataLoader
       query={notificationsQuery}
