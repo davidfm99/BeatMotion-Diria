@@ -44,8 +44,8 @@ const Attendance = () => {
     } else {
       SetAttendancePerUser((prev) =>
         prev.map((att) =>
-          att.userId === userId ? { ...att, attended: isChecked } : att
-        )
+          att.userId === userId ? { ...att, attended: isChecked } : att,
+        ),
       );
     }
   };

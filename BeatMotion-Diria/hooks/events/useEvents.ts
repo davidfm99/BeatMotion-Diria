@@ -1,8 +1,15 @@
+import { firestore } from "@/firebaseConfig";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  collection,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
 import { useEffect } from "react";
 import { Alert } from "react-native";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { collection, getDocs, onSnapshot, orderBy, query, where } from "firebase/firestore";
-import { firestore } from "@/firebaseConfig";
 import { eventCollectionSchema, type Event } from "./schema";
 
 type Options = {
@@ -18,7 +25,11 @@ const buildQuery = (options?: Options) => {
   if (!options?.includePrivate) {
     constraints.push(where("isPublic", "==", true));
   }
-  return query(collection(firestore, "events"), ...constraints);
+  return query(
+    collection(firestore, "events"),
+    where("isDeleted", "==", false),
+    ...constraints,
+  );
 };
 
 const fetchEvents = async (options?: Options) => {
@@ -29,14 +40,18 @@ const fetchEvents = async (options?: Options) => {
       ({
         id: doc.id,
         ...doc.data(),
-      }) as Record<string, unknown>
+      }) as Record<string, unknown>,
   );
   return eventCollectionSchema.parse(records);
 };
 
 export const useEvents = (options?: Options) => {
   const queryClient = useQueryClient();
-  const queryKey = ["events", !!options?.includeDrafts, !!options?.includePrivate];
+  const queryKey = [
+    "events",
+    !!options?.includeDrafts,
+    !!options?.includePrivate,
+  ];
 
   const queryResult = useQuery<Event[]>({
     queryKey,
@@ -62,7 +77,7 @@ export const useEvents = (options?: Options) => {
             ({
               id: doc.id,
               ...doc.data(),
-            }) as Record<string, unknown>
+            }) as Record<string, unknown>,
         );
         const parsed = eventCollectionSchema.parse(records);
         queryClient.setQueryData(queryKey, parsed);

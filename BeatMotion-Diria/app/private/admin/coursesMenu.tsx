@@ -2,6 +2,7 @@ import DataLoader from "@/components/DataLoader";
 import HeaderTitle from "@/components/headerTitle";
 import { firestore } from "@/firebaseConfig";
 import { useCourses } from "@/hooks/courses/useCourses";
+import { useUpdateCourse } from "@/hooks/courses/useUpdateCourse";
 import { Ionicons, Octicons } from "@expo/vector-icons";
 import type { Href } from "expo-router";
 import { router } from "expo-router";
@@ -29,8 +30,9 @@ type ClassItem = {
 
 export default function CoursesMenuScreen() {
   const coursesQuery = useCourses();
+  const updateCourse = useUpdateCourse();
   const [expandedCourses, setExpandedCourses] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [classesByCourse, setClassesByCourse] = useState<
     Record<string, ClassItem[]>
@@ -44,7 +46,7 @@ export default function CoursesMenuScreen() {
     coursesQuery.data.forEach((course) => {
       const q = query(
         collection(firestore, "classes"),
-        where("courseId", "==", course.id)
+        where("courseId", "==", course.id),
       );
 
       const unsub = onSnapshot(q, (snapshot) => {
@@ -79,26 +81,20 @@ export default function CoursesMenuScreen() {
     });
   };
 
-  const handleDeleteCourse = (courseId: string, courseName: string) => {
+  const handleDeleteCourse = (course: any) => {
     Alert.alert(
       "Eliminar curso",
-      `¿Estás seguro de eliminar "${courseName}"? Esto también eliminará todas sus clases.`,
+      `¿Estás seguro de eliminar "${course.name}"? Esto también eliminará todas sus clases.`,
       [
         { text: "Cancelar", style: "cancel" },
         {
           text: "Eliminar",
           style: "destructive",
           onPress: async () => {
-            try {
-              await deleteDoc(doc(firestore, "courses", courseId));
-              Alert.alert("Éxito", "Curso eliminado correctamente");
-            } catch (error) {
-              console.error(error);
-              Alert.alert("Error", "No se pudo eliminar el curso");
-            }
+            updateCourse.mutate({ id: course.id, patch: { isDeleted: false } });
           },
         },
-      ]
+      ],
     );
   };
 
@@ -194,9 +190,7 @@ export default function CoursesMenuScreen() {
                         </TouchableOpacity>
                         <TouchableOpacity
                           className="bg-gray-800 rounded-full p-2"
-                          onPress={() =>
-                            handleDeleteCourse(course.id, course.title)
-                          }
+                          onPress={() => handleDeleteCourse(course)}
                         >
                           <Ionicons
                             name="trash-outline"
@@ -300,7 +294,7 @@ export default function CoursesMenuScreen() {
                                       classItem.id,
                                       classItem.title ||
                                         classItem.date ||
-                                        "esta clase"
+                                        "esta clase",
                                     )
                                   }
                                 >

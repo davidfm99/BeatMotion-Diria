@@ -51,7 +51,6 @@ export default function NewClassScreen() {
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [capacity, setCapacity] = useState<string>("");
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
@@ -64,9 +63,14 @@ export default function NewClassScreen() {
   const navState = useRootNavigationState();
   const [pendingNav, setPendingNav] = useState(false);
 
+  //todo: Code dev
   useEffect(() => {
     const db = getFirestore();
-    const q = query(collection(db, "courses"), orderBy("createdAt", "desc"));
+    const q = query(
+      collection(db, "courses"),
+      where("isDeleted", "==", false),
+      orderBy("createdAt", "desc"),
+    );
     const unsub = onSnapshot(q, (snap) => {
       const arr: any[] = [];
       snap.forEach((d) => arr.push({ id: d.id, ...d.data() }));
@@ -88,7 +92,7 @@ export default function NewClassScreen() {
       const db = getFirestore();
       const q = query(
         collection(db, "classes"),
-        where("courseId", "==", selectedCourseId)
+        where("courseId", "==", selectedCourseId),
       );
       const snapshot = await getDocs(q);
       const classCount = snapshot.size;
@@ -109,7 +113,7 @@ export default function NewClassScreen() {
   function pad(n: number) {
     return n < 10 ? `0${n}` : String(n);
   }
-
+  //Todo: use format already created
   function formatYYYYMMDD(d: Date) {
     const y = d.getFullYear();
     const m = pad(d.getMonth() + 1);
@@ -202,7 +206,6 @@ export default function NewClassScreen() {
         date: date.trim() || null,
         startTime: startTime.trim() || null,
         endTime: endTime.trim() || null,
-        capacity: capacity ? Number(capacity) : null,
         videoLinks: videoLinks.map((v) => ({
           url: v.url,
           platform: v.platform,
@@ -363,19 +366,6 @@ export default function NewClassScreen() {
                   }}
                 />
               )}
-
-              {/* Capacity */}
-              <Text className="text-gray-300 mb-2 text-sm">
-                Capacidad máxima
-              </Text>
-              <TextInput
-                className="bg-gray-900 text-white rounded-xl px-4 py-3"
-                value={capacity}
-                onChangeText={setCapacity}
-                placeholder="Ej: 20"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="number-pad"
-              />
             </View>
 
             {/* Description */}

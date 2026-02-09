@@ -11,7 +11,6 @@ import { useEnrollmentsByStatus } from "@/hooks/enrollment/useEnrollmentsByStatu
 import { useUpdateEnrollment } from "@/hooks/enrollment/useUpdateEnrollment";
 import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useRouter } from "expo-router";
-import { serverTimestamp } from "firebase/database";
 import { useState } from "react";
 import {
   Alert,
@@ -58,7 +57,7 @@ const EnrollmentList = () => {
 
   const handleClickOption = async (
     enrollment: Enrollmentype,
-    action: "approve" | "reject"
+    action: "approve" | "reject",
   ) => {
     const { course, user, ...rest } = enrollment;
     try {
@@ -66,7 +65,6 @@ const EnrollmentList = () => {
         ...rest,
         status: action === "approve" ? "approved" : "rejected",
         reviewedBy: activeUser?.uid || null,
-        reviewedAt: serverTimestamp(),
       });
       Alert.alert("Matrícula actualizada");
     } catch (error: any) {
@@ -76,7 +74,7 @@ const EnrollmentList = () => {
 
   const handleConfirmationEnrollment = (
     enrollment: Enrollmentype,
-    action: "approve" | "reject"
+    action: "approve" | "reject",
   ) => {
     Alert.alert(
       `Confirmar ${action === "approve" ? "aprobar" : "rechazar"}`,
@@ -92,7 +90,7 @@ const EnrollmentList = () => {
           text: "Confirmar",
           onPress: () => handleClickOption(enrollment, action),
         },
-      ]
+      ],
     );
   };
 
@@ -135,7 +133,7 @@ const EnrollmentList = () => {
                   onClickImage(item.paymentProofImage || "");
                 }}
               >
-                <>
+                <View>
                   {item.status === "pending" && (
                     <View className="absolute top-2 right-2 z-10 flex-row gap-4">
                       <TouchableHighlight
@@ -156,6 +154,7 @@ const EnrollmentList = () => {
                       </TouchableHighlight>
                     </View>
                   )}
+                  {/* Image */}
                   <View className="h-36 w-full bg-gray-950">
                     {item.paymentProofImage ? (
                       <Image
@@ -177,40 +176,39 @@ const EnrollmentList = () => {
                     )}
                   </View>
                   <View className="p-4 gap-2">
-                    <TouchableHighlight
-                      onPress={() =>
-                        handleViewCourseDetails(item.course?.id || "")
-                      }
-                    >
-                      <Text className="text-primary text-2xl font-bold">
-                        {item.course?.title}
-                      </Text>
-                    </TouchableHighlight>
-
-                    <Text className="text-white text-lg">
-                      Estado:{" "}
-                      <Text className={`${getEnrollmentColor(item.status)}`}>
-                        {statusTranslations[item.status]}
-                      </Text>
-                    </Text>
                     <View className="text-md flex-row ">
-                      <Text className="text-white">Estudiante: </Text>
                       <TouchableHighlight
                         onPress={() =>
                           handleViewUserProfile(item.user?.id || "")
                         }
                       >
-                        <Text className=" text-primary">
+                        <Text className="text-primary text-2xl">
                           {item.user?.name} {item.user?.lastName}
                         </Text>
                       </TouchableHighlight>
                     </View>
+                    <TouchableHighlight
+                      onPress={() =>
+                        handleViewCourseDetails(item.course?.id || "")
+                      }
+                    >
+                      <Text className="text-white text-lg font-bold">
+                        Curso: {item.course?.title}
+                      </Text>
+                    </TouchableHighlight>
+
+                    <Text className="text-white text-lg">
+                      <Text className={`${getEnrollmentColor(item.status)}`}>
+                        {statusTranslations[item.status]}
+                      </Text>
+                    </Text>
+                    <Text className="text-white">
+                      Monto total: {formatCurrency(item.totalAmount)}
+                    </Text>
                     <Text className="text-white">
                       Correo Estudiante: {item.user?.email}
                     </Text>
-                    <Text className="text-gray-400">
-                      Monto total: {formatCurrency(item.totalAmount)}
-                    </Text>
+
                     <Text className="text-gray-400">
                       Fecha de solicitud:{" "}
                       {new Date(item.submittedAt).toLocaleDateString()}
@@ -219,7 +217,7 @@ const EnrollmentList = () => {
                       Dia de curso: {item.course?.day}
                     </Text>
                   </View>
-                </>
+                </View>
               </TouchableHighlight>
             )}
           />

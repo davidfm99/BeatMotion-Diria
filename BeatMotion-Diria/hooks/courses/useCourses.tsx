@@ -1,13 +1,26 @@
 import { firestore } from "@/firebaseConfig";
-import { collection, getDocs, onSnapshot } from "@firebase/firestore";
+import {
+  collection,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "@firebase/firestore";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Alert } from "react-native";
 import { courseSchema } from "./schema/courseSchema";
 
+const courseQuery = query(
+  collection(firestore, "courses"),
+  where("isDeleted", "==", false),
+  orderBy("createdAt", "desc"),
+);
+
 const fetchCourses = async () => {
   try {
-    const snapshot = await getDocs(collection(firestore, "courses"));
+    const snapshot = await getDocs(courseQuery);
     const courses = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -31,7 +44,7 @@ export const useCourses = () => {
 
   //Will do updates in real time
   useEffect(() => {
-    const unsub = onSnapshot(collection(firestore, "courses"), (snapshot) => {
+    const unsub = onSnapshot(courseQuery, (snapshot) => {
       const courses = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),

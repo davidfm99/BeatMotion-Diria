@@ -1,4 +1,7 @@
 import AssignStudentModal from "@/components/AssignStudentModal";
+import HeaderTitle from "@/components/headerTitle";
+import { firestore } from "@/firebaseConfig";
+import { useUpdateCourse } from "@/hooks/courses/useUpdateCourse";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import type { Href } from "expo-router";
@@ -16,8 +19,6 @@ import {
   onSnapshot,
   orderBy,
   query,
-  serverTimestamp,
-  updateDoc,
   where,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -29,6 +30,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Teacher = {
   id: string;
@@ -39,10 +41,10 @@ type Teacher = {
 
 export default function EditCourseScreen() {
   const { id, tab } = useLocalSearchParams<{
-    id?: string;
-    tab?: string | string[];
+    id: string;
+    tab: string | string[];
   }>();
-
+  const mutationCourse = useUpdateCourse();
   const navState = useRootNavigationState();
   const [notFound, setNotFound] = useState(false);
 
@@ -64,7 +66,6 @@ export default function EditCourseScreen() {
   const [level, setLevel] = useState("Inicial");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [isActive, setIsActive] = useState(true);
 
   const [classes, setClasses] = useState<any[]>([]);
 
@@ -75,11 +76,10 @@ export default function EditCourseScreen() {
   const loadTeachers = async () => {
     try {
       setLoadingTeachers(true);
-      const db = getFirestore();
       const q = query(
-        collection(db, "users"),
+        collection(firestore, "users"),
         where("role", "==", "teacher"),
-        orderBy("name", "asc")
+        orderBy("name", "asc"),
       );
 
       const snapshot = await getDocs(q);
@@ -103,7 +103,7 @@ export default function EditCourseScreen() {
         Alert.alert(
           "Configuración requerida",
           "Se necesita crear un índice en Firestore. Revisa la consola para el enlace de creación del índice.",
-          [{ text: "OK" }]
+          [{ text: "OK" }],
         );
       } else {
         Alert.alert("Error", "No se pudieron cargar los profesores.");
@@ -116,8 +116,7 @@ export default function EditCourseScreen() {
   useEffect(() => {
     const loadCourse = async () => {
       setLoading(true);
-      const db = getFirestore();
-      const snap = await getDoc(doc(db, "courses", String(id)));
+      const snap = await getDoc(doc(firestore, "courses", id));
       if (!snap.exists()) {
         setNotFound(true);
         setLoading(false);
@@ -129,7 +128,6 @@ export default function EditCourseScreen() {
       setLevel(data.level ?? "Inicial");
       setDescription(data.description ?? "");
       setImageUrl(data.imageUrl ?? "");
-      setIsActive(Boolean(data.isActive));
       setLoading(false);
     };
     if (id) loadCourse();
@@ -140,7 +138,7 @@ export default function EditCourseScreen() {
     const db = getFirestore();
     const q = query(
       collection(db, "classes"),
-      where("courseId", "==", String(id))
+      where("courseId", "==", String(id)),
     );
     const unsub = onSnapshot(q, (snap) => {
       const arr: any[] = [];
@@ -161,23 +159,15 @@ export default function EditCourseScreen() {
       Alert.alert("Faltan datos", "Título y profesor son obligatorios.");
       return;
     }
-
-    try {
-      const db = getFirestore();
-      await updateDoc(doc(db, "courses", String(id)), {
-        title: title.trim(),
-        teacher: teacher.trim(),
-        level: level.trim(),
-        description: description.trim(),
-        imageUrl: imageUrl.trim() || "",
-        isActive,
-        updatedAt: serverTimestamp(),
-      });
-      Alert.alert("Curso", "Actualizado correctamente.");
-    } catch (e) {
-      console.error(e);
-      Alert.alert("Error", "No se pudo actualizar el curso.");
-    }
+    const body = {
+      id: id as string,
+      title: title.trim(),
+      teacher: teacher.trim(),
+      level: level.trim(),
+      description: description.trim(),
+      isDeleted: false,
+    };
+    mutationCourse.mutate({ id, patch: body });
   };
 
   if (loading || loadingTeachers) {
@@ -193,184 +183,185 @@ export default function EditCourseScreen() {
     : tab === "classes";
 
   return (
-    <ScrollView className="flex-1 bg-black px-6 py-10">
-      <Text className="text-white text-2xl font-bold mb-6">
-        {showClassesTab ? "Clases del curso" : "Editar curso"}
-      </Text>
+    <SafeAreaView className="flex-1 bg-black">
+      <HeaderTitle
+        title={showClassesTab ? "Clases del curso" : "Editar curso"}
+      />
+      <ScrollView className="px-6">
+        {!showClassesTab ? (
+          <>
+            <Text className="text-white mb-2 font-semibold">Título *</Text>
+            <TextInput
+              className="bg-gray-900 text-white rounded-xl px-4 py-3 mb-4"
+              value={title}
+              onChangeText={setTitle}
+              placeholder="Título"
+              placeholderTextColor="#9CA3AF"
+            />
 
-      {!showClassesTab ? (
-        <>
-          <Text className="text-white mb-2 font-semibold">Título *</Text>
-          <TextInput
-            className="bg-gray-900 text-white rounded-xl px-4 py-3 mb-4"
-            value={title}
-            onChangeText={setTitle}
-            placeholder="Título"
-            placeholderTextColor="#9CA3AF"
-          />
+            <Text className="text-white mb-2 font-semibold">Profesor *</Text>
+            {teachers.length === 0 ? (
+              <View className="bg-gray-900 rounded-xl px-4 py-3 mb-4">
+                <Text className="text-gray-400">
+                  No hay usuarios con rol de profesor
+                </Text>
+                <Text className="text-gray-500 text-xs mt-2">
+                  Asigna el rol profesor a un usuario
+                </Text>
+              </View>
+            ) : (
+              <View className="bg-gray-900 rounded-xl mb-4">
+                <Picker
+                  selectedValue={teacher}
+                  onValueChange={(value) => setTeacher(String(value))}
+                  dropdownIconColor="#ffffff"
+                  style={{ color: "white" }}
+                >
+                  {teachers.map((t) => (
+                    <Picker.Item
+                      key={t.id}
+                      label={`${t.name} ${t.lastName}`}
+                      value={`${t.name} ${t.lastName}`}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            )}
 
-          <Text className="text-white mb-2 font-semibold">Profesor *</Text>
-          {teachers.length === 0 ? (
-            <View className="bg-gray-900 rounded-xl px-4 py-3 mb-4">
-              <Text className="text-gray-400">
-                No hay usuarios con rol de profesor
-              </Text>
-              <Text className="text-gray-500 text-xs mt-2">
-                Asigna el rol profesor a un usuario
-              </Text>
-            </View>
-          ) : (
+            <Text className="text-white mb-2 font-semibold">Nivel *</Text>
             <View className="bg-gray-900 rounded-xl mb-4">
               <Picker
-                selectedValue={teacher}
-                onValueChange={(value) => setTeacher(String(value))}
+                selectedValue={level}
+                onValueChange={(v) => setLevel(String(v))}
                 dropdownIconColor="#ffffff"
                 style={{ color: "white" }}
               >
-                {teachers.map((t) => (
-                  <Picker.Item
-                    key={t.id}
-                    label={`${t.name} ${t.lastName}`}
-                    value={`${t.name} ${t.lastName}`}
-                  />
-                ))}
+                <Picker.Item label="Inicial" value="Inicial" />
+                <Picker.Item label="Intermedio" value="Intermedio" />
+                <Picker.Item label="Avanzado" value="Avanzado" />
               </Picker>
             </View>
-          )}
 
-          <Text className="text-white mb-2 font-semibold">Nivel *</Text>
-          <View className="bg-gray-900 rounded-xl mb-4">
-            <Picker
-              selectedValue={level}
-              onValueChange={(v) => setLevel(String(v))}
-              dropdownIconColor="#ffffff"
-              style={{ color: "white" }}
+            <Text className="text-white mb-2 font-semibold">Descripción</Text>
+            <TextInput
+              className="bg-gray-900 text-white rounded-xl px-4 py-3 mb-4"
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Descripción"
+              placeholderTextColor="#9CA3AF"
+              multiline
+            />
+
+            <Text className="text-white mb-2 font-semibold">Imagen (URL)</Text>
+            <TextInput
+              className="bg-gray-900 text-white rounded-xl px-4 py-3 mb-6"
+              value={imageUrl}
+              onChangeText={setImageUrl}
+              placeholder="https://..."
+              placeholderTextColor="#9CA3AF"
+            />
+
+            <TouchableOpacity
+              className="bg-primary rounded-2xl px-5 py-4 active:opacity-80 mb-4"
+              onPress={handleUpdateCourse}
+              disabled={teachers.length === 0}
             >
-              <Picker.Item label="Inicial" value="Inicial" />
-              <Picker.Item label="Intermedio" value="Intermedio" />
-              <Picker.Item label="Avanzado" value="Avanzado" />
-            </Picker>
-          </View>
+              <Text className="text-center font-semibold">Guardar cambios</Text>
+            </TouchableOpacity>
 
-          <Text className="text-white mb-2 font-semibold">Descripción</Text>
-          <TextInput
-            className="bg-gray-900 text-white rounded-xl px-4 py-3 mb-4"
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Descripción"
-            placeholderTextColor="#9CA3AF"
-            multiline
-          />
+            <TouchableOpacity
+              className="bg-secondary rounded-2xl px-5 py-4 active:opacity-80 mb-4 flex-row items-center justify-center gap-2"
+              onPress={() => setAssignModalVisible(true)}
+            >
+              <Ionicons name="person-add" size={20} color="white" />
+              <Text className="text-center font-semibold text-white">
+                Asignar Estudiante al Curso
+              </Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity
+              className="bg-white rounded-2xl px-5 py-4 active:opacity-80 mb-4"
+              onPress={() =>
+                router.push({
+                  pathname: "/private/admin/classes/new",
+                  params: { courseId: String(id) },
+                } as Href)
+              }
+            >
+              <Text className="text-center font-semibold">Crear clase</Text>
+            </TouchableOpacity>
 
-          <Text className="text-white mb-2 font-semibold">Imagen (URL)</Text>
-          <TextInput
-            className="bg-gray-900 text-white rounded-xl px-4 py-3 mb-6"
-            value={imageUrl}
-            onChangeText={setImageUrl}
-            placeholder="https://..."
-            placeholderTextColor="#9CA3AF"
-          />
+            {classes.map((cl) => (
+              <View
+                key={cl.id}
+                className="bg-gray-900 rounded-2xl px-4 py-3 mb-3"
+              >
+                <Text className="text-white font-semibold">
+                  {cl.title || `${cl.date} ${cl.startTime}-${cl.endTime}`}
+                </Text>
+                <Text className="text-gray-400">
+                  {cl.date && `Fecha: ${cl.date}`}
+                  {cl.room && ` • Sala: ${cl.room}`}
+                  {cl.capacity && ` • Cupo: ${cl.capacity}`}
+                </Text>
 
+                <View className="flex-row gap-2 mt-3">
+                  <TouchableOpacity
+                    className="bg-white rounded-xl px-4 py-2"
+                    onPress={() =>
+                      router.push({
+                        pathname: "/private/admin/classes/[id]",
+                        params: { id: String(cl.id) },
+                      } as Href)
+                    }
+                  >
+                    <Text className="font-semibold">Editar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </>
+        )}
+
+        <View className="flex-row gap-2 mt-4">
           <TouchableOpacity
-            className="bg-primary rounded-2xl px-5 py-4 active:opacity-80 mb-4"
-            onPress={handleUpdateCourse}
-            disabled={teachers.length === 0}
+            className="bg-gray-700 rounded-2xl px-5 py-3"
+            onPress={() => router.replace("/private/admin/coursesMenu")}
           >
-            <Text className="text-center font-semibold">Guardar cambios</Text>
+            <Text className="text-center text-white font-semibold">Volver</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="bg-secondary rounded-2xl px-5 py-4 active:opacity-80 mb-4 flex-row items-center justify-center gap-2"
-            onPress={() => setAssignModalVisible(true)}
-          >
-            <Ionicons name="person-add" size={20} color="white" />
-            <Text className="text-center font-semibold text-white">
-              Asignar Estudiante al Curso
-            </Text>
-          </TouchableOpacity>
-        </>
-      ) : (
-        <>
-          <TouchableOpacity
-            className="bg-white rounded-2xl px-5 py-4 active:opacity-80 mb-4"
+            className="bg-gray-800 rounded-2xl px-5 py-3"
             onPress={() =>
-              router.push({
-                pathname: "/private/admin/classes/new",
-                params: { courseId: String(id) },
-              } as Href)
+              router.replace(
+                showClassesTab
+                  ? ({
+                      pathname: "/private/admin/courses/[id]",
+                      params: { id: String(id) },
+                    } as Href)
+                  : ({
+                      pathname: "/private/admin/courses/[id]",
+                      params: { id: String(id), tab: "classes" },
+                    } as Href),
+              )
             }
           >
-            <Text className="text-center font-semibold">Crear clase</Text>
+            <Text className="text-center text-white font-semibold">
+              {showClassesTab ? "Editar curso" : "Ver clases"}
+            </Text>
           </TouchableOpacity>
+        </View>
 
-          {classes.map((cl) => (
-            <View
-              key={cl.id}
-              className="bg-gray-900 rounded-2xl px-4 py-3 mb-3"
-            >
-              <Text className="text-white font-semibold">
-                {cl.title || `${cl.date} ${cl.startTime}-${cl.endTime}`}
-              </Text>
-              <Text className="text-gray-400">
-                {cl.date && `Fecha: ${cl.date}`}
-                {cl.room && ` • Sala: ${cl.room}`}
-                {cl.capacity && ` • Cupo: ${cl.capacity}`}
-              </Text>
-
-              <View className="flex-row gap-2 mt-3">
-                <TouchableOpacity
-                  className="bg-white rounded-xl px-4 py-2"
-                  onPress={() =>
-                    router.push({
-                      pathname: "/private/admin/classes/[id]",
-                      params: { id: String(cl.id) },
-                    } as Href)
-                  }
-                >
-                  <Text className="font-semibold">Editar</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
-        </>
-      )}
-
-      <View className="flex-row gap-2 mt-4">
-        <TouchableOpacity
-          className="bg-gray-700 rounded-2xl px-5 py-3"
-          onPress={() => router.replace("/private/admin/coursesMenu")}
-        >
-          <Text className="text-center text-white font-semibold">Volver</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          className="bg-gray-800 rounded-2xl px-5 py-3"
-          onPress={() =>
-            router.replace(
-              showClassesTab
-                ? ({
-                    pathname: "/private/admin/courses/[id]",
-                    params: { id: String(id) },
-                  } as Href)
-                : ({
-                    pathname: "/private/admin/courses/[id]",
-                    params: { id: String(id), tab: "classes" },
-                  } as Href)
-            )
-          }
-        >
-          <Text className="text-center text-white font-semibold">
-            {showClassesTab ? "Editar curso" : "Ver clases"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <AssignStudentModal
-        visible={assignModalVisible}
-        courseId={String(id)}
-        courseName={title}
-        onClose={() => setAssignModalVisible(false)}
-      />
-    </ScrollView>
+        <AssignStudentModal
+          visible={assignModalVisible}
+          courseId={String(id)}
+          courseName={title}
+          onClose={() => setAssignModalVisible(false)}
+        />
+      </ScrollView>
+    </SafeAreaView>
   );
 }

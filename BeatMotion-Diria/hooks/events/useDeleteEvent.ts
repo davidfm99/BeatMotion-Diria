@@ -1,7 +1,7 @@
-import { Alert } from "react-native";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteDoc, doc } from "firebase/firestore";
 import { firestore } from "@/firebaseConfig";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { Alert } from "react-native";
 
 type DeleteEventInput = { id: string };
 
@@ -11,7 +11,10 @@ export const useDeleteEvent = () => {
   return useMutation({
     mutationFn: async ({ id }: DeleteEventInput) => {
       if (!id) throw new Error("ID de evento faltante");
-      await deleteDoc(doc(firestore, "events", id));
+      await updateDoc(doc(firestore, "events", id), {
+        isDeleted: false,
+        updatedAt: serverTimestamp(),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["events"] });

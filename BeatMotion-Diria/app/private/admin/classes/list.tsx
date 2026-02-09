@@ -1,8 +1,7 @@
+import { useUpdateClass } from "@/hooks/classes/useUpdateClass";
 import { router } from "expo-router";
 import {
   collection,
-  deleteDoc,
-  doc,
   getFirestore,
   onSnapshot,
   orderBy,
@@ -17,11 +16,16 @@ export default function ClassesBrowserScreen() {
   const [courses, setCourses] = useState<any[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [classes, setClasses] = useState<any[]>([]);
+  const updateClassMutation = useUpdateClass();
 
-  // Cargar cursos
+  // todo: change this
   useEffect(() => {
     const db = getFirestore();
-    const q = query(collection(db, "courses"), orderBy("createdAt", "desc"));
+    const q = query(
+      collection(db, "courses"),
+      where("isDeleted", "==", false),
+      orderBy("createdAt", "desc"),
+    );
     const unsub = onSnapshot(q, (snap) => {
       const arr: any[] = [];
       snap.forEach((d) => arr.push({ id: d.id, ...d.data() }));
@@ -42,7 +46,7 @@ export default function ClassesBrowserScreen() {
     const q = query(
       collection(db, "classes"),
       where("courseId", "==", selectedCourseId),
-      orderBy("date", "desc")
+      orderBy("date", "desc"),
     );
 
     const unsub = onSnapshot(
@@ -56,9 +60,9 @@ export default function ClassesBrowserScreen() {
         console.error("Snapshot error (classes):", err);
         Alert.alert(
           "Clases",
-          "No se pudieron cargar las clases. Si Firestore pide un índice (courseId + date), crea el índice en la consola de Firebase."
+          "No se pudieron cargar las clases. Si Firestore pide un índice (courseId + date), crea el índice en la consola de Firebase.",
         );
-      }
+      },
     );
     return () => unsub();
   }, [selectedCourseId]);
@@ -70,18 +74,12 @@ export default function ClassesBrowserScreen() {
         text: "Eliminar",
         style: "destructive",
         onPress: async () => {
-          try {
-            const db = getFirestore();
-            await deleteDoc(doc(db, "classes", id));
-          } catch (e) {
-            console.error(e);
-            Alert.alert("Error", "No se pudo eliminar la clase.");
-          }
+          updateClassMutation.mutate({ id, patch: { isDeleted: true } });
         },
       },
     ]);
   };
-//TODO: Cambiar Vista de lista al DataLoader
+  //TODO: Change to Data loader
   return (
     <SafeAreaView className="flex-1 bg-black px-6 py-10">
       <Text className="text-white text-2xl font-bold mb-6">Ver clases</Text>

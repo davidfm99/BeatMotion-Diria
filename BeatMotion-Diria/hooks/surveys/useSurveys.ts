@@ -1,27 +1,20 @@
 import { firestore } from "@/firebaseConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  addDoc,
   collection,
   doc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  getDocs,
   getDoc,
-  query,
-  where,
+  getDocs,
   orderBy,
+  query,
   serverTimestamp,
   Timestamp,
+  updateDoc,
+  where,
 } from "firebase/firestore";
 import { Alert } from "react-native";
-import {
-  surveySchema,
-  surveyListSchema,
-  Survey,
-  SurveyQuestion,
-} from "./surveySchema";
-
+import { surveyListSchema, SurveyQuestion, surveySchema } from "./surveySchema";
 
 type CreateSurveyInput = {
   title: string;
@@ -48,6 +41,7 @@ const createSurvey = async (input: CreateSurveyInput) => {
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     expiresAt: input.expiresAt ? Timestamp.fromDate(input.expiresAt) : null,
+    isDeleted: false,
   };
 
   const docRef = await addDoc(collection(firestore, "surveys"), surveyData);
@@ -72,7 +66,11 @@ export const useCreateSurvey = () => {
 
 const fetchSurveys = async () => {
   try {
-    const snapshot = await getDocs(collection(firestore, "surveys"));
+    const q = query(
+      collection(firestore, "surveys"),
+      where("isDelete", "==", false),
+    );
+    const snapshot = await getDocs(q);
     const surveys = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -97,7 +95,7 @@ const fetchSurveysByCourse = async (courseId: string) => {
     const q = query(
       collection(firestore, "surveys"),
       where("courseId", "==", courseId),
-      orderBy("createdAt", "desc")
+      orderBy("createdAt", "desc"),
     );
     const snapshot = await getDocs(q);
     const surveys = snapshot.docs.map((doc) => ({
@@ -127,17 +125,18 @@ const fetchAvailableSurveys = async (userId: string, courseIds: string[]) => {
     const q = query(
       collection(firestore, "surveys"),
       where("courseId", "in", courseIds),
-      where("isActive", "==", true)
+      where("isActive", "==", true),
+      where("isDeleted", "==", false),
     );
     const snapshot = await getDocs(q);
 
     const responsesQuery = query(
       collection(firestore, "surveyResponses"),
-      where("userId", "==", userId)
+      where("userId", "==", userId),
     );
     const responsesSnapshot = await getDocs(responsesQuery);
     const answeredSurveyIds = new Set(
-      responsesSnapshot.docs.map((doc) => doc.data().surveyId)
+      responsesSnapshot.docs.map((doc) => doc.data().surveyId),
     );
 
     const now = new Date();
@@ -252,7 +251,10 @@ export const useUpdateSurvey = () => {
 
 const deleteSurvey = async (surveyId: string) => {
   const docRef = doc(firestore, "surveys", surveyId);
-  await deleteDoc(docRef);
+  await updateDoc(docRef, {
+    isDeleted: true,
+    updatedAt: serverTimestamp(),
+  });
 };
 
 export const useDeleteSurvey = () => {
@@ -283,8 +285,13 @@ export const useToggleSurveyActive = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ surveyId, isActive }: { surveyId: string; isActive: boolean }) =>
-      toggleSurveyActive(surveyId, isActive),
+    mutationFn: ({
+      surveyId,
+      isActive,
+    }: {
+      surveyId: string;
+      isActive: boolean;
+    }) => toggleSurveyActive(surveyId, isActive),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["surveys"] });
     },

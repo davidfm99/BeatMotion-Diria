@@ -44,7 +44,7 @@ export default function NewCourseScreen() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [level, setLevel] = useState("Inicial");
   const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  // const [imageUrl, setImageUrl] = useState("");
   const [day, setDay] = useState("lunes");
   const [isSaving, setIsSaving] = useState(false);
   const [loadingTeachers, setLoadingTeachers] = useState(true);
@@ -60,7 +60,8 @@ export default function NewCourseScreen() {
       const q = query(
         collection(db, "users"),
         where("role", "==", "teacher"),
-        orderBy("name", "asc")
+        where("isActive", "==", true),
+        orderBy("name", "asc"),
       );
 
       const snapshot = await getDocs(q);
@@ -88,7 +89,7 @@ export default function NewCourseScreen() {
         Alert.alert(
           "Configuración requerida",
           "Se necesita crear un índice en Firestore. Revisa la consola para el enlace de creación del índice.",
-          [{ text: "OK" }]
+          [{ text: "OK" }],
         );
       } else {
         Alert.alert("Error", "No se pudieron cargar los profesores.");
@@ -112,8 +113,8 @@ export default function NewCourseScreen() {
         description: description.trim(),
         level: level.trim(),
         teacher: teacher.trim(),
-        imageUrl: imageUrl.trim() || undefined,
-        isActive: true,
+        // imageUrl: imageUrl.trim() || undefined,
+        isDeleted: true,
         createdBy: uid,
         day: day,
       });
@@ -213,13 +214,13 @@ export default function NewCourseScreen() {
         />
 
         <Text className="text-white mb-2 font-semibold">Imagen (URL)</Text>
-        <TextInput
+        {/* <TextInput
           className="bg-gray-900 text-white rounded-xl px-4 py-3 mb-6"
           value={imageUrl}
           onChangeText={setImageUrl}
           placeholder="https://..."
           placeholderTextColor="#9CA3AF"
-        />
+        /> */}
 
         <TouchableOpacity
           className="bg-primary rounded-2xl px-5 py-4 active:opacity-80 mb-3"
