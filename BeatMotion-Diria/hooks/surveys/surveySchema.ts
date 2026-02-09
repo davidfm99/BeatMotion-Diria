@@ -49,6 +49,7 @@ export const surveySchema = zod.object({
   createdAt: timestampSchema,
   updatedAt: timestampSchema,
   expiresAt: timestampSchema.nullable().optional(),
+  isDeleted: zod.boolean(),
 });
 
 export type Survey = zod.infer<typeof surveySchema>;
@@ -59,10 +60,7 @@ export const questionResponseSchema = zod.object({
   questionId: zod.string(),
   questionText: zod.string(),
   questionType: questionTypeSchema,
-  response: zod.union([
-    zod.number().int().min(1).max(5),
-    zod.string(),
-  ]),
+  response: zod.union([zod.number().int().min(1).max(5), zod.string()]),
 });
 
 export type QuestionResponse = zod.infer<typeof questionResponseSchema>;
@@ -88,7 +86,7 @@ export const surveyResultsSchema = zod.object({
   averageRatings: zod.record(zod.string(), zod.number()),
   responseDistribution: zod.record(
     zod.string(),
-    zod.record(zod.string(), zod.number())
+    zod.record(zod.string(), zod.number()),
   ),
   textResponses: zod.record(zod.string(), zod.array(zod.string())),
   completionRate: zod.number().min(0).max(100),
@@ -181,13 +179,7 @@ export const quickSurveyTemplate = {
         questionText: "Nivel de dificultad del contenido",
         questionType: "multiple_choice" as QuestionType,
         required: true,
-        options: [
-          "Muy fácil",
-          "Fácil",
-          "Adecuado",
-          "Difícil",
-          "Muy difícil",
-        ],
+        options: ["Muy fácil", "Fácil", "Adecuado", "Difícil", "Muy difícil"],
         order: 1,
       },
       {

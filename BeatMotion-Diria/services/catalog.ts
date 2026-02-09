@@ -1,6 +1,12 @@
 import {
-  getFirestore, collection, addDoc, serverTimestamp,
-  doc, getDoc, updateDoc, deleteDoc,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getFirestore,
+  serverTimestamp,
+  updateDoc,
 } from "firebase/firestore";
 
 export type NewCourse = {
@@ -9,7 +15,7 @@ export type NewCourse = {
   level: string;
   teacher: string;
   imageUrl?: string;
-  isActive: boolean;
+  isDeleted: boolean;
   createdBy: string;
   day: string;
 };
@@ -39,9 +45,9 @@ export async function deleteCourse(id: string) {
 
 export type ClassPatch = {
   courseId?: string;
-  date?: string; 
-  startTime?: string;   
-  endTime?: string; 
+  date?: string;
+  startTime?: string;
+  endTime?: string;
   room?: string;
   capacity?: number;
   notes?: string;

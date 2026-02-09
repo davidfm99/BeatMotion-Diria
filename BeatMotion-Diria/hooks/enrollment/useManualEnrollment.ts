@@ -1,13 +1,12 @@
 import { firestore } from "@/firebaseConfig";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  collection,
-  doc,
   addDoc,
-  serverTimestamp,
-  query,
-  where,
+  collection,
   getDocs,
+  query,
+  serverTimestamp,
+  where,
 } from "firebase/firestore";
 import { Alert } from "react-native";
 
@@ -20,14 +19,14 @@ type ManualEnrollmentData = {
 
 const checkExistingEnrollment = async (
   userId: string,
-  courseId: string
+  courseId: string,
 ): Promise<boolean> => {
   try {
     const enrollmentsRef = collection(firestore, "enrollments");
     const q = query(
       enrollmentsRef,
       where("userId", "==", userId),
-      where("courseId", "==", courseId)
+      where("courseId", "==", courseId),
     );
     const snapshot = await getDocs(q);
     return !snapshot.empty;
@@ -43,7 +42,7 @@ const createManualEnrollment = async (data: ManualEnrollmentData) => {
   const exists = await checkExistingEnrollment(userId, courseId);
   if (exists) {
     throw new Error(
-      "El estudiante ya está inscrito en este curso o tiene una solicitud pendiente."
+      "El estudiante ya está inscrito en este curso o tiene una solicitud pendiente.",
     );
   }
 
@@ -72,16 +71,17 @@ export const useManualEnrollment = () => {
       queryClient.invalidateQueries({ queryKey: ["enrollments"] });
       queryClient.invalidateQueries({ queryKey: ["myCourses"] });
       queryClient.invalidateQueries({ queryKey: ["courseMember"] });
+
       Alert.alert(
         "Éxito",
-        "El estudiante ha sido asignado al curso correctamente."
+        "El estudiante ha sido asignado al curso correctamente.",
       );
     },
     onError: (error: any) => {
       console.error("Error en asignación manual:", error);
       Alert.alert(
         "Error",
-        error.message || "No se pudo asignar el estudiante al curso."
+        error.message || "No se pudo asignar el estudiante al curso.",
       );
     },
   });
@@ -104,16 +104,16 @@ export const useAvailableStudents = (courseId: string) => {
         const enrollmentsRef = collection(firestore, "enrollments");
         const enrollmentsQuery = query(
           enrollmentsRef,
-          where("courseId", "==", courseId)
+          where("courseId", "==", courseId),
         );
         const enrollmentsSnapshot = await getDocs(enrollmentsQuery);
 
         const enrolledUserIds = new Set(
-          enrollmentsSnapshot.docs.map((doc) => doc.data().userId)
+          enrollmentsSnapshot.docs.map((doc) => doc.data().userId),
         );
 
         const availableStudents = allStudents.filter(
-          (student: any) => !enrolledUserIds.has(student.id)
+          (student: any) => !enrolledUserIds.has(student.id),
         );
 
         return availableStudents;

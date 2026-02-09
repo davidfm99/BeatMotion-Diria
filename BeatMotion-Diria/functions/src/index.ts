@@ -36,7 +36,8 @@ export const onEnrollmentAccepted = onDocumentUpdated(
     if (!before || !after) return;
     if (before.status !== "approved" && after.status === "approved") {
       const paymentDate: Date = after.submittedAt.toDate();
-
+      // to do: check if the user already has a course, if the course is already added the paymentDate will be the same
+      // as the one already added
       await db
         .collection("courseMember")
         .add({

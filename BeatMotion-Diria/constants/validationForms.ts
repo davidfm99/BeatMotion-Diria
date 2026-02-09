@@ -13,8 +13,8 @@ export const signInValidationSchema = {
     .min(8, "La contraseña debe tener al menos 8 caracteres")
     .required("La contraseña es obligatoria")
     .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-      "La contraseña debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial."
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-])[A-Za-z\d@$!%*?&\-]{8,}$/,
+      "La contraseña debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial [@$!%*?&-].",
     ),
 };
 
@@ -74,7 +74,7 @@ export const eventSchema = yup.object().shape({
           .test(
             "min-1",
             "La capacidad debe ser al menos 1.",
-            (v) => Number(v) > 0
+            (v) => Number(v) > 0,
           );
   }),
   unlimited: yup.boolean(),
@@ -89,7 +89,7 @@ export const eventSchema = yup.object().shape({
           .test(
             "min-price",
             "El precio debe ser mayor a 0.",
-            (v) => Number(v) > 0
+            (v) => Number(v) > 0,
           );
   }),
   isFree: yup.boolean(),

@@ -14,7 +14,7 @@ export const useCreateFCMToken = () => {
 
     const registerToken = async () => {
       if (!Device.isDevice) {
-        console.log("Push notifications only work on a physical device");
+        console.error("Push notifications only work on a physical device");
         return;
       }
 
@@ -28,7 +28,7 @@ export const useCreateFCMToken = () => {
       }
 
       if (finalStatus !== "granted") {
-        console.log("Permission not granted for push notifications");
+        console.error("Permission not granted for push notifications");
         return;
       }
 

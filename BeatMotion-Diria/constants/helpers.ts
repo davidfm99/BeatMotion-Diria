@@ -31,8 +31,9 @@ const formatCurrency = (value: number, currency?: string) => {
   }
 };
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string | null) => {
   try {
+    if (dateString === null) return "N/A";
     const date = new Date(dateString);
     return date.toLocaleDateString("es-CR");
   } catch (error) {

@@ -1,14 +1,8 @@
+import { useUpdateClass } from "@/hooks/classes/useUpdateClass";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
-import {
-  deleteDoc,
-  doc,
-  getDoc,
-  getFirestore,
-  serverTimestamp,
-  updateDoc,
-} from "firebase/firestore";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -28,9 +22,9 @@ type VideoLink = {
 };
 
 export default function EditClassScreen() {
+  const updateClassMutation = useUpdateClass();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
-  const [courseId, setCourseId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [content, setContent] = useState("");
@@ -41,7 +35,6 @@ export default function EditClassScreen() {
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [capacity, setCapacity] = useState<string>("");
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
@@ -64,7 +57,6 @@ export default function EditClassScreen() {
       }
 
       const data = snap.data();
-      setCourseId(data.courseId ?? "");
       setTitle(data.title ?? "");
       setDescription(data.description ?? "");
       setContent(data.content ?? "");
@@ -72,13 +64,12 @@ export default function EditClassScreen() {
       setDate(data.date ?? "");
       setStartTime(data.startTime ?? "");
       setEndTime(data.endTime ?? "");
-      setCapacity(data.capacity ? String(data.capacity) : "");
 
       if (data.date) {
         try {
           const [year, month, day] = data.date.split("-");
           setDateObj(
-            new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+            new Date(parseInt(year), parseInt(month) - 1, parseInt(day)),
           );
         } catch (e) {
           console.error("Error parsing date:", e);
@@ -202,52 +193,24 @@ export default function EditClassScreen() {
       Alert.alert("Clase", "El contenido es obligatorio.");
       return;
     }
-
-    try {
-      const db = getFirestore();
-      await updateDoc(doc(db, "classes", id!), {
-        title: title.trim(),
-        description: description.trim() || null,
-        content: content.trim(),
-        objectives: objectives.trim() || null,
-        date: date.trim() || null,
-        startTime: startTime.trim() || null,
-        endTime: endTime.trim() || null,
-        capacity: capacity ? Number(capacity) : null,
-        videoLinks: videoLinks.map((v) => ({
-          url: v.url,
-          platform: v.platform,
-          title: v.title || null,
-        })),
-        updatedAt: serverTimestamp(),
-      });
-      Alert.alert("Clase", "Actualizada correctamente.");
-      router.back();
-    } catch (e) {
-      console.error(e);
-      Alert.alert("Error", "No se pudo actualizar la clase.");
-    }
-  };
-
-  const handleDelete = () => {
-    Alert.alert("Eliminar", "¿Seguro que quieres eliminar esta clase?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Eliminar",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            const db = getFirestore();
-            await deleteDoc(doc(db, "classes", id!));
-            Alert.alert("Clase", "Eliminada correctamente.");
-            router.back();
-          } catch (e) {
-            console.error(e);
-            Alert.alert("Error", "No se pudo eliminar la clase.");
-          }
-        },
-      },
-    ]);
+    //Todo change those undefined
+    const body = {
+      id,
+      title: title.trim(),
+      description: description.trim() || "",
+      content: content.trim(),
+      objectives: objectives.trim() || "",
+      date: date.trim() || "",
+      startTime: startTime.trim() || "",
+      endTime: endTime.trim() || "",
+      videoLinks: videoLinks.map((v) => ({
+        url: v.url,
+        platform: v.platform,
+        title: v.title as string,
+      })),
+    };
+    updateClassMutation.mutate({ id, patch: body });
+    router.back();
   };
 
   if (loading) {
@@ -297,8 +260,8 @@ export default function EditClassScreen() {
               {dateObj
                 ? formatDDMMYYYY(dateObj)
                 : date
-                ? date
-                : "Selecciona fecha"}
+                  ? date
+                  : "Selecciona fecha"}
             </Text>
             <Ionicons name="calendar-outline" size={20} color="#9CA3AF" />
           </TouchableOpacity>
@@ -326,8 +289,8 @@ export default function EditClassScreen() {
               {startObj
                 ? to12hLabel(startObj)
                 : startTime
-                ? startTime
-                : "Selecciona hora"}
+                  ? startTime
+                  : "Selecciona hora"}
             </Text>
             <Ionicons name="time-outline" size={20} color="#9CA3AF" />
           </TouchableOpacity>
@@ -358,8 +321,8 @@ export default function EditClassScreen() {
               {endObj
                 ? to12hLabel(endObj)
                 : endTime
-                ? endTime
-                : "Selecciona hora"}
+                  ? endTime
+                  : "Selecciona hora"}
             </Text>
             <Ionicons name="time-outline" size={20} color="#9CA3AF" />
           </TouchableOpacity>
@@ -377,17 +340,6 @@ export default function EditClassScreen() {
               }}
             />
           )}
-
-          {/* Capcity */}
-          <Text className="text-gray-300 mb-2 text-sm">Capacidad máxima</Text>
-          <TextInput
-            className="bg-gray-900 text-white rounded-xl px-4 py-3"
-            value={capacity}
-            onChangeText={setCapacity}
-            placeholder="Ej: 20"
-            placeholderTextColor="#9CA3AF"
-            keyboardType="number-pad"
-          />
         </View>
 
         {/* Description */}
@@ -510,15 +462,6 @@ export default function EditClassScreen() {
           >
             <Text className="text-center font-semibold text-base">
               Guardar cambios
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="bg-red-500 rounded-2xl px-5 py-4"
-            onPress={handleDelete}
-          >
-            <Text className="text-center font-semibold text-white">
-              Eliminar clase
             </Text>
           </TouchableOpacity>
 

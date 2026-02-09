@@ -2,7 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Alert } from "react-native";
 
 import { firestore } from "@/firebaseConfig";
-import { collection, getDocs, query, where } from "@firebase/firestore";
+import {
+  collection,
+  getDocs,
+  orderBy,
+  query,
+  where,
+} from "@firebase/firestore";
 import { useCourses } from "../courses/useCourses";
 import { useUsers } from "../user/useUsers";
 import { enrollmentSchema } from "./schema";
@@ -15,7 +21,8 @@ export const useEnrollmentsByStatus = (status: string) => {
     try {
       const queryRef = query(
         collection(firestore, "enrollments"),
-        where("status", "==", status)
+        where("status", "==", status),
+        orderBy("submittedAt", "desc"),
       );
       const snapshot = await getDocs(queryRef);
       const enrollments = snapshot.docs.map((doc) => {
@@ -38,7 +45,7 @@ export const useEnrollmentsByStatus = (status: string) => {
   };
 
   return useQuery({
-    queryKey: ["enrollments", status],
+    queryKey: ["enrollments", status, courses?.length ?? 0, users?.length ?? 0],
     queryFn: getEnrollmentsByStatus,
     staleTime: 1000 * 60 * 20, // 20 minutes
     refetchOnWindowFocus: false,

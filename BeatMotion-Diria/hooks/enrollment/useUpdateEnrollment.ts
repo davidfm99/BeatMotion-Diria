@@ -1,13 +1,19 @@
 import { firestore } from "@/firebaseConfig";
 import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { collection, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
 import { Enrollment } from "./schema";
 
 const createEnrollment = async (enrollment: Enrollment) => {
   const ref = doc(collection(firestore, "enrollments"), enrollment.id);
   await updateDoc(ref, {
     ...enrollment,
+    reviewedAt: serverTimestamp(),
   });
   return enrollment;
 };

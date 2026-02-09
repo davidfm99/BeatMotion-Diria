@@ -1,7 +1,7 @@
-import { Alert } from "react-native";
+import { firestore } from "@/firebaseConfig";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { firestore } from "@/firebaseConfig";
+import { Alert } from "react-native";
 import { useActiveUser } from "../user/UseActiveUser";
 
 type CreateEventInput = {
@@ -41,6 +41,7 @@ export const useCreateEvent = () => {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         createdBy: user?.uid ?? "system",
+        isDeleted: false,
       };
 
       await addDoc(collection(firestore, "events"), payload);

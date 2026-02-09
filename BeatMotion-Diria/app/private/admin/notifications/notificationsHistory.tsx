@@ -12,6 +12,7 @@ const DICTIONARY_SENTS = {
 
 const NotificationsHistory = () => {
   const notificationsQuery = useNotificationsHistory();
+
   return (
     <DataLoader
       query={notificationsQuery}

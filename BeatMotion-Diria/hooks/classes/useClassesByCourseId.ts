@@ -15,7 +15,6 @@ export const useClassesByCourseId = (courseId: string) => {
         id: doc.id,
         ...doc.data(),
       })) as ClassesType[];
-      console.log("Fetched classes for courseId", courseId, data);
       return ClassesSchemaArray.parse(classes);
     } catch (error) {
       console.error("Error fetching classes:", error);

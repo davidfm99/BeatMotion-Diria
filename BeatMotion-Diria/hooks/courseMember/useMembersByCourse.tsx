@@ -21,7 +21,7 @@ export const useMembersByCourse = (courseId: string) => {
       }));
       return membersByCourseSchema.parse(members);
     } catch (error) {
-      console.log("Error in useMembersByCourse", error);
+      console.error("Error in useMembersByCourse", error);
     }
   };
 
