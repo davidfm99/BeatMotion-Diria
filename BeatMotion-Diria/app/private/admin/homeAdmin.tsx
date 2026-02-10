@@ -78,9 +78,9 @@ const HomeAdmin = () => {
   const handleGoToRoute = (route: string) => {
     router.push(route as Href);
   };
-  
+
   return (
-    <View className="gap-6 flex-1">
+    <View className="gap-6 flex-1 px-6 py-12">
       <EnrollmentAvailable />
       <ScrollView
         className="flex-1"
