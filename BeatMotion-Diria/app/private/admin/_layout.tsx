@@ -18,7 +18,7 @@ export default function AdminLayout() {
       const db = getFirestore();
       const snap = await getDoc(doc(db, "users", u.uid));
       const role = snap.exists() ? (snap.data() as any).role : "user";
-      const isAdmin = role === "admin";
+      const isAdmin = role === "admin" || role === "teacher";
       setAllowed(isAdmin);
       if (!isAdmin) router.replace("/private/home");
     });

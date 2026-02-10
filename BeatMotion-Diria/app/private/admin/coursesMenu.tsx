@@ -4,6 +4,7 @@ import { firestore } from "@/firebaseConfig";
 import { useUpdateClass } from "@/hooks/classes/useUpdateClass";
 import { useCourses } from "@/hooks/courses/useCourses";
 import { useUpdateCourse } from "@/hooks/courses/useUpdateCourse";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { Ionicons, Octicons } from "@expo/vector-icons";
 import type { Href } from "expo-router";
 import { router } from "expo-router";
@@ -23,6 +24,7 @@ type ClassItem = {
 };
 
 export default function CoursesMenuScreen() {
+  const activeUser = useActiveUser();
   const coursesQuery = useCourses();
   const updateCourse = useUpdateCourse();
   const updateClass = useUpdateClass();
@@ -43,7 +45,7 @@ export default function CoursesMenuScreen() {
       const q = query(
         collection(firestore, "classes"),
         where("courseId", "==", course.id),
-        where("isDeleted", "==", false),  
+        where("isDeleted", "==", false),
       );
 
       const unsub = onSnapshot(q, (snapshot) => {
@@ -114,13 +116,16 @@ export default function CoursesMenuScreen() {
 
       {/* Action Buttons */}
       <View className="px-6 pb-4 flex-row gap-3">
-        <TouchableOpacity
-          className="flex-1 bg-primary rounded-2xl px-4 py-3 flex-row items-center justify-center gap-2"
-          onPress={() => router.push("/private/admin/courses/new")}
-        >
-          <Ionicons name="add-circle-outline" size={20} color="black" />
-          <Text className="font-semibold">Nuevo Curso</Text>
-        </TouchableOpacity>
+        {activeUser.user?.role === "admin" && (
+          <TouchableOpacity
+            className="flex-1 bg-primary rounded-2xl px-4 py-3 flex-row items-center justify-center gap-2"
+            onPress={() => router.push("/private/admin/courses/new")}
+          >
+            <Ionicons name="add-circle-outline" size={20} color="black" />
+            <Text className="font-semibold">Nuevo Curso</Text>
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity
           className="flex-1 bg-secondary rounded-2xl px-4 py-3 flex-row items-center justify-center gap-2"
           onPress={() => router.push("/private/admin/classes/new")}
@@ -164,31 +169,36 @@ export default function CoursesMenuScreen() {
                         </Text>
                       </View>
                       <View className="flex-row gap-2">
-                        <TouchableOpacity
-                          className="bg-gray-800 rounded-full p-2"
-                          onPress={() =>
-                            router.push({
-                              pathname: "/private/admin/courses/[id]",
-                              params: { id: course.id },
-                            } as Href)
-                          }
-                        >
-                          <Ionicons
-                            name="create-outline"
-                            size={18}
-                            color="#40E0D0"
-                          />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          className="bg-gray-800 rounded-full p-2"
-                          onPress={() => handleDeleteCourse(course)}
-                        >
-                          <Ionicons
-                            name="trash-outline"
-                            size={18}
-                            color="#ef4444"
-                          />
-                        </TouchableOpacity>
+                        {activeUser.user?.role === "admin" && (
+                          <>
+                            <TouchableOpacity
+                              className="bg-gray-800 rounded-full p-2"
+                              onPress={() =>
+                                router.push({
+                                  pathname: "/private/admin/courses/[id]",
+                                  params: { id: course.id },
+                                } as Href)
+                              }
+                            >
+                              <Ionicons
+                                name="create-outline"
+                                size={18}
+                                color="#40E0D0"
+                              />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              className="bg-gray-800 rounded-full p-2"
+                              onPress={() => handleDeleteCourse(course)}
+                            >
+                              <Ionicons
+                                name="trash-outline"
+                                size={18}
+                                color="#ef4444"
+                              />
+                            </TouchableOpacity>
+                          </>
+                        )}
+
                         <Ionicons
                           name={isExpanded ? "chevron-up" : "chevron-down"}
                           size={20}

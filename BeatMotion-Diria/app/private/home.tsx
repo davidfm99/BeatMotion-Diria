@@ -6,6 +6,7 @@ import { router } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import HomeAdmin from "./admin/homeAdmin";
+import HomeTeacher from "./teacher/homeTeacher";
 import HomeUser from "./user/HomeUser";
 
 export default function HomeScreen() {
@@ -20,9 +21,10 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View className="flex-1 bg-black px-6 py-12">
+      <View className="flex-1 bg-black ">
         {user?.role === "user" && <HomeUser />}
         {user?.role === "admin" && <HomeAdmin />}
+        {user?.role === "teacher" && <HomeTeacher />}
 
         {/* Bottom bar */}
         <View className="absolute left-0 right-0 bottom-0 bg-gray-900 h-24 flex-row items-center px-6 gap-6">

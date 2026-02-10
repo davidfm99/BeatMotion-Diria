@@ -1,13 +1,13 @@
 import MenuButton from "@/components/MenuButton";
+import { useCourseMemberByUser } from "@/hooks/courseMember/useCourseMemberByUser";
+import { useAvailableSurveys } from "@/hooks/surveys/useSurveys";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Href, useRouter } from "expo-router";
 import { JSX } from "react";
 import { ScrollView, Text, TouchableHighlight, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import MyCourses from "./myCourses";
-import { useActiveUser } from "@/hooks/user/UseActiveUser";
-import { useCourseMemberByUser } from "@/hooks/courseMember/useCourseMemberByUser";
-import { useAvailableSurveys } from "@/hooks/surveys/useSurveys";
 
 type MenuProps = {
   icon: JSX.Element;
@@ -67,7 +67,7 @@ const HomeUser = () => {
   };
 
   return (
-    <View>
+    <View className="px-6 py-12">
       <TouchableHighlight
         className="bg-primary self-end text-gray-950 w-1/2 rounded-full px-3 py-3 justify-center active:opacity-80 mb-8"
         onPress={handleClickEnroll}
