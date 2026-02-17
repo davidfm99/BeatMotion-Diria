@@ -1,31 +1,29 @@
 import zod from "zod";
 
-const timestampSchema = zod
-  .any()
-  .transform((value) => {
-    if (!value) return null;
-    if (value instanceof Date) return value;
-    if (typeof value === "string" || typeof value === "number") {
-      const parsed = new Date(value);
-      return Number.isNaN(parsed.getTime()) ? null : parsed;
+const timestampSchema = zod.any().transform((value) => {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (typeof value === "string" || typeof value === "number") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "object" && value !== null) {
+    if (typeof (value as { toDate?: () => Date }).toDate === "function") {
+      return (value as { toDate: () => Date }).toDate();
     }
-    if (typeof value === "object" && value !== null) {
-      if (typeof (value as { toDate?: () => Date }).toDate === "function") {
-        return (value as { toDate: () => Date }).toDate();
-      }
-      if ("seconds" in value && "nanoseconds" in value) {
-        const seconds = Number(
-          (value as { seconds: number; nanoseconds: number }).seconds
-        );
-        const nanos = Number(
-          (value as { seconds: number; nanoseconds: number }).nanoseconds
-        );
-        const date = new Date(seconds * 1000 + nanos / 1_000_000);
-        return Number.isNaN(date.getTime()) ? null : date;
-      }
+    if ("seconds" in value && "nanoseconds" in value) {
+      const seconds = Number(
+        (value as { seconds: number; nanoseconds: number }).seconds,
+      );
+      const nanos = Number(
+        (value as { seconds: number; nanoseconds: number }).nanoseconds,
+      );
+      const date = new Date(seconds * 1000 + nanos / 1_000_000);
+      return Number.isNaN(date.getTime()) ? null : date;
     }
-    return null;
-  });
+  }
+  return null;
+});
 
 const nullableNumber = zod
   .union([zod.number(), zod.null(), zod.undefined(), zod.string()])
@@ -40,7 +38,7 @@ export const eventSchema = zod
     id: zod.string(),
     title: zod.string(),
     description: zod.string().optional().default(""),
-    bannerUrl: zod.string().optional().default(""),
+    bannerUrl: zod.string().optional().nullable().default(""),
     datetime: timestampSchema,
     capacity: nullableNumber,
     isPublic: zod.boolean().default(true),

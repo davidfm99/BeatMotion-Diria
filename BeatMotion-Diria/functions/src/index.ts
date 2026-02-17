@@ -12,7 +12,7 @@ import { setGlobalOptions } from "firebase-functions";
 import { onCall } from "firebase-functions/https";
 import * as logger from "firebase-functions/logger";
 import { onSchedule } from "firebase-functions/scheduler";
-import { onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
 
 import * as admin from "firebase-admin";
 
@@ -49,6 +49,45 @@ export const onEnrollmentAccepted = onDocumentUpdated(
           paymentStatus: "ok", // pending | late | ok
           nextPaymentDate: getNextPaymentDate(paymentDate),
           createdBy: after.reviewedBy || null,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        })
+        .then(() => {
+          logger.info(
+            `CourseMember document created for enrollment ID: ${enrollmentId}`
+          );
+        })
+        .catch((error) => {
+          logger.error(
+            `Error creating CourseMember document for enrollment ID: ${enrollmentId}`,
+            error
+          );
+        });
+    }
+  }
+);
+
+export const onEnrollmentCreatedByManual = onDocumentCreated(
+  "enrollments/{enrollmentId}",
+  async (event) => {
+    const enrollmentCreated = event.data?.data();
+    const enrollmentId = event.params.enrollmentId;
+
+    if (!enrollmentCreated) return;
+    if (enrollmentCreated.status !== "approved") {
+      const paymentDate: Date = enrollmentCreated.submittedAt.toDate();
+      // to do: check if the user already has a course, if the course is already added the paymentDate will be the same
+      // as the one already added
+      await db
+        .collection("courseMember")
+        .add({
+          enrollmentId: enrollmentId,
+          userId: enrollmentCreated.userId,
+          courseId: enrollmentCreated.courseId,
+          joinedAt: admin.firestore.FieldValue.serverTimestamp(),
+          active: true,
+          paymentStatus: "ok", // pending | late | ok
+          nextPaymentDate: getNextPaymentDate(paymentDate),
+          createdBy: enrollmentCreated.reviewedBy || null,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         })
         .then(() => {
