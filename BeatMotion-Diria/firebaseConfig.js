@@ -5,16 +5,17 @@ import { getDatabase } from "firebase/database";
 import { getFirestore } from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
 import { getStorage } from "firebase/storage";
+import Constants from "expo-constants";
+
+const extra = Constants.expoConfig?.extra ?? Constants.manifest?.extra;
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAOL7CpmGBqMvuWyWGHFYN7e3Wm60_2dzc",
-  authDomain: "beatmotion-b1ec6.firebaseapp.com",
-  databaseURL: "https://beatmotion-b1ec6-default-rtdb.firebaseio.com",
-  projectId: "beatmotion-b1ec6",
-  storageBucket: "beatmotion-b1ec6.firebasestorage.app",
-  messagingSenderId: "736000845187",
-  appId: "1:736000845187:web:658bf261a3165e8b8c42b6",
-  measurementId: "G-STX01S6FVQ",
+  apiKey: extra?.firebase?.apiKey,
+  authDomain: extra?.firebase?.authDomain,
+  projectId: extra?.firebase?.projectId,
+  storageBucket: extra?.firebase?.storageBucket,
+  messagingSenderId: extra?.firebase?.messagingSenderId,
+  appId: extra?.firebase?.appId,
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
