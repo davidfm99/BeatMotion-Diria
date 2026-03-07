@@ -10,6 +10,7 @@ export default {
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
+      bundleIdentifier: "com.andreydev.beatmotion",
       supportsTablet: true,
     },
     owner: "beatmotion",
@@ -20,7 +21,7 @@ export default {
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
-      package: "com.anonymous.BeatMotionDiria",
+      package: "com.andreydev.BeatMotionDiria",
     },
     web: {
       output: "static",
