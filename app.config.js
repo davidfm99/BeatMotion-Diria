@@ -5,7 +5,7 @@ export default {
     slug: "BeatMotion-Diria",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/icon.png",
+    icon: "./assets/images/BeatMotionLogo.png",
     scheme: "beatmotiondiria",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
