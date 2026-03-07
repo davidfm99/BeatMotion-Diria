@@ -1,11 +1,12 @@
 ﻿import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useRouter } from "expo-router";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Image,
+  Linking,
   Text,
   TextInput,
   TouchableHighlight,
@@ -14,11 +15,23 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const URL_POLICIES = "https://beatmotion-politica-privacidad.netlify.app";
+
 const LogIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { isLoading } = useActiveUser();
   const router = useRouter();
+
+  const handlePressPolicy = useCallback(async () => {
+    const supported = await Linking.canOpenURL(URL_POLICIES);
+
+    if (supported) {
+      await Linking.openURL(URL_POLICIES);
+    } else {
+      Alert.alert(`Error al abrir enlace: ${URL_POLICIES}`);
+    }
+  }, []);
 
   const handleLogin = async () => {
     const auth = getAuth();
@@ -30,7 +43,7 @@ const LogIn = () => {
       Alert.alert(
         "Error",
         "Hubo un problema al iniciar sesión. Verifica tus credenciales o conexión.",
-        [{ text: "OK" }]
+        [{ text: "OK" }],
       );
     }
   };
@@ -49,7 +62,9 @@ const LogIn = () => {
 
           <View className="bg-gray-900 w-full rounded-3xl p-7 gap-5 shadow-lg border border-gray-800">
             <View className="gap-1">
-              <Text className="text-2xl font-bold text-white">Iniciar sesión</Text>
+              <Text className="text-2xl font-bold text-white">
+                Iniciar sesión
+              </Text>
               <Text className="text-gray-400 text-sm">
                 Accede con tu correo y contraseña
               </Text>
@@ -75,17 +90,23 @@ const LogIn = () => {
               className="bg-emerald-400 rounded-xl py-3 active:opacity-80"
               onPress={handleLogin}
             >
-              <Text className="text-center font-semibold text-black">Ingresar</Text>
+              <Text className="text-center font-semibold text-black">
+                Ingresar
+              </Text>
             </TouchableOpacity>
 
-            <TouchableHighlight onPress={() => router.push("/public/resetPassword")}>
+            <TouchableHighlight
+              onPress={() => router.push("/public/resetPassword")}
+            >
               <Text className="text-sm text-blue-400 underline">
                 ¿Olvidaste tu contraseña?
               </Text>
             </TouchableHighlight>
 
             <View className="gap-2">
-              <Text className="text-sm text-gray-300">¿Aún no tienes una cuenta?</Text>
+              <Text className="text-sm text-gray-300">
+                ¿Aún no tienes una cuenta?
+              </Text>
               <TouchableOpacity
                 className="bg-emerald-700 rounded-xl py-3 active:opacity-80"
                 onPress={() => router.push("/public/signIn")}
@@ -95,6 +116,11 @@ const LogIn = () => {
                 </Text>
               </TouchableOpacity>
             </View>
+            <TouchableHighlight onPress={handlePressPolicy}>
+              <Text className="text-secondary text-center">
+                Políticas de privacidad
+              </Text>
+            </TouchableHighlight>
           </View>
 
           <Image
