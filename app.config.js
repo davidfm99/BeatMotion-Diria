@@ -1,14 +1,17 @@
 import "dotenv/config";
+
+const ENV = process.env.APP_ENV || "development";
+
 export default {
   expo: {
-    name: "BeatMotion-Diria",
+    name: "BeatMotion",
     slug: "BeatMotion-Diria",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/BeatMotionLogo.png",
     scheme: "beatmotiondiria",
     userInterfaceStyle: "automatic",
-    newArchEnabled: true,
+    newArchEnabled: false,
     ios: {
       bundleIdentifier: "com.andreydev.beatmotion",
       supportsTablet: true,
@@ -42,12 +45,22 @@ export default {
         },
       ],
       "expo-web-browser",
+      [
+        "@sentry/react-native/expo",
+        {
+          url: "https://sentry.io/",
+          project: "react-native",
+          organization: "beatmotion",
+        },
+      ],
     ],
     experiments: {
       typedRoutes: true,
-      reactCompiler: true,
+      reactCompiler: false,
     },
     extra: {
+      appEnv: ENV,
+      sentryDsn: process.env.SENTRY_DSN,
       router: {},
       firebase: {
         apiKey: process.env.FIREBASE_API_KEY,

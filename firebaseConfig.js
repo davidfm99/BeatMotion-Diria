@@ -1,17 +1,18 @@
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { getReactNativePersistence, initializeAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 import { getFirestore } from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
 import { getStorage } from "firebase/storage";
-import Constants from "expo-constants";
 
 const extra = Constants.expoConfig?.extra ?? Constants.manifest?.extra;
 
 const firebaseConfig = {
   apiKey: extra?.firebase?.apiKey,
   authDomain: extra?.firebase?.authDomain,
+  databaseURL: "https://beatmotion-b1ec6-default-rtdb.firebaseio.com",
   projectId: extra?.firebase?.projectId,
   storageBucket: extra?.firebase?.storageBucket,
   messagingSenderId: extra?.firebase?.messagingSenderId,
