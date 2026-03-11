@@ -1,6 +1,7 @@
+import { auth, firestore } from "@/firebaseConfig";
 import { Stack, router } from "expo-router";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
@@ -8,15 +9,13 @@ export default function AdminLayout() {
   const [allowed, setAllowed] = useState<null | boolean>(null);
 
   useEffect(() => {
-    const auth = getAuth();
     const unsub = onAuthStateChanged(auth, async (u) => {
       if (!u) {
         setAllowed(false);
         router.replace("/public/login");
         return;
       }
-      const db = getFirestore();
-      const snap = await getDoc(doc(db, "users", u.uid));
+      const snap = await getDoc(doc(firestore, "users", u.uid));
       const role = snap.exists() ? (snap.data() as any).role : "user";
       const isAdmin = role === "admin" || role === "teacher";
       setAllowed(isAdmin);

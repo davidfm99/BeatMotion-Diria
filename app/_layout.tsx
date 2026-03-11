@@ -14,10 +14,12 @@ import "react-native-reanimated";
 import "../global.css";
 
 Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  debug: process.env.APP_ENV !== "production",
-  environment: process.env.APP_ENV,
-  enabled: process.env.APP_ENV !== "development",
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  debug: process.env.EXPO_PUBLIC_APP_ENV !== "production",
+  environment: process.env.EXPO_PUBLIC_APP_ENV,
+  enabled:
+    process.env.EXPO_PUBLIC_APP_ENV !== "development" &&
+    !!process.env.EXPO_PUBLIC_SENTRY_DSN,
 });
 
 const queryClient = new QueryClient();
