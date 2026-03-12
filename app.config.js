@@ -1,6 +1,22 @@
+import "dotenv/config";
+
+const ENV = process.env.EXPO_PUBLIC_APP_ENV ?? "preview";
+
+const isProd = ENV === "production";
+
+const appName = isProd ? "BeatMotion" : "BeatMotion QA";
+
+const androidPackage = isProd
+  ? "com.andreydev.beatmotion"
+  : "com.andreydev.beatmotion.qa";
+
+const iosBundleIdentifier = isProd
+  ? "com.andreydev.beatmotion"
+  : "com.andreydev.beatmotion.qa";
+
 export default {
   expo: {
-    name: "BeatMotion",
+    name: appName,
     slug: "BeatMotion-Diria",
     version: "1.0.0",
     orientation: "portrait",
@@ -8,22 +24,22 @@ export default {
     scheme: "beatmotiondiria",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
+    owner: "beatmotion",
     ios: {
-      bundleIdentifier: "com.andreydev.beatmotion",
+      bundleIdentifier: iosBundleIdentifier,
       supportsTablet: true,
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
       },
     },
-    owner: "beatmotion",
     android: {
+      package: androidPackage,
       adaptiveIcon: {
         foregroundImage: "./assets/images/BeatMotionLogo.png",
         backgroundColor: "#000000",
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
-      package: "com.andreydev.BeatMotionDiria",
     },
     web: {
       output: "static",
