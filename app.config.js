@@ -33,7 +33,7 @@ export default ({ config }) => {
       },
       android: {
         package: androidPackage,
-        googleServicesFile: true
+        googleServicesFile: isProd
           ? "./google-services-production.json"
           : "./google-services-preview.json",
         adaptiveIcon: {
