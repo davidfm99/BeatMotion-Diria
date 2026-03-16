@@ -89,9 +89,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.andreydev.beatmotion.qa'
+    namespace 'com.andreydev.beatmotion'
     defaultConfig {
-        applicationId 'com.andreydev.beatmotion.qa'
+        applicationId 'com.andreydev.beatmotion'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -4,7 +4,7 @@ import { timestampSchema } from "../enrollment/schema";
 export const ClassesSchema = zod.object({
   id: zod.string(),
   title: zod.string().nullable(),
-  capacity: zod.number(),
+  capacity: zod.number().nullish(),
   courseId: zod.string(),
   createdAt: timestampSchema,
   date: zod.string(),
@@ -20,7 +20,7 @@ export const ClassesSchema = zod.object({
         title: zod.string(),
         url: zod.string().url(),
         platform: zod.string().nullable(),
-      })
+      }),
     )
     .nullish(),
 });

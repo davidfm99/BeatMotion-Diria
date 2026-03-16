@@ -1,4 +1,4 @@
-package com.andreydev.beatmotion.qa
+package com.andreydev.beatmotion
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

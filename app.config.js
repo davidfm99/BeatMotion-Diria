@@ -1,15 +1,15 @@
 export default ({ config }) => {
-  const ENV = process.env.EXPO_PUBLIC_APP_ENV ?? "development";
+  const ENV = process.env.EAS_BUILD_PROFILE ?? "development";
 
   const isProd = ENV === "production";
 
   const appName = true ? "BeatMotion" : "BeatMotion QA";
 
-  const androidPackage = false
+  const androidPackage = true
     ? "com.andreydev.beatmotion"
     : "com.andreydev.beatmotion.qa";
 
-  const iosBundleIdentifier = false
+  const iosBundleIdentifier = true
     ? "com.andreydev.beatmotion"
     : "com.andreydev.beatmotion.qa";
 
@@ -33,9 +33,9 @@ export default ({ config }) => {
       },
       android: {
         package: androidPackage,
-        googleServicesFile: isProd
-        ? "./google-services-production.json"
-        : "./google-services-preview.json",
+        googleServicesFile: true
+          ? "./google-services-production.json"
+          : "./google-services-preview.json",
         adaptiveIcon: {
           foregroundImage: "./assets/images/BeatMotionLogo.png",
           backgroundColor: "#000000",

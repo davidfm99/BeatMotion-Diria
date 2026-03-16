@@ -296,7 +296,7 @@ export default function EditCourseScreen() {
                 <Text className="text-gray-400">
                   {cl.date && `Fecha: ${cl.date}`}
                   {cl.room && ` • Sala: ${cl.room}`}
-                  {cl.capacity && ` • Cupo: ${cl.capacity}`}
+                  {/* {cl.capacity && ` • Cupo: ${cl.capacity}`} */}
                 </Text>
 
                 <View className="flex-row gap-2 mt-3">
