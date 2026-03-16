@@ -6,6 +6,7 @@
   "build": {
     "development": {
       "developmentClient": true,
+      "distribution": "internal",
       "env": {
         "FIREBASE_API_KEY": "$FIREBASE_API_KEY_DEV",
         "FIREBASE_AUTH_DOMAIN": "$FIREBASE_AUTH_DOMAIN_DEV",
@@ -18,11 +19,14 @@
     },
     "preview": {
       "autoIncrement": true,
-      "environment": "preview"
+      "environment": "preview"  
     },
     "production": {
       "autoIncrement": true,
-      "environment": "production"
+      "environment": "production",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production"
+      }
     }
   },
   "submit": {
