@@ -12,7 +12,10 @@ import { setGlobalOptions } from "firebase-functions";
 import { onCall } from "firebase-functions/https";
 import * as logger from "firebase-functions/logger";
 import { onSchedule } from "firebase-functions/scheduler";
-import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
+import {
+  onDocumentCreated,
+  onDocumentUpdated,
+} from "firebase-functions/v2/firestore";
 
 import * as admin from "firebase-admin";
 
@@ -53,17 +56,17 @@ export const onEnrollmentAccepted = onDocumentUpdated(
         })
         .then(() => {
           logger.info(
-            `CourseMember document created for enrollment ID: ${enrollmentId}`
+            `CourseMember document created for enrollment ID: ${enrollmentId}`,
           );
         })
         .catch((error) => {
           logger.error(
             `Error creating CourseMember document for enrollment ID: ${enrollmentId}`,
-            error
+            error,
           );
         });
     }
-  }
+  },
 );
 
 export const onEnrollmentCreatedByManual = onDocumentCreated(
@@ -73,7 +76,7 @@ export const onEnrollmentCreatedByManual = onDocumentCreated(
     const enrollmentId = event.params.enrollmentId;
 
     if (!enrollmentCreated) return;
-    if (enrollmentCreated.status !== "approved") {
+    if (enrollmentCreated.status === "approved") {
       const paymentDate: Date = enrollmentCreated.submittedAt.toDate();
       // to do: check if the user already has a course, if the course is already added the paymentDate will be the same
       // as the one already added
@@ -92,17 +95,17 @@ export const onEnrollmentCreatedByManual = onDocumentCreated(
         })
         .then(() => {
           logger.info(
-            `CourseMember document created for enrollment ID: ${enrollmentId}`
+            `CourseMember document created for enrollment ID: ${enrollmentId}`,
           );
         })
         .catch((error) => {
           logger.error(
             `Error creating CourseMember document for enrollment ID: ${enrollmentId}`,
-            error
+            error,
           );
         });
     }
-  }
+  },
 );
 
 // Triggered when an payment document is updated
@@ -143,7 +146,7 @@ export const onPaymentAccepted = onDocumentUpdated(
 
       logger.log("onPaymentAccepted finished running successfully");
     }
-  }
+  },
 );
 
 interface NotificationPayload {
@@ -249,18 +252,18 @@ export const checkPaymentStatus = onSchedule(
           memberData.active
         ) {
           logger.info(
-            `User ${userId} has a next payment: ${paymentDate.toISOString()}`
+            `User ${userId} has a next payment: ${paymentDate.toISOString()}`,
           );
 
           updates.push(
             doc.ref.update({
               paymentStatus: "pending",
               updatedAt: Timestamp.now(),
-            })
+            }),
           );
 
           notifications.push(
-            sendPaymentReminderNotification(userId, paymentDate, db)
+            sendPaymentReminderNotification(userId, paymentDate, db),
           );
           //send notifications to firebase, so the user can see it in the menu in case don't have the user login in a device
           batch.set(refNotifications, {
@@ -277,13 +280,13 @@ export const checkPaymentStatus = onSchedule(
           memberData.active
         ) {
           logger.warn(
-            `User ${userId} has an overdue payment: ${paymentDate.toISOString()}`
+            `User ${userId} has an overdue payment: ${paymentDate.toISOString()}`,
           );
           updates.push(
             doc.ref.update({
               paymentStatus: "late",
               updatedAt: Timestamp.now(),
-            })
+            }),
           );
           notifications.push(sendOverdueNotification(userId, paymentDate, db));
           //send notifications to firebase, so the user can see it in the menu in case don't have the user login in a device
@@ -297,7 +300,7 @@ export const checkPaymentStatus = onSchedule(
         }
       } else {
         logger.warn(
-          `User ${userId} does not have a nextPaymentDate valid or the data type has an error.`
+          `User ${userId} does not have a nextPaymentDate valid or the data type has an error.`,
         );
       }
     });
@@ -307,7 +310,7 @@ export const checkPaymentStatus = onSchedule(
     batch.commit();
 
     logger.info("Next payment check function is finished");
-  }
+  },
 );
 
 // For cost control, you can set the maximum number of containers that can be

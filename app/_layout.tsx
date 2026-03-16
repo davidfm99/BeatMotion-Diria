@@ -6,11 +6,21 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
+import * as Sentry from "@sentry/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import "../global.css";
+
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  debug: process.env.EXPO_PUBLIC_APP_ENV !== "production",
+  environment: process.env.EXPO_PUBLIC_APP_ENV,
+  enabled:
+    process.env.EXPO_PUBLIC_APP_ENV !== "development" &&
+    !!process.env.EXPO_PUBLIC_SENTRY_DSN,
+});
 
 const queryClient = new QueryClient();
 
@@ -29,7 +39,7 @@ function AppContent() {
   );
 }
 
-export default function RootLayout() {
+export default Sentry.wrap(function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
@@ -40,4 +50,4 @@ export default function RootLayout() {
       </ThemeProvider>
     </QueryClientProvider>
   );
-}
+});
