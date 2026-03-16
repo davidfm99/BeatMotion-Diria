@@ -1,15 +1,15 @@
 export default ({ config }) => {
-  const ENV = process.env.EAS_BUILD_PROFILE ?? "development";
+  const ENV = process.env.EXPO_PUBLIC_APP_ENV ?? "development";
 
   const isProd = ENV === "production";
 
   const appName = true ? "BeatMotion" : "BeatMotion QA";
 
-  const androidPackage = true
+  const androidPackage = isProd
     ? "com.andreydev.beatmotion"
     : "com.andreydev.beatmotion.qa";
 
-  const iosBundleIdentifier = true
+  const iosBundleIdentifier = isProd
     ? "com.andreydev.beatmotion"
     : "com.andreydev.beatmotion.qa";
 

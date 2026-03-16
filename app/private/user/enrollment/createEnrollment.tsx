@@ -49,7 +49,7 @@ const CreateEnrollment = () => {
   useEffect(() => {
     if (enrollmentsQuery.data && coursesQuery.data) {
       const enrolledCourseIds = enrollmentsQuery.data.map(
-        (enrollment: EnrollmentType) => enrollment.courseId
+        (enrollment: EnrollmentType) => enrollment.courseId,
       );
       const enrolledCourseNames: string[] = [];
       coursesQuery.data.forEach((element) => {
@@ -74,15 +74,17 @@ const CreateEnrollment = () => {
     //if the number is more or equal than five is the same fare
     if (enrolledCourses >= 5)
       return setTotalAmount(
-        faresQuery.data?.find((data) => data.type === "course_5")?.fare || 0
+        faresQuery.data?.find((data) => data.type === "course_5")?.fare || 0,
       );
     //look the fate for number of Course in fare collection
     const fareAccumulated = faresQuery.data?.find(
-      (data) => data.numCourse === enrolledCourses
+      (data) => data.numCourse === enrolledCourses,
     ) || { fare: 0 };
+
     const previousFare = faresQuery.data?.find(
-      (data) => data.numCourse === enrolledCourseIds.length
+      (data) => data.numCourse === enrolledCourseIds.length,
     ) || { fare: 0 };
+
     const totalToPayForNewEnrollment =
       fareAccumulated?.fare - previousFare?.fare;
     setTotalAmount(selectedCourses.length > 0 ? totalToPayForNewEnrollment : 0);
@@ -156,7 +158,7 @@ const CreateEnrollment = () => {
           {(data) => (
             <FlatList
               data={data.filter(
-                (course) => !enrolledCourseIds.includes(course.id)
+                (course) => !enrolledCourseIds.includes(course.id),
               )}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (

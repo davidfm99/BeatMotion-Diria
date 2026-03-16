@@ -19,7 +19,10 @@
     },
     "preview": {
       "autoIncrement": true,
-      "environment": "preview"  
+      "environment": "preview",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "preview"
+      }
     },
     "production": {
       "autoIncrement": true,
