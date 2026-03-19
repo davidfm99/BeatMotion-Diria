@@ -19,6 +19,7 @@ import {
 
 import * as admin from "firebase-admin";
 
+import { deleteByQueryInChunks } from "./utils/batchDelete";
 import {
   sendOverdueNotification,
   sendPaymentReminderNotification,
@@ -27,6 +28,7 @@ import { getNextPaymentDate } from "./utils/payment";
 
 admin.initializeApp();
 const db = admin.firestore();
+const auth = admin.auth();
 
 // Triggered when an enrollment document is updated
 export const onEnrollmentAccepted = onDocumentUpdated(
@@ -312,6 +314,49 @@ export const checkPaymentStatus = onSchedule(
     logger.info("Next payment check function is finished");
   },
 );
+
+interface UserDeletePayload {
+  userId: string;
+}
+
+export const deleteUser = onCall(async (data) => {
+  try {
+    logger.info("Delete user starts");
+    const { userId } = data.data as unknown as UserDeletePayload;
+    if (!userId) {
+      throw new Error("Missing userId in Delete user call");
+    }
+    logger.log("Deleting userID", userId);
+    Promise.all([
+      deleteByQueryInChunks(
+        db.collection("enrollments").where("userId", "==", userId),
+      ),
+      deleteByQueryInChunks(
+        db.collection("eventSignups").where("userId", "==", userId),
+      ),
+      deleteByQueryInChunks(
+        db.collection("notifications").where("userId", "==", userId),
+      ),
+      deleteByQueryInChunks(
+        db.collection("payments").where("userId", "==", userId),
+      ),
+      deleteByQueryInChunks(
+        db.collection("userprogress").where("userId", "==", userId),
+      ),
+      deleteByQueryInChunks(
+        db.collection("courseMember").where("userId", "==", userId),
+      ),
+      deleteByQueryInChunks(
+        db.collection("surveyResponses").where("userId", "==", userId),
+      ),
+      deleteByQueryInChunks(db.collection("users").where("uid", "==", userId)),
+      auth.deleteUser(userId),
+    ]);
+    return { success: true };
+  } catch (error: unknown) {
+    throw new Error(`Error in delete user cause: ${error}`);
+  }
+});
 
 // For cost control, you can set the maximum number of containers that can be
 // running at the same time. This helps mitigate the impact of unexpected

@@ -1,6 +1,11 @@
-import { Stack } from "expo-router";
+import { useActiveUser } from "@/hooks/user/UseActiveUser";
+import { Redirect, Stack } from "expo-router";
+import { ActivityIndicator } from "react-native";
 
 export default function PrivateLayout() {
+  const { user, isLoading } = useActiveUser();
+  if (isLoading) return <ActivityIndicator />;
+  if (!user) return <Redirect href="/public/login" />;
   return (
     <Stack initialRouteName="home">
       <Stack.Screen name="home" options={{ headerShown: false }} />

@@ -1,12 +1,14 @@
+import { DeleteAccountModal } from "@/components/DeleteAccountModal";
 import HeaderTitle from "@/components/headerTitle";
 import { UserProfileValidationSchema } from "@/constants/validationForms";
-import { auth } from "@/firebaseConfig";
+import { auth, functions } from "@/firebaseConfig";
 import { useActiveUser } from "@/hooks/user/UseActiveUser";
 import { useUpdateProfile } from "@/hooks/user/useUpdateProfile";
 import { useUserInfo } from "@/hooks/user/useUserInfo";
-import { QueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { signOut } from "firebase/auth";
+import { httpsCallable } from "firebase/functions";
 import { useEffect, useState } from "react";
 import {
   Image,
@@ -23,6 +25,7 @@ export default function ProfileScreen() {
   const { user: activeUser } = useActiveUser();
   const userInfo = useUserInfo(activeUser?.uid as string);
   const updateProfile = useUpdateProfile();
+  const queryClient = useQueryClient();
 
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
@@ -30,6 +33,7 @@ export default function ProfileScreen() {
   const [phone, setPhone] = useState("");
   const [photoUrl, setPhotoUrl] = useState<string | null>("");
   const [email, setEmail] = useState<string | null>("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [formErrors, setFormErrors] = useState({
     name: "",
@@ -57,7 +61,7 @@ export default function ProfileScreen() {
         },
         {
           abortEarly: false,
-        }
+        },
       );
       setFormErrors({
         name: "",
@@ -94,16 +98,26 @@ export default function ProfileScreen() {
     }
   };
 
-  // Cerrar sesion y volver a login publico
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      const queryClient = new QueryClient();
       queryClient.invalidateQueries({ queryKey: ["activeUser"] });
       router.replace("/public/login");
     } catch (err) {
-      console.error("Error signing out:", err);
+      throw new Error(`Error loggin out ${err}`);
     }
+  };
+
+  const handleDeleteAccount = async () => {
+    const sendPush = httpsCallable(functions, "deleteUser");
+    await signOut(auth);
+
+    await sendPush({
+      userId: activeUser?.uid,
+    });
+
+    queryClient.invalidateQueries({ queryKey: ["activeUser"] });
+    router.replace("/public/login");
   };
 
   const resetState = () => {
@@ -248,7 +262,21 @@ export default function ProfileScreen() {
             Cerrar sesión
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          className="border border-red-500 rounded-2xl px-5 py-4 active:opacity-80 mt-8"
+          onPress={() => setShowDeleteModal(true)}
+          accessibilityLabel="Eliminar Cuenta"
+        >
+          <Text className="text-center font-semibold text-red-500">
+            Eliminar cuenta
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
+      <DeleteAccountModal
+        visible={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteAccount}
+      />
     </SafeAreaView>
   );
 }
