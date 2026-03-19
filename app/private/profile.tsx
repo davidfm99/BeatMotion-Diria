@@ -1,3 +1,4 @@
+import { DeleteAccountModal } from "@/components/DeleteAccountModal";
 import HeaderTitle from "@/components/headerTitle";
 import { UserProfileValidationSchema } from "@/constants/validationForms";
 import { auth, functions } from "@/firebaseConfig";
@@ -10,7 +11,6 @@ import { signOut } from "firebase/auth";
 import { httpsCallable } from "firebase/functions";
 import { useEffect, useState } from "react";
 import {
-  Alert,
   Image,
   ScrollView,
   Text,
@@ -33,6 +33,7 @@ export default function ProfileScreen() {
   const [phone, setPhone] = useState("");
   const [photoUrl, setPhotoUrl] = useState<string | null>("");
   const [email, setEmail] = useState<string | null>("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [formErrors, setFormErrors] = useState({
     name: "",
@@ -108,35 +109,15 @@ export default function ProfileScreen() {
   };
 
   const handleDeleteAccount = async () => {
-    Alert.prompt(
-      "Eliminar cuenta",
-      'Eliminar tu cuenta es una acción permanente y no se puede deshacer. Para confirmar, escribe "Eliminar cuenta" en el campo a continuación.',
-      [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async (text?: string) => {
-            if (text?.toLocaleLowerCase() === "eliminar cuenta") {
-              const sendPush = httpsCallable(functions, "deleteUser");
-              try {
-                const body = {
-                  userId: activeUser?.uid,
-                };
-                await sendPush({ ...body });
-                queryClient.invalidateQueries({ queryKey: ["activeUser"] });
-                router.replace("/public/login");
-              } catch (err: unknown) {
-                throw new Error(`Error trying to delete account ${err}`);
-              }
-            }
-          },
-        },
-      ],
-    );
+    const sendPush = httpsCallable(functions, "deleteUser");
+    await signOut(auth);
+
+    await sendPush({
+      userId: activeUser?.uid,
+    });
+
+    queryClient.invalidateQueries({ queryKey: ["activeUser"] });
+    router.replace("/public/login");
   };
 
   const resetState = () => {
@@ -283,7 +264,7 @@ export default function ProfileScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           className="border border-red-500 rounded-2xl px-5 py-4 active:opacity-80 mt-8"
-          onPress={handleDeleteAccount}
+          onPress={() => setShowDeleteModal(true)}
           accessibilityLabel="Eliminar Cuenta"
         >
           <Text className="text-center font-semibold text-red-500">
@@ -291,6 +272,11 @@ export default function ProfileScreen() {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+      <DeleteAccountModal
+        visible={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteAccount}
+      />
     </SafeAreaView>
   );
 }

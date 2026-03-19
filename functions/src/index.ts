@@ -349,8 +349,10 @@ export const deleteUser = onCall(async (data) => {
       deleteByQueryInChunks(
         db.collection("surveyResponses").where("userId", "==", userId),
       ),
+      deleteByQueryInChunks(db.collection("users").where("uid", "==", userId)),
       auth.deleteUser(userId),
     ]);
+    return { success: true };
   } catch (error: unknown) {
     throw new Error(`Error in delete user cause: ${error}`);
   }
