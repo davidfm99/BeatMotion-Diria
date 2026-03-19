@@ -1,11 +1,11 @@
 import * as admin from "firebase-admin";
 
-const db = admin.firestore();
-
 export async function deleteByQueryInChunks(
   query: FirebaseFirestore.Query,
   chunkSize = 500,
 ) {
+  const db = admin.firestore();
+
   while (true) {
     const snapshot = await query.limit(chunkSize).get();
 
