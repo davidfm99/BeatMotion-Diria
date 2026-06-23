@@ -164,7 +164,7 @@ export default function CoursesMenuScreen() {
                           {course.title}
                         </Text>
                         <Text className="text-gray-400 text-xs mt-1">
-                          {course.teacher} • {course.level} • {classes.length}{" "}
+                          {course.teacher} • Nivel {course.level} • {classes.length}{" "}
                           clase(s)
                         </Text>
                       </View>

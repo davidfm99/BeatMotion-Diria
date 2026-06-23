@@ -75,7 +75,7 @@ const CourseDetail = () => {
                   <View className="flex-row items-center bg-gray-900 rounded-full px-3 py-1 gap-1">
                     <Ionicons name="ribbon-outline" size={14} color="#9ca3af" />
                     <Text className="text-gray-400 text-sm">
-                      {course.level}
+                      Nivel {course.level}
                     </Text>
                   </View>
                 )}
