@@ -2,9 +2,19 @@ import { signInValidationSchema } from "@/constants/validationForms";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { useState } from "react";
-import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Linking,
+  Pressable,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Yup from "yup";
+
+const PRIVACY_POLICY_URL = "https://beatmotion-politica-privacidad.netlify.app";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -12,6 +22,8 @@ const SignIn = () => {
   const [name, setName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+
+  const [consentAccepted, setConsentAccepted] = useState(false);
 
   const [formErrors, setFormErrors] = useState({
     name: "",
@@ -57,6 +69,14 @@ const SignIn = () => {
     if (!validateForm()) {
       return;
     }
+    if (!consentAccepted) {
+      Alert.alert(
+        "Consentimiento requerido",
+        "Debes aceptar la política de privacidad para registrarte.",
+        [{ text: "OK" }],
+      );
+      return;
+    }
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -74,6 +94,8 @@ const SignIn = () => {
         uid: user.uid,
         role: "user",
         isActive: true,
+        consentAccepted: true,
+        consentAcceptedAt: new Date(),
       });
       handleClearValues();
       Alert.alert("Registro exitoso", "Usuario registrado y datos guardados", [
@@ -181,11 +203,43 @@ const SignIn = () => {
           </View>
         </View>
 
-        <TouchableOpacity
-          className="bg-emerald-400 rounded-xl py-3 active:opacity-80"
-          onPress={register}
+        <Pressable
+          onPress={() => setConsentAccepted((v) => !v)}
+          className="flex-row items-start gap-3"
         >
-          <Text className="text-center font-semibold text-black">
+          <View
+            className={`mt-0.5 h-5 w-5 shrink-0 items-center justify-center rounded border-2 ${
+              consentAccepted
+                ? "border-emerald-400 bg-emerald-400"
+                : "border-gray-600 bg-gray-950"
+            }`}
+          >
+            {consentAccepted && (
+              <Text className="text-xs font-bold text-black">✓</Text>
+            )}
+          </View>
+          <Text className="flex-1 text-xs leading-5 text-gray-400">
+            He leído y acepto la{" "}
+            <Text
+              className="text-emerald-400 underline"
+              onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}
+            >
+              Política de Privacidad
+            </Text>{" "}
+            y el tratamiento de mis datos conforme a las Leyes N.° 8.968 y N.°
+            9.048 de Costa Rica, incluida la transferencia a servidores de
+            Firebase (Google LLC) fuera de Costa Rica.
+          </Text>
+        </Pressable>
+
+        <TouchableOpacity
+          className={`rounded-xl py-3 active:opacity-80 ${consentAccepted ? "bg-emerald-400" : "bg-emerald-900"}`}
+          onPress={register}
+          disabled={!consentAccepted}
+        >
+          <Text
+            className={`text-center font-semibold ${consentAccepted ? "text-black" : "text-gray-500"}`}
+          >
             Crear cuenta
           </Text>
         </TouchableOpacity>
