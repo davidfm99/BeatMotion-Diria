@@ -106,13 +106,15 @@ export const PrivacyConsentModal = ({ visible, onAccept }: Props) => {
             </Section>
 
             <Section title="Base legal">
-              El tratamiento de sus datos se realiza conforme a la{" "}
-              <Text className="font-semibold">
-                Ley N.° 8.968 (Protección de la Persona frente al Tratamiento
-                de sus Datos Personales)
-              </Text>{" "}
-              y la <Text className="font-semibold">Ley N.° 9.048</Text> de
-              Costa Rica.
+              <Text className="text-sm leading-5 text-gray-700">
+                El tratamiento de sus datos se realiza conforme a la{" "}
+                <Text className="font-semibold">
+                  Ley N.° 8.968 (Protección de la Persona frente al Tratamiento
+                  de sus Datos Personales)
+                </Text>{" "}
+                y la <Text className="font-semibold">Ley N.° 9.048</Text> de
+                Costa Rica.
+              </Text>
             </Section>
 
             <Pressable onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}>
