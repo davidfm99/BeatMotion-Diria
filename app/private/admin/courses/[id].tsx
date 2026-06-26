@@ -66,7 +66,7 @@ export default function EditCourseScreen() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [title, setTitle] = useState("");
   const [teacher, setTeacher] = useState("");
-  const [level, setLevel] = useState("0");
+  const [level, setLevel] = useState("Inicial");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [branchId, setBranchId] = useState("");
@@ -130,7 +130,7 @@ export default function EditCourseScreen() {
       const data = snap.data() as any;
       setTitle(data.title ?? "");
       setTeacher(data.teacher ?? "");
-      setLevel(data.level ?? "0");
+      setLevel(data.level ?? "Inicial");
       setDescription(data.description ?? "");
       setImageUrl(data.imageUrl ?? "");
       setBranchId(data.branchId ?? "");
@@ -243,10 +243,9 @@ export default function EditCourseScreen() {
                 dropdownIconColor="#ffffff"
                 style={{ color: "white" }}
               >
-                <Picker.Item label="Nivel 0" value="0" />
-                <Picker.Item label="Nivel 1" value="1" />
-                <Picker.Item label="Nivel 2" value="2" />
-                <Picker.Item label="Nivel 3" value="3" />
+                <Picker.Item label="Inicial" value="Inicial" />
+                <Picker.Item label="Intermedio" value="Intermedio" />
+                <Picker.Item label="Avanzado" value="Avanzado" />
               </Picker>
             </View>
 

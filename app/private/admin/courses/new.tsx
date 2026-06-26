@@ -43,7 +43,7 @@ export default function NewCourseScreen() {
   const [title, setTitle] = useState("");
   const [teacher, setTeacher] = useState("");
   const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [level, setLevel] = useState("0");
+  const [level, setLevel] = useState("Inicial");
   const [description, setDescription] = useState("");
   const [day, setDay] = useState("lunes");
   const [branchId, setBranchId] = useState("");
@@ -63,7 +63,6 @@ export default function NewCourseScreen() {
       const q = query(
         collection(db, "users"),
         where("role", "==", "teacher"),
-        where("role", "==", "admin"),
         where("isActive", "==", true),
         orderBy("name", "asc"),
       );
@@ -179,10 +178,9 @@ export default function NewCourseScreen() {
             dropdownIconColor="#ffffff"
             style={{ color: "white" }}
           >
-            <Picker.Item label="Nivel 0" value="0" />
-            <Picker.Item label="Nivel 1" value="1" />
-            <Picker.Item label="Nivel 2" value="2" />
-            <Picker.Item label="Nivel 3" value="3" />
+            <Picker.Item label="Inicial" value="Inicial" />
+            <Picker.Item label="Intermedio" value="Intermedio" />
+            <Picker.Item label="Avanzado" value="Avanzado" />
           </Picker>
         </View>
 

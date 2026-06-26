@@ -205,7 +205,7 @@ const CreateEnrollment = () => {
                         <Text className="text-gray-400">
                           {item.description}
                         </Text>
-                        <Text className="text-gray-500">Nivel {item.level}</Text>
+                        <Text className="text-gray-500">{item.level}</Text>
                         <Text className="text-gray-500">
                           {capitalize(item.day || "")}
                         </Text>

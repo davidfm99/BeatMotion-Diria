@@ -12,8 +12,6 @@ export const userSchema = zod
     photoURL: zod.string().url().optional(),
     isActive: zod.boolean(),
     createdAt: timestampSchema,
-    consentAccepted: zod.boolean().optional(),
-    consentAcceptedAt: timestampSchema.optional(),
   })
   .transform((user) => ({
     ...user,

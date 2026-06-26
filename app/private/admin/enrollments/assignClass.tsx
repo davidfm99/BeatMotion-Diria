@@ -79,7 +79,7 @@ export default function AssignClass() {
           {selectedEnrollment.course?.title}
         </Text>
         <Text className="text-gray-400">
-          Nivel {selectedEnrollment.course?.level}
+          Nivel: {selectedEnrollment.course?.level}
         </Text>
       </View>
 
