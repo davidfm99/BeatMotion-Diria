@@ -116,6 +116,44 @@ export const onEnrollmentCreatedByManual = onDocumentCreated(
   },
 );
 
+// Triggered when a course is logically deleted (isDeleted set to true)
+export const onCourseDeleted = onDocumentUpdated(
+  "courses/{courseId}",
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    const courseId = event.params.courseId;
+
+    if (!before || !after) return;
+    if (before.isDeleted === after.isDeleted || after.isDeleted !== true) return;
+
+    const membersSnap = await db
+      .collection("courseMember")
+      .where("courseId", "==", courseId)
+      .where("active", "==", true)
+      .get();
+
+    if (membersSnap.empty) {
+      logger.info(`No active courseMembers found for course ${courseId}`);
+      return;
+    }
+
+    const batch = db.batch();
+    membersSnap.docs.forEach((doc: admin.firestore.QueryDocumentSnapshot) => {
+      batch.update(doc.ref, {
+        active: false,
+        deletedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    });
+    await batch.commit();
+
+    logger.info(
+      `Logically deleted ${membersSnap.size} courseMember(s) for course ${courseId}`,
+    );
+  },
+);
+
 // Triggered when an payment document is updated
 export const onPaymentAccepted = onDocumentUpdated(
   "payments/{paymentId}",

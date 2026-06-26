@@ -17,7 +17,7 @@ export default ({ config }) => {
     expo: {
       name: appName,
       slug: "BeatMotion-Diria",
-      version: "1.1.0",
+      version: "1.2.0",
       orientation: "portrait",
       icon: "./assets/images/LogoDiria.png",
       scheme: isProd ? "beatmotiondiria" : "beatmotiondiria-qa",
@@ -34,8 +34,8 @@ export default ({ config }) => {
       android: {
         package: androidPackage,
         googleServicesFile: isProd
-          ? "./google-services-production.json"
-          : "./google-services-preview.json",
+          ? "./android/app/google-services-production.json"
+          : "./android/app/google-services-preview.json",
         adaptiveIcon: {
           foregroundImage: "./assets/images/LogoDiria.png",
           backgroundColor: "#000000",
@@ -48,6 +48,7 @@ export default ({ config }) => {
         favicon: "./assets/images/favicon.png",
       },
       plugins: [
+        "expo-font",
         "expo-router",
         [
           "expo-splash-screen",
