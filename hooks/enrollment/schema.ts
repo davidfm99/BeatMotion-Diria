@@ -2,7 +2,7 @@ import zod from "zod";
 
 export const timestampSchema = zod
   .any()
-  .nullable()
+  .nullish()
   .transform((value) => {
     if (!value) return null;
     if (value instanceof Date) return value;
