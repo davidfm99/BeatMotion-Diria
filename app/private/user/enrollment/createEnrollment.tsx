@@ -40,15 +40,21 @@ const CreateEnrollment = () => {
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
   const isExemptMonth = currentMonth === 10 || currentMonth === 11;
-  const annualFare = faresQuery.data?.find((d) => d.type === "annual")?.fare ?? 0;
+  const annualFare =
+    faresQuery.data?.find((d) => d.type === "annual")?.fare ?? 0;
 
-  const paidInPayments = paymentsByUserQuery.data?.some(
-    (p) => (p as any).annualFeeYear === currentYear && p.status !== "rejected"
-  ) ?? false;
-  const paidInEnrollments = enrollmentsQuery.data?.some(
-    (e) => (e as any).annualFeeYear === currentYear && e.status !== "rejected"
-  ) ?? false;
-  const shouldChargeAnnualFee = !isExemptMonth && !paidInPayments && !paidInEnrollments;
+  const paidInPayments =
+    paymentsByUserQuery.data?.some(
+      (p) =>
+        (p as any).annualFeeYear === currentYear && p.status !== "rejected",
+    ) ?? false;
+  const paidInEnrollments =
+    enrollmentsQuery.data?.some(
+      (e) =>
+        (e as any).annualFeeYear === currentYear && e.status !== "rejected",
+    ) ?? false;
+  const shouldChargeAnnualFee =
+    !isExemptMonth && !paidInPayments && !paidInEnrollments;
 
   const router = useRouter();
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
@@ -92,16 +98,25 @@ const CreateEnrollment = () => {
         faresQuery.data?.find((data) => data.type === "course_5")?.fare || 0,
       );
 
-    const courseTierFares = faresQuery.data?.filter((d) => d.numCourse > 0) ?? [];
+    const courseTierFares =
+      faresQuery.data?.filter((d) => d.numCourse > 0) ?? [];
 
     const fareAccumulated =
       courseTierFares.find((d) => d.numCourse === enrolledCourses)?.fare ?? 0;
     const previousFare =
-      courseTierFares.find((d) => d.numCourse === enrolledCourseIds.length)?.fare ?? 0;
+      courseTierFares.find((d) => d.numCourse === enrolledCourseIds.length)
+        ?.fare ?? 0;
 
-    const courseDiff = selectedCourses.length > 0 ? fareAccumulated - previousFare : 0;
+    const courseDiff =
+      selectedCourses.length > 0 ? fareAccumulated - previousFare : 0;
     setTotalAmount(courseDiff + (shouldChargeAnnualFee ? annualFare : 0));
-  }, [selectedCourses, faresQuery.data, enrolledCourseIds, shouldChargeAnnualFee, annualFare]);
+  }, [
+    selectedCourses,
+    faresQuery.data,
+    enrolledCourseIds,
+    shouldChargeAnnualFee,
+    annualFare,
+  ]);
 
   const handleImagePick = async () => {
     const imageSelected = await askForCameraPermission();
@@ -165,10 +180,7 @@ const CreateEnrollment = () => {
         Cursos disponibles para matricular:
       </Text>
 
-      <DataLoader
-        query={coursesQuery}
-        emptyMessage="No hay cursos disponibles"
-      >
+      <DataLoader query={coursesQuery} emptyMessage="No hay cursos disponibles">
         {(courses, isRefetching, refetch) => {
           const sections = (branchesQuery.data ?? [])
             .map((branch) => ({
@@ -176,8 +188,7 @@ const CreateEnrollment = () => {
               branchId: branch.id,
               data: courses.filter(
                 (c) =>
-                  c.branchId === branch.id &&
-                  !enrolledCourseIds.includes(c.id),
+                  c.branchId === branch.id && !enrolledCourseIds.includes(c.id),
               ),
             }))
             .filter((s) => s.data.length > 0);
@@ -186,7 +197,6 @@ const CreateEnrollment = () => {
             <SectionList
               sections={sections}
               keyExtractor={(item) => item.id}
-              scrollEnabled={false}
               contentContainerStyle={{ paddingBottom: 16 }}
               renderSectionHeader={({ section }) => (
                 <View className="px-3 pt-4 pb-1">
@@ -205,7 +215,9 @@ const CreateEnrollment = () => {
                         <Text className="text-gray-400">
                           {item.description}
                         </Text>
-                        <Text className="text-gray-500">Nivel {item.level}</Text>
+                        <Text className="text-gray-500">
+                          Nivel {item.level}
+                        </Text>
                         <Text className="text-gray-500">
                           {capitalize(item.day || "")}
                         </Text>
@@ -231,9 +243,18 @@ const CreateEnrollment = () => {
                     <Text className="font-extrabold">₡{totalAmount}</Text>
                   </Text>
 
+                  <View className="bg-yellow-900 border border-yellow-600 rounded-lg p-3 mt-8 mx-1">
+                    <Text className="text-yellow-300 text-sm font-semibold mb-1">
+                      Antes de realizar el pago:
+                    </Text>
+                    <Text className="text-yellow-200 text-sm">
+                      Incluye tu <Text className="font-bold">nombre completo</Text> y los <Text className="font-bold">cursos seleccionados</Text> en la descripción de la transferencia.
+                    </Text>
+                  </View>
+
                   <TouchableHighlight
                     onPress={handleImagePick}
-                    className="bg-blue-600 rounded-lg p-5 mt-10 w-50 self-center text-center"
+                    className="bg-blue-600 rounded-lg p-5 mt-4 w-50 self-center text-center"
                   >
                     <Text className="text-white">
                       Subir comprobante de pago
@@ -247,9 +268,7 @@ const CreateEnrollment = () => {
                   )}
                   <TouchableHighlight
                     disabled={
-                      !image ||
-                      selectedCourses.length === 0 ||
-                      paymentInProcess
+                      !image || selectedCourses.length === 0 || paymentInProcess
                     }
                     className="bg-primary rounded-lg p-5 mt-4 w-50 self-center text-center disabled:bg-gray-500 disabled:opacity-50"
                     onPress={handleConfirmEnrollment}
@@ -260,10 +279,6 @@ const CreateEnrollment = () => {
                         : "Confirmar matrícula"}
                     </Text>
                   </TouchableHighlight>
-                  <Text className="text-white text-sm mt-10">
-                    Es recomendable de colocar en la descripción del pago su
-                    nombre y los cursos a los que se está matriculando.
-                  </Text>
                 </View>
               }
             />
